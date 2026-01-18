@@ -3,7 +3,7 @@
     <div class="login-card">
       <div class="login-header">
         <h1>SIJAGATANI</h1>
-        <p>Sistem Informasi Jagung Pati</p>
+        <p>Sistem Informasi Jagung Petani</p>
       </div>
       
       <form @submit.prevent="handleLogin" class="login-form">
