@@ -65,8 +65,7 @@
             <th>No</th>
             <th>Tanggal</th>
             <th>Nama Makloon</th>
-            <th>Petani</th>
-            <th>NIK</th>
+            <th>Nama Petani</th>
             <th>Lokasi Makloon</th>
             <th>Total Tonase (KG)</th>
             <th>Jumlah Angkutan</th>
@@ -75,17 +74,16 @@
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="9" class="loading-cell">Loading...</td>
+            <td colspan="8" class="loading-cell">Loading...</td>
           </tr>
           <tr v-else-if="filteredData.length === 0">
-            <td colspan="9" class="empty-cell">Tidak ada data</td>
+            <td colspan="8" class="empty-cell">Tidak ada data</td>
           </tr>
           <tr v-else v-for="(item, index) in filteredData" :key="item.id">
             <td>{{ index + 1 }}</td>
             <td>{{ formatDate(item.tanggal_pengajuan) }}</td>
             <td>{{ item.nama_penggilingan }}</td>
-            <td>{{ item.petani?.nama || '-' }}</td>
-            <td>{{ item.petani?.nik || '-' }}</td>
+            <td>{{ item.nama_petani || '-' }}</td>
             <td>{{ item.lokasi_makloon }}</td>
             <td class="text-right">{{ parseFloat(String(item.total_tonase)) }} KG</td>
             <td class="text-center">{{ item.jumlah_angkutan }}</td>
@@ -134,7 +132,7 @@
                 <label>Petani <span class="required">*</span></label>
                 <input
                   type="text"
-                  v-model="form.nama_penggilingan"
+                  v-model="form.petani_id"
                   required
                   placeholder="Contoh: Budi Santoso"
                 />
@@ -328,20 +326,8 @@
             <h3>Informasi Petani</h3>
             <div class="detail-grid">
               <div class="detail-item">
-                <span class="detail-label">Nama:</span>
-                <span class="detail-value">{{ selectedItem.petani?.nama || '-' }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">NIK:</span>
-                <span class="detail-value">{{ selectedItem.petani?.nik || '-' }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Alamat:</span>
-                <span class="detail-value">{{ selectedItem.petani?.alamat || '-' }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">No. Telepon:</span>
-                <span class="detail-value">{{ selectedItem.petani?.no_telepon || '-' }}</span>
+                <span class="detail-label">Nama Petani:</span>
+                <span class="detail-value">{{ selectedItem.nama_petani || '-' }}</span>
               </div>
             </div>
           </div>
@@ -761,7 +747,7 @@ const editItem = (item) => {
   form.value = {
     id: item.id,
     tanggal_pengajuan: tanggalFormatted,
-    petani_id: String(item.petani_id),
+    petani_id: item.nama_petani || '',  // Use nama_petani
     nama_penggilingan: item.nama_penggilingan,
     lokasi_makloon: item.lokasi_makloon,
     foto_gkp_1: null,

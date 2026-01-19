@@ -28,11 +28,11 @@ class PenggilinganController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Penggilingan::with(['petani', 'transports']);
+        $query = Penggilingan::with(['transports']);
 
-        // Filter by petani
+        // Filter by nama petani
         if ($request->has('petani_id')) {
-            $query->where('petani_id', $request->petani_id);
+            $query->where('nama_petani', 'LIKE', '%' . $request->petani_id . '%');
         }
 
         // Filter by nama penggilingan
@@ -48,12 +48,7 @@ class PenggilinganController extends Controller
             $query->whereDate('tanggal_pengajuan', '<=', $request->tanggal_sampai);
         }
 
-        // Filter by kabupaten (through petani relationship)
-        if ($request->has('kabupaten')) {
-            $query->whereHas('petani', function($q) use ($request) {
-                $q->where('kabupaten', $request->kabupaten);
-            });
-        }
+        // Removed kabupaten filter since we no longer have petani relationship
 
         $penggilingan = $query->latest('tanggal_pengajuan')->get();
 
@@ -80,7 +75,7 @@ class PenggilinganController extends Controller
 
         $validator = Validator::make($data, [
             'tanggal_pengajuan' => 'required|date',
-            'petani_id' => 'required|exists:petani,id',
+            'petani_id' => 'required|string|max:255',  // Changed to string (nama petani)
             'nama_penggilingan' => 'required|string|max:255',
             'lokasi_makloon' => 'required|string|max:255',
             'foto_gkp_1' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
@@ -104,7 +99,12 @@ class PenggilinganController extends Controller
 
         DB::beginTransaction();
         try {
-            $data = $request->only(['tanggal_pengajuan', 'petani_id', 'nama_penggilingan', 'lokasi_makloon']);
+            $data = [
+                'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                'nama_petani' => $request->petani_id,  // Save as nama_petani
+                'nama_penggilingan' => $request->nama_penggilingan,
+                'lokasi_makloon' => $request->lokasi_makloon
+            ];
 
             // Handle image uploads for GKP
             if ($request->hasFile('foto_gkp_1')) {
@@ -167,7 +167,7 @@ class PenggilinganController extends Controller
             // Calculate totals
             $penggilingan->refresh();
             $penggilingan->calculateTotals();
-            $penggilingan->load(['petani', 'transports']);
+            $penggilingan->load(['transports']);
 
             DB::commit();
 
@@ -222,7 +222,7 @@ class PenggilinganController extends Controller
 
         $validator = Validator::make($data, [
             'tanggal_pengajuan' => 'required|date',
-            'petani_id' => 'required|exists:petani,id',
+            'petani_id' => 'required|string|max:255',  // Changed to string (nama petani)
             'nama_penggilingan' => 'required|string|max:255',
             'lokasi_makloon' => 'required|string|max:255',
             'foto_gkp_1' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
@@ -254,7 +254,12 @@ class PenggilinganController extends Controller
                 ], 404);
             }
 
-            $data = $request->only(['tanggal_pengajuan', 'petani_id', 'nama_penggilingan', 'lokasi_makloon']);
+            $data = [
+                'tanggal_pengajuan' => $request->tanggal_pengajuan,
+                'nama_petani' => $request->petani_id,  // Save as nama_petani
+                'nama_penggilingan' => $request->nama_penggilingan,
+                'lokasi_makloon' => $request->lokasi_makloon
+            ];
 
             // Handle image uploads
             if ($request->hasFile('foto_gkp_1')) {
@@ -341,7 +346,7 @@ class PenggilinganController extends Controller
             // Recalculate totals
             $penggilingan->refresh();
             $penggilingan->calculateTotals();
-            $penggilingan->load(['petani', 'transports']);
+            $penggilingan->load(['transports']);
 
             DB::commit();
 

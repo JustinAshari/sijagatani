@@ -12,7 +12,7 @@ class Penggilingan extends Model
 
     protected $fillable = [
         'tanggal_pengajuan',
-        'petani_id',
+        'nama_petani',
         'nama_penggilingan',
         'foto_gkp_1',
         'foto_gkp_2',
@@ -29,10 +29,11 @@ class Penggilingan extends Model
 
     protected $with = ['transports']; // Eager load transports by default
 
-    public function petani(): BelongsTo
-    {
-        return $this->belongsTo(Petani::class);
-    }
+    // Removed petani relationship since we now store nama_petani as string
+    // public function petani(): BelongsTo
+    // {
+    //     return $this->belongsTo(Petani::class);
+    // }
 
     public function transports(): HasMany
     {
