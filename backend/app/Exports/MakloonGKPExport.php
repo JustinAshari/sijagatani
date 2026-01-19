@@ -19,9 +19,11 @@ class MakloonGKPExport implements FromCollection, WithHeadings, WithStyles, With
 {
     protected $year;
     protected $lastRow;
+    protected $penggilinganId;
 
-    public function __construct($year = null)
+    public function __construct($penggilinganId, $year = null)
     {
+        $this->penggilinganId = $penggilinganId;
         $this->year = $year ?? date('Y');
     }
 
@@ -29,33 +31,33 @@ class MakloonGKPExport implements FromCollection, WithHeadings, WithStyles, With
     {
         $penggilingan = Penggilingan::with(['transports' => function($query) {
             $query->orderBy('urutan');
-        }])->get();
+        }])->findOrFail($this->penggilinganId);
 
         $data = collect();
         $no = 1;
 
-        foreach ($penggilingan as $peng) {
-            if ($peng->transports->isEmpty()) {
-                continue;
-            }
-
-            $totalKuantum = $peng->transports->sum('kuantum') * 1000; // Convert ton to kg
-            $isFirstRow = true;
-
-            foreach ($peng->transports as $transport) {
-                $data->push([
-                    $no++,
-                    $isFirstRow ? $peng->lokasi_makloon : '',
-                    $transport->nopol,
-                    $transport->nama_pengemudi,
-                    number_format($transport->kuantum * 1000, 0, ',', '.'), // Convert ton to kg
-                    $isFirstRow ? number_format($totalKuantum, 0, ',', '.') : ''
-                ]);
-                $isFirstRow = false;
-            }
+        if ($penggilingan->transports->isEmpty()) {
+            return $data;
         }
 
-        $this->lastRow = $data->count() + 2; // +2 for header rows
+        $totalKuantum = $penggilingan->transports->sum('kuantum') * 1000; // Convert ton to kg
+        $totalKuantumFormatted = number_format($totalKuantum, 0, ',', '.');
+        $isFirstRow = true;
+
+        foreach ($penggilingan->transports as $transport) {
+            $data->push([
+                $no++,
+                $penggilingan->lokasi_makloon,
+                $transport->nopol,
+                $transport->nama_pengemudi,
+                number_format($transport->kuantum * 1000, 0, ',', '.'), // Convert ton to kg
+                $isFirstRow ? $totalKuantumFormatted : ''
+            ]);
+            $isFirstRow = false;
+        }
+
+        // lastRow is data count only (will add title+header offset in registerEvents)
+        $this->lastRow = $data->count();
 
         return $data;
     }
@@ -74,26 +76,8 @@ class MakloonGKPExport implements FromCollection, WithHeadings, WithStyles, With
 
     public function styles(Worksheet $sheet)
     {
-        $lastRow = $this->lastRow;
-
-        return [
-            // Header row styling
-            2 => [
-                'font' => ['bold' => true, 'size' => 11],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E7E6E6']],
-                'borders' => [
-                    'allBorders' => ['borderStyle' => Border::BORDER_THIN]
-                ]
-            ],
-            // Data rows styling
-            "3:{$lastRow}" => [
-                'borders' => [
-                    'allBorders' => ['borderStyle' => Border::BORDER_THIN]
-                ],
-                'alignment' => ['vertical' => Alignment::VERTICAL_CENTER]
-            ]
-        ];
+        // No styling here, will be done in registerEvents
+        return [];
     }
 
     public function columnWidths(): array
@@ -138,11 +122,62 @@ class MakloonGKPExport implements FromCollection, WithHeadings, WithStyles, With
                 
                 $sheet->getRowDimension(1)->setRowHeight(25);
                 
-                // Center align for specific columns
-                $lastRow = $this->lastRow + 1; // +1 because we added title row
-                $sheet->getStyle("A3:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("C3:C{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("E3:F{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                // Style header row (row 2 after title insert)
+                $sheet->getStyle('A2:F2')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 11],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'E7E6E6']
+                    ],
+                    'borders' => [
+                        'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                    ]
+                ]);
+                
+                // Apply border and alignment to data rows (only columns A-F)
+                // lastRow = data count, +2 for title and header rows
+                $lastDataRow = $this->lastRow + 2;
+                $sheet->getStyle("A3:F{$lastDataRow}")->applyFromArray([
+                    'borders' => [
+                        'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                    ],
+                    'alignment' => [
+                        'vertical' => Alignment::VERTICAL_CENTER
+                    ]
+                ]);
+                
+                // Center align for specific columns in data rows
+                $sheet->getStyle("A3:A{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("C3:C{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("E3:F{$lastDataRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                
+                // Add Catatan section (2 rows below data table)
+                $catatanStartRow = $lastDataRow + 2;
+                $sheet->setCellValue("A{$catatanStartRow}", 'Catatan');
+                $sheet->getStyle("A{$catatanStartRow}")->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 11]
+                ]);
+                
+                // Add catatan items
+                $catatan = [
+                    '1' => 'Pengajuan Makloon sesuai dengan kepemilikan infrastruktur  (Dryer - RMU)',
+                    '2' => 'Jaminan makloon dan TTD perjanjian dibayarkan sebelum pengajuan PO',
+                    '3' => 'Nota Timbang berdasarkan kuantum dikirimkan asli ke Kantor Cabang atau kirim PDF',
+                    '4' => 'Surat Jalan per angkutan dikirimkan asli ke Kantor Cabang atau kirim PDF',
+                    '5' => 'Foto kegiatan GKP di sawah dan Penggilingan dikirimkan asli ke Kantor Cabang atau kirim PDF'
+                ];
+                
+                $catatanRow = $catatanStartRow + 1;
+                foreach ($catatan as $no => $text) {
+                    $sheet->setCellValue("A{$catatanRow}", $no);
+                    $sheet->setCellValue("B{$catatanRow}", $text);
+                    $sheet->mergeCells("B{$catatanRow}:F{$catatanRow}");
+                    $catatanRow++;
+                }
             },
         ];
     }

@@ -458,15 +458,21 @@ class PenggilinganController extends Controller
             'data_penggilingan_' . date('Y-m-d_His') . '.xlsx'
         );
     }
+    
     /**
-     * Export Makloon GKP data to Excel (Form Pengajuan GKP Maklon MPP)
+     * Export Makloon GKP data to Excel per penggilingan (Form Pengajuan GKP Maklon MPP)
      */
-    public function exportMakloonGKP(Request $request)
+    public function exportMakloonGKP($id)
     {
-        $year = $request->input('tahun', date('Y'));
+        $penggilingan = Penggilingan::findOrFail($id);
+        $year = date('Y');
+        
+        // Sanitize filename
+        $filename = preg_replace('/[^A-Za-z0-9_\-]/', '_', $penggilingan->nama ?? 'penggilingan');
         
         return Excel::download(
-            new MakloonGKPExport($year),
-            'form_pengajuan_gkp_maklon_mpp_' . $year . '.xlsx'
+            new MakloonGKPExport($id, $year),
+            'form_gkp_maklon_' . $filename . '_' . $year . '.xlsx'
         );
-    }}
+    }
+}

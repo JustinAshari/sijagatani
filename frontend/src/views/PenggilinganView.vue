@@ -94,6 +94,13 @@
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
               </button>
+              <button @click="downloadMakloonGKP(item.id)" class="btn-download" title="Download Form GKP Maklon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </button>
               <button v-if="authStore.isAdmin || authStore.isSuperAdmin" @click="editItem(item)" class="btn-edit" title="Edit">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -861,6 +868,26 @@ const exportExcel = async () => {
     alert('Gagal export data')
   }
 }
+
+const downloadMakloonGKP = async (penggilinganId) => {
+  try {
+    const response = await api.get(`/penggilingan/${penggilinganId}/export-makloon-gkp`, {
+      responseType: 'blob'
+    })
+
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `form_gkp_maklon_${penggilinganId}_${new Date().getFullYear()}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    console.error('Error downloading:', error)
+    alert('Gagal download Form GKP Maklon')
+  }
+}
+
 </script>
 
 <style scoped>
@@ -1051,6 +1078,7 @@ td {
 }
 
 .btn-view,
+.btn-download,
 .btn-edit,
 .btn-delete {
   padding: 6px 12px;
@@ -1067,6 +1095,15 @@ td {
 
 .btn-view:hover {
   background: #2980b9;
+}
+
+.btn-download {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-download:hover {
+  background: #229954;
 }
 
 .btn-edit {
@@ -1590,6 +1627,7 @@ td {
 }
 
 .btn-view svg,
+.btn-download svg,
 .btn-edit svg,
 .btn-delete svg {
   width: 16px;
