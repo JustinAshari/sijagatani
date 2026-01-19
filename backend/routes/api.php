@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PetaniController;
 use App\Http\Controllers\Api\PenggilinganController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\WilayahController;
 
 // Auth Routes (Public)
 Route::post('/login', [AuthController::class, 'login']);
@@ -46,5 +47,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/{id}', [UserController::class, 'show']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
+        
+        // Wilayah Routes
+        Route::get('/provinsi', [WilayahController::class, 'getProvinsi']);
+        Route::post('/provinsi', [WilayahController::class, 'storeProvinsi']);
+        Route::put('/provinsi/{id}', [WilayahController::class, 'updateProvinsi']);
+        Route::delete('/provinsi/{id}', [WilayahController::class, 'deleteProvinsi']);
+        
+        Route::get('/kabupaten', [WilayahController::class, 'getKabupaten']);
+        Route::post('/kabupaten', [WilayahController::class, 'storeKabupaten']);
+        Route::put('/kabupaten/{id}', [WilayahController::class, 'updateKabupaten']);
+        Route::delete('/kabupaten/{id}', [WilayahController::class, 'deleteKabupaten']);
+        
+        Route::get('/kecamatan', [WilayahController::class, 'getKecamatan']);
+        Route::post('/kecamatan', [WilayahController::class, 'storeKecamatan']);
+        Route::put('/kecamatan/{id}', [WilayahController::class, 'updateKecamatan']);
+        Route::delete('/kecamatan/{id}', [WilayahController::class, 'deleteKecamatan']);
+        
+        Route::get('/kalurahan', [WilayahController::class, 'getKalurahan']);
+        Route::post('/kalurahan', [WilayahController::class, 'storeKalurahan']);
+        Route::put('/kalurahan/{id}', [WilayahController::class, 'updateKalurahan']);
+        Route::delete('/kalurahan/{id}', [WilayahController::class, 'deleteKalurahan']);
     });
 });

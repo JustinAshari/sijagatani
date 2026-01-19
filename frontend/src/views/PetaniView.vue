@@ -202,7 +202,7 @@
                 <input v-model="form.kecamatan" type="text" required />
               </div>
               <div class="form-group">
-                <label>Desa</label>
+                <label>Kelurahan/Desa</label>
                 <input v-model="form.desa" type="text" />
               </div>
             </div>
@@ -378,7 +378,7 @@
                 <span>{{ selectedPetani.kecamatan }}</span>
               </div>
               <div class="info-item">
-                <strong>Desa:</strong>
+                <strong>Kelurahan/Desa:</strong>
                 <span>{{ selectedPetani.desa || '-' }}</span>
               </div>
             </div>
