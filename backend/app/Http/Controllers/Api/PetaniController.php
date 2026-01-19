@@ -23,16 +23,26 @@ class PetaniController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Petani::query();
+        $query = Petani::with(['provinsi', 'kabupaten', 'kecamatan', 'kalurahan']);
 
-        // Filter by kabupaten
-        if ($request->has('kabupaten')) {
-            $query->where('kabupaten', $request->kabupaten);
+        // Filter by provinsi_id
+        if ($request->has('provinsi_id')) {
+            $query->where('provinsi_id', $request->provinsi_id);
         }
 
-        // Filter by kecamatan
-        if ($request->has('kecamatan')) {
-            $query->where('kecamatan', $request->kecamatan);
+        // Filter by kabupaten_id
+        if ($request->has('kabupaten_id')) {
+            $query->where('kabupaten_id', $request->kabupaten_id);
+        }
+
+        // Filter by kecamatan_id
+        if ($request->has('kecamatan_id')) {
+            $query->where('kecamatan_id', $request->kecamatan_id);
+        }
+
+        // Filter by kalurahan_id
+        if ($request->has('kalurahan_id')) {
+            $query->where('kalurahan_id', $request->kalurahan_id);
         }
 
         // Filter by tanggal (tanggal field, not created_at)
@@ -160,7 +170,7 @@ class PetaniController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $petani = Petani::find($id);
+        $petani = Petani::with(['provinsi', 'kabupaten', 'kecamatan', 'kalurahan'])->find($id);
 
         if (!$petani) {
             return response()->json([

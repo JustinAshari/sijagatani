@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Petani extends Model
 {
@@ -14,9 +15,10 @@ class Petani extends Model
         'nik',
         'nama',
         'alamat',
-        'kabupaten',
-        'kecamatan',
-        'desa',
+        'provinsi_id',
+        'kabupaten_id',
+        'kecamatan_id',
+        'kalurahan_id',
         'no_telepon',
         'bank',
         'no_rekening',
@@ -39,5 +41,25 @@ class Petani extends Model
     public function penggilingan(): HasMany
     {
         return $this->hasMany(Penggilingan::class);
+    }
+
+    public function provinsi(): BelongsTo
+    {
+        return $this->belongsTo(Provinsi::class);
+    }
+
+    public function kabupaten(): BelongsTo
+    {
+        return $this->belongsTo(Kabupaten::class);
+    }
+
+    public function kecamatan(): BelongsTo
+    {
+        return $this->belongsTo(Kecamatan::class);
+    }
+
+    public function kalurahan(): BelongsTo
+    {
+        return $this->belongsTo(Kalurahan::class);
     }
 }

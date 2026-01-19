@@ -101,8 +101,8 @@
             <td>{{ formatDate(petani.tanggal) }}</td>
             <td>{{ petani.nik }}</td>
             <td>{{ petani.nama }}</td>
-            <td>{{ petani.kabupaten }}</td>
-            <td>{{ petani.kecamatan }}</td>
+            <td>{{ petani.kabupaten?.nama || '-' }}</td>
+            <td>{{ petani.kecamatan?.nama || '-' }}</td>
             <td>{{ petani.luas_lahan }}</td>
             <td>{{ petani.potensi_panen }}</td>
             <td>
@@ -189,21 +189,42 @@
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>Kabupaten *</label>
-                <select v-model="form.kabupaten" required>
-                  <option value="">Pilih Kabupaten</option>
-                  <option v-for="kab in kabupatenList" :key="kab" :value="kab">
-                    {{ kab }}
+                <label>Provinsi</label>
+                <select v-model="form.provinsi_id" @change="onProvinsiChange">
+                  <option value="">Pilih Provinsi</option>
+                  <option v-for="prov in provinsiList" :key="prov.id" :value="prov.id">
+                    {{ prov.nama }}
                   </option>
                 </select>
               </div>
               <div class="form-group">
-                <label>Kecamatan *</label>
-                <input v-model="form.kecamatan" type="text" required />
+                <label>Kabupaten</label>
+                <select v-model="form.kabupaten_id" @change="onKabupatenChange" :disabled="!form.provinsi_id">
+                  <option value="">Pilih Kabupaten</option>
+                  <option v-for="kab in kabupatenOptions" :key="kab.id" :value="kab.id">
+                    {{ kab.nama }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Kecamatan</label>
+                <select v-model="form.kecamatan_id" @change="onKecamatanChange" :disabled="!form.kabupaten_id">
+                  <option value="">Pilih Kecamatan</option>
+                  <option v-for="kec in kecamatanOptions" :key="kec.id" :value="kec.id">
+                    {{ kec.nama }}
+                  </option>
+                </select>
               </div>
               <div class="form-group">
-                <label>Kelurahan/Desa</label>
-                <input v-model="form.desa" type="text" />
+                <label>Kalurahan/Desa</label>
+                <select v-model="form.kalurahan_id" :disabled="!form.kecamatan_id">
+                  <option value="">Pilih Kalurahan/Desa</option>
+                  <option v-for="kal in kalurahanOptions" :key="kal.id" :value="kal.id">
+                    {{ kal.nama }}
+                  </option>
+                </select>
               </div>
             </div>
           </div>
@@ -370,16 +391,20 @@
                 <span>{{ selectedPetani.alamat }}</span>
               </div>
               <div class="info-item">
+                <strong>Provinsi:</strong>
+                <span>{{ selectedPetani.provinsi?.nama || '-' }}</span>
+              </div>
+              <div class="info-item">
                 <strong>Kabupaten:</strong>
-                <span>{{ selectedPetani.kabupaten }}</span>
+                <span>{{ selectedPetani.kabupaten?.nama || '-' }}</span>
               </div>
               <div class="info-item">
                 <strong>Kecamatan:</strong>
-                <span>{{ selectedPetani.kecamatan }}</span>
+                <span>{{ selectedPetani.kecamatan?.nama || '-' }}</span>
               </div>
               <div class="info-item">
-                <strong>Kelurahan/Desa:</strong>
-                <span>{{ selectedPetani.desa || '-' }}</span>
+                <strong>Kalurahan/Desa:</strong>
+                <span>{{ selectedPetani.kalurahan?.nama || '-' }}</span>
               </div>
             </div>
           </div>
@@ -497,14 +522,26 @@ const kabupatenList = ref(kabupatenJawaTengah)
 const nikCheckTimeout = ref(null)
 const nikStatus = ref({ message: '', class: '', isDuplicate: false })
 
+// Wilayah data
+const provinsiList = ref([])
+const allKabupaten = ref([])
+const allKecamatan = ref([])
+const allKalurahan = ref([])
+
+// Filtered options based on parent selection
+const kabupatenOptions = ref([])
+const kecamatanOptions = ref([])
+const kalurahanOptions = ref([])
+
 const form = ref({
   tanggal: new Date().toISOString().split('T')[0],
   nik: '',
   nama: '',
   alamat: '',
-  kabupaten: '',
-  kecamatan: '',
-  desa: '',
+  provinsi_id: '',
+  kabupaten_id: '',
+  kecamatan_id: '',
+  kalurahan_id: '',
   no_telepon: '',
   bank: '',
   no_rekening: '',
@@ -662,9 +699,10 @@ const editPetani = (petani) => {
     nik: petani.nik,
     nama: petani.nama,
     alamat: petani.alamat,
-    kabupaten: petani.kabupaten,
-    kecamatan: petani.kecamatan,
-    desa: petani.desa,
+    provinsi_id: petani.provinsi_id || '',
+    kabupaten_id: petani.kabupaten_id || '',
+    kecamatan_id: petani.kecamatan_id || '',
+    kalurahan_id: petani.kalurahan_id || '',
     no_telepon: petani.no_telepon,
     bank: petani.bank,
     no_rekening: petani.no_rekening,
@@ -676,6 +714,17 @@ const editPetani = (petani) => {
     foto_petani: null,
     foto_komoditi: null,
     kwitansi_pembayaran: null
+  }
+  
+  // Load cascading options
+  if (petani.provinsi_id) {
+    kabupatenOptions.value = allKabupaten.value.filter(k => k.provinsi_id == petani.provinsi_id)
+  }
+  if (petani.kabupaten_id) {
+    kecamatanOptions.value = allKecamatan.value.filter(k => k.kabupaten_id == petani.kabupaten_id)
+  }
+  if (petani.kecamatan_id) {
+    kalurahanOptions.value = allKalurahan.value.filter(k => k.kecamatan_id == petani.kecamatan_id)
   }
   
   // Set previews for existing images
@@ -720,9 +769,10 @@ const closeModal = () => {
     nik: '',
     nama: '',
     alamat: '',
-    kabupaten: '',
-    kecamatan: '',
-    desa: '',
+    provinsi_id: '',
+    kabupaten_id: '',
+    kecamatan_id: '',
+    kalurahan_id: '',
     no_telepon: '',
     bank: '',
     no_rekening: '',
@@ -735,6 +785,9 @@ const closeModal = () => {
     foto_komoditi: null,
     kwitansi_pembayaran: null
   }
+  kabupatenOptions.value = []
+  kecamatanOptions.value = []
+  kalurahanOptions.value = []
 }
 
 const exportExcel = async () => {
@@ -783,8 +836,64 @@ const formatDate = (date) => {
   })
 }
 
+// Wilayah functions
+const loadWilayahData = async () => {
+  try {
+    const [provRes, kabRes, kecRes, kalRes] = await Promise.all([
+      api.get('/provinsi'),
+      api.get('/kabupaten'),
+      api.get('/kecamatan'),
+      api.get('/kalurahan')
+    ])
+    
+    provinsiList.value = provRes.data.data
+    allKabupaten.value = kabRes.data.data
+    allKecamatan.value = kecRes.data.data
+    allKalurahan.value = kalRes.data.data
+  } catch (error) {
+    console.error('Error loading wilayah:', error)
+  }
+}
+
+const onProvinsiChange = () => {
+  form.value.kabupaten_id = ''
+  form.value.kecamatan_id = ''
+  form.value.kalurahan_id = ''
+  
+  if (form.value.provinsi_id) {
+    kabupatenOptions.value = allKabupaten.value.filter(k => k.provinsi_id == form.value.provinsi_id)
+  } else {
+    kabupatenOptions.value = []
+  }
+  kecamatanOptions.value = []
+  kalurahanOptions.value = []
+}
+
+const onKabupatenChange = () => {
+  form.value.kecamatan_id = ''
+  form.value.kalurahan_id = ''
+  
+  if (form.value.kabupaten_id) {
+    kecamatanOptions.value = allKecamatan.value.filter(k => k.kabupaten_id == form.value.kabupaten_id)
+  } else {
+    kecamatanOptions.value = []
+  }
+  kalurahanOptions.value = []
+}
+
+const onKecamatanChange = () => {
+  form.value.kalurahan_id = ''
+  
+  if (form.value.kecamatan_id) {
+    kalurahanOptions.value = allKalurahan.value.filter(k => k.kecamatan_id == form.value.kecamatan_id)
+  } else {
+    kalurahanOptions.value = []
+  }
+}
+
 onMounted(() => {
   fetchPetani()
+  loadWilayahData()
 })
 </script>
 
