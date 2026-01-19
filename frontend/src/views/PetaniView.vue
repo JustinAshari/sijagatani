@@ -78,7 +78,8 @@
       </div>
     </div>
 
-    <div class="table-container">
+    <!-- Table dengan style baru -->
+    <div class="table-wrapper">
       <table>
         <thead>
           <tr>
@@ -96,46 +97,47 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(petani, index) in filteredPetani" :key="petani.id">
+          <tr v-if="loading">
+            <td colspan="11" class="loading-cell">Loading...</td>
+          </tr>
+          <tr v-else-if="filteredPetani.length === 0">
+            <td colspan="11" class="empty-cell">Tidak ada data petani</td>
+          </tr>
+          <tr v-else v-for="(petani, index) in filteredPetani" :key="petani.id">
             <td>{{ index + 1 }}</td>
             <td>{{ formatDate(petani.tanggal) }}</td>
             <td>{{ petani.nik }}</td>
             <td>{{ petani.nama }}</td>
             <td>{{ petani.kabupaten?.nama || '-' }}</td>
             <td>{{ petani.kecamatan?.nama || '-' }}</td>
-            <td>{{ petani.luas_lahan }}</td>
-            <td>{{ petani.potensi_panen }}</td>
-            <td>
+            <td class="text-right">{{ petani.luas_lahan }}</td>
+            <td class="text-right">{{ petani.potensi_panen }}</td>
+            <td class="text-center">
               <span class="badge" :class="`badge-${petani.komoditi.toLowerCase()}`">
                 {{ petani.komoditi }}
               </span>
             </td>
             <td>{{ petani.no_telepon || '-' }}</td>
-            <td>
-              <div class="action-buttons">
-                <button @click="viewDetail(petani)" class="btn-info" title="Detail">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-                <button v-if="authStore.isAdmin || authStore.isSuperAdmin" @click="editPetani(petani)" class="btn-warning" title="Edit">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                </button>
-                <button v-if="authStore.isAdmin || authStore.isSuperAdmin" @click="deletePetani(petani.id)" class="btn-danger" title="Hapus">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                  </svg>
-                </button>
-              </div>
+            <td class="action-buttons">
+              <button @click="viewDetail(petani)" class="btn-view" title="Detail">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <button v-if="authStore.isAdmin || authStore.isSuperAdmin" @click="editPetani(petani)" class="btn-edit" title="Edit">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button v-if="authStore.isAdmin || authStore.isSuperAdmin" @click="deletePetani(petani.id)" class="btn-delete" title="Hapus">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
             </td>
-          </tr>
-          <tr v-if="filteredPetani.length === 0">
-            <td colspan="11" class="text-center">Tidak ada data petani</td>
           </tr>
         </tbody>
       </table>
@@ -1091,11 +1093,12 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.table-container {
-  overflow-x: auto;
+/* Table styling yang baru - mengikuti PenggilinganView */
+.table-wrapper {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
 }
 
 table {
@@ -1103,46 +1106,91 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+thead {
+  background: #34495e;
+  color: white;
+}
+
+th,
+td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #ddd;
 }
 
 th {
-  background: #f8f9fa;
   font-weight: 600;
-  color: #495057;
-  position: sticky;
-  top: 0;
+  font-size: 14px;
+}
+
+td {
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.loading-cell,
+.empty-cell {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
 }
 
 .action-buttons {
   display: flex;
-  gap: 5px;
+  gap: 8px;
+  justify-content: center;
 }
 
-.action-buttons button {
-  padding: 5px 10px;
+.btn-view,
+.btn-edit,
+.btn-delete {
+  padding: 6px 12px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
 }
 
-.btn-info {
-  background: #17a2b8;
+.btn-view {
+  background: #3498db;
   color: white;
 }
 
-.btn-warning {
-  background: #ffc107;
-  color: #212529;
+.btn-view:hover {
+  background: #2980b9;
 }
 
-.btn-danger {
-  background: #dc3545;
+.btn-edit {
+  background: #f39c12;
   color: white;
+}
+
+.btn-edit:hover {
+  background: #d68910;
+}
+
+.btn-delete {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #c0392b;
+}
+
+.btn-view svg,
+.btn-edit svg,
+.btn-delete svg {
+  width: 16px;
+  height: 16px;
 }
 
 .modal {
@@ -1344,15 +1392,9 @@ th {
   transform: scale(1.05);
 }
 
-.text-center {
-  text-align: center;
-  padding: 40px;
-  color: #6c757d;
-}
-
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .table-container {
+  .table-wrapper {
     overflow-x: auto;
   }
   
@@ -1433,11 +1475,6 @@ th {
   display: inline-block;
   vertical-align: middle;
   margin-right: 6px;
-}
-
-.action-buttons svg {
-  width: 16px;
-  height: 16px;
 }
 
 .btn-success svg,
