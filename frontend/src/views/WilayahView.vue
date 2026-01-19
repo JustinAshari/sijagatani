@@ -2,6 +2,10 @@
   <div class="wilayah-container">
     <div class="header">
       <h2>Data Wilayah</h2>
+      <div class="header-actions">
+        <button @click="exportAllData" class="btn-export">📥 Export Semua Data</button>
+        <button @click="showImportModal = true" class="btn-import">📤 Import Data</button>
+      </div>
     </div>
 
     <!-- Tabs -->
@@ -21,7 +25,9 @@
       <div v-if="activeTab === 'provinsi'" class="content-section">
         <div class="section-header">
           <h3>Data Provinsi</h3>
-          <button @click="openModal('provinsi')" class="btn-primary">+ Tambah Provinsi</button>
+          <div class="header-actions">
+            <button @click="openModal('provinsi')" class="btn-primary">+ Tambah Provinsi</button>
+          </div>
         </div>
         <table class="data-table">
           <thead>
@@ -52,7 +58,9 @@
       <div v-if="activeTab === 'kabupaten'" class="content-section">
         <div class="section-header">
           <h3>Data Kabupaten</h3>
-          <button @click="openModal('kabupaten')" class="btn-primary">+ Tambah Kabupaten</button>
+          <div class="header-actions">
+            <button @click="openModal('kabupaten')" class="btn-primary">+ Tambah Kabupaten</button>
+          </div>
         </div>
         <table class="data-table">
           <thead>
@@ -85,7 +93,9 @@
       <div v-if="activeTab === 'kecamatan'" class="content-section">
         <div class="section-header">
           <h3>Data Kecamatan</h3>
-          <button @click="openModal('kecamatan')" class="btn-primary">+ Tambah Kecamatan</button>
+          <div class="header-actions">
+            <button @click="openModal('kecamatan')" class="btn-primary">+ Tambah Kecamatan</button>
+          </div>
         </div>
         <table class="data-table">
           <thead>
@@ -120,7 +130,9 @@
       <div v-if="activeTab === 'kalurahan'" class="content-section">
         <div class="section-header">
           <h3>Data Kalurahan/Desa</h3>
-          <button @click="openModal('kalurahan')" class="btn-primary">+ Tambah Kalurahan</button>
+          <div class="header-actions">
+            <button @click="openModal('kalurahan')" class="btn-primary">+ Tambah Kalurahan</button>
+          </div>
         </div>
         <table class="data-table">
           <thead>
@@ -224,6 +236,55 @@
         </form>
       </div>
     </div>
+
+    <!-- Import Modal -->
+    <div v-if="showImportModal" class="modal-overlay" @click="closeImportModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Import Data Wilayah</h3>
+          <button @click="closeImportModal" class="btn-close">&times;</button>
+        </div>
+        <div class="import-body">
+          <div class="import-section">
+            <h4>1. Download Template</h4>
+            <p>Download template Excel dengan format: NO, PROVINSI, KABUPATEN, KECAMATAN, KELURAHAN/DESA:</p>
+            <button @click="downloadTemplate" class="btn-template">
+              📄 Download Template Data Wilayah
+            </button>
+          </div>
+
+          <div class="import-section">
+            <h4>2. Upload File Excel</h4>
+            <p>Pilih file Excel (.xlsx, .xls, atau .csv):</p>
+            <input 
+              type="file" 
+              @change="handleFileSelect" 
+              accept=".xlsx,.xls,.csv"
+              ref="fileInput"
+              class="file-input"
+            />
+            <p v-if="selectedFile" class="file-name">📎 {{ selectedFile.name }}</p>
+          </div>
+
+          <div class="import-info">
+            <strong>⚠️ Catatan:</strong>
+            <ul>
+              <li>Format: NO, PROVINSI, KABUPATEN, KECAMATAN, KELURAHAN/DESA</li>
+              <li>Setiap baris adalah data kelurahan lengkap dengan hierarkinya</li>
+              <li>Sistem akan otomatis membuat Provinsi, Kabupaten, Kecamatan jika belum ada</li>
+              <li>Data duplikat akan diabaikan</li>
+              <li>Maksimal ukuran: 5 MB</li>
+            </ul>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" @click="closeImportModal" class="btn-secondary">Batal</button>
+          <button @click="importData" class="btn-primary" :disabled="!selectedFile || importing">
+            {{ importing ? 'Mengimport...' : 'Import Sekarang' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -241,9 +302,13 @@ const tabs = [
 const activeTab = ref('provinsi')
 const loading = ref(false)
 const showModal = ref(false)
+const showImportModal = ref(false)
 const isEdit = ref(false)
 const modalType = ref('')
 const form = ref({})
+const importing = ref(false)
+const selectedFile = ref(null)
+const fileInput = ref(null)
 
 const provinsiList = ref([])
 const kabupatenList = ref([])
@@ -349,6 +414,86 @@ const closeModal = () => {
   form.value = {}
 }
 
+const exportAllData = async () => {
+  try {
+    const response = await api.get('/wilayah/export', {
+      responseType: 'blob'
+    })
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `data_wilayah_${new Date().getTime()}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    
+    alert('Data wilayah berhasil diexport!')
+  } catch (error) {
+    console.error('Error exporting:', error)
+    alert('Gagal export data')
+  }
+}
+
+const downloadTemplate = async () => {
+  try {
+    const response = await api.get('/wilayah/template', {
+      responseType: 'blob'
+    })
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `template_data_wilayah.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    console.error('Error downloading template:', error)
+    alert('Gagal download template')
+  }
+}
+
+const handleFileSelect = (event) => {
+  selectedFile.value = event.target.files[0]
+}
+
+const importData = async () => {
+  if (!selectedFile.value) {
+    alert('Pilih file terlebih dahulu')
+    return
+  }
+
+  importing.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', selectedFile.value)
+
+    const response = await api.post('/wilayah/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    alert('Data wilayah berhasil diimport!')
+    closeImportModal()
+    loadAllData()
+  } catch (error) {
+    console.error('Error importing:', error)
+    alert(error.response?.data?.message || 'Gagal import data')
+  } finally {
+    importing.value = false
+  }
+}
+
+const closeImportModal = () => {
+  showImportModal.value = false
+  selectedFile.value = null
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
+}
+
 onMounted(() => {
   loadAllData()
 })
@@ -359,9 +504,16 @@ onMounted(() => {
   padding: 20px;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .header h2 {
   color: #2c3e50;
-  margin-bottom: 20px;
+  margin: 0;
 }
 
 .tabs {
@@ -408,6 +560,39 @@ onMounted(() => {
 .section-header h3 {
   margin: 0;
   color: #2c3e50;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-export {
+  background: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-export:hover {
+  background: #218838;
+}
+
+.btn-import {
+  background: #17a2b8;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-import:hover {
+  background: #138496;
 }
 
 .data-table {
@@ -583,5 +768,84 @@ onMounted(() => {
 
 .btn-secondary:hover {
   background: #5a6268;
+}
+
+.import-body {
+  padding: 20px;
+}
+
+.import-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.import-section h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.import-section p {
+  margin: 5px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.btn-template {
+  background: #6c757d;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.btn-template:hover {
+  background: #5a6268;
+}
+
+.file-input {
+  margin-top: 10px;
+  padding: 10px;
+  border: 2px dashed #ddd;
+  border-radius: 5px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.file-name {
+  margin-top: 10px;
+  padding: 10px;
+  background: #e7f3ff;
+  border-radius: 5px;
+  color: #004085;
+  font-size: 14px;
+}
+
+.import-info {
+  background: #fff3cd;
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 4px solid #ffc107;
+}
+
+.import-info strong {
+  color: #856404;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.import-info ul {
+  margin: 5px 0 0 20px;
+  color: #856404;
+}
+
+.import-info li {
+  margin: 5px 0;
+  font-size: 14px;
 }
 </style>

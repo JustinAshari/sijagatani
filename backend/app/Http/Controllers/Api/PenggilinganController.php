@@ -8,6 +8,7 @@ use App\Models\PenggilinganTransport;
 use App\Models\Petani;
 use App\Services\ImageService;
 use App\Exports\PenggilinganExport;
+use App\Exports\MakloonGKPExport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -457,4 +458,15 @@ class PenggilinganController extends Controller
             'data_penggilingan_' . date('Y-m-d_His') . '.xlsx'
         );
     }
-}
+    /**
+     * Export Makloon GKP data to Excel (Form Pengajuan GKP Maklon MPP)
+     */
+    public function exportMakloonGKP(Request $request)
+    {
+        $year = $request->input('tahun', date('Y'));
+        
+        return Excel::download(
+            new MakloonGKPExport($year),
+            'form_pengajuan_gkp_maklon_mpp_' . $year . '.xlsx'
+        );
+    }}

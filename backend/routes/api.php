@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PetaniController;
 use App\Http\Controllers\Api\PenggilinganController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WilayahController;
+use App\Http\Controllers\WilayahController as WilayahExportImportController;
 
 // Auth Routes (Public)
 Route::post('/login', [AuthController::class, 'login']);
@@ -34,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/penggilingan/{id}', [PenggilinganController::class, 'show']);
         Route::get('/penggilingan/summary', [PenggilinganController::class, 'summary']);
         Route::get('/penggilingan/export/excel', [PenggilinganController::class, 'export']);
+        Route::get('/penggilingan/export/makloon-gkp', [PenggilinganController::class, 'exportMakloonGKP']);
         Route::post('/penggilingan', [PenggilinganController::class, 'store']);
         Route::put('/penggilingan/{id}', [PenggilinganController::class, 'update']);
         Route::post('/penggilingan/{id}', [PenggilinganController::class, 'update']); // For FormData
@@ -68,5 +70,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/kalurahan', [WilayahController::class, 'storeKalurahan']);
         Route::put('/kalurahan/{id}', [WilayahController::class, 'updateKalurahan']);
         Route::delete('/kalurahan/{id}', [WilayahController::class, 'deleteKalurahan']);
+        
+        // Wilayah Export/Import Routes (Combined - SuperAdmin only)
+        Route::get('/wilayah/export', [WilayahExportImportController::class, 'exportWilayah']);
+        Route::post('/wilayah/import', [WilayahExportImportController::class, 'importWilayah']);
+        Route::get('/wilayah/template', [WilayahExportImportController::class, 'templateWilayah']);
     });
 });
