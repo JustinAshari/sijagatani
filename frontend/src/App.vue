@@ -34,11 +34,15 @@ const handleLogout = async () => {
           <div class="user-info">
             <span class="user-name">{{ authStore.user?.name }}</span>
             <span class="user-role" :class="{
+              'role-superadmin': authStore.isSuperAdmin,
               'role-admin': authStore.isAdmin,
               'role-petani': authStore.isPetani,
               'role-penggilingan': authStore.isPenggilingan
             }">
-              {{ authStore.isAdmin ? 'Administrator' : authStore.isPetani ? 'Petani' : authStore.isPenggilingan ? 'Penggilingan' : 'User' }}
+              {{ authStore.isSuperAdmin ? 'Super Admin' : 
+                 authStore.isAdmin ? 'Administrator' : 
+                 authStore.isPetani ? 'Petani' : 
+                 authStore.isPenggilingan ? 'Penggilingan' : 'User' }}
             </span>
           </div>
           <button @click="handleLogout" class="btn-logout">
@@ -144,9 +148,24 @@ body {
   font-weight: 600;
 }
 
-.role-admin {
+.role-superadmin {
   background: #e3f2fd;
   color: #1976d2;
+}
+
+.role-admin {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.role-petani {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.role-penggilingan {
+  background: #fff3e0;
+  color: #f57c00;
 }
 
 .role-user {

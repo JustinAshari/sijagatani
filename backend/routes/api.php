@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PetaniController;
 use App\Http\Controllers\Api\PenggilinganController;
+use App\Http\Controllers\Api\UserController;
 
 // Auth Routes (Public)
 Route::post('/login', [AuthController::class, 'login']);
@@ -16,7 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     
     // Petani Routes - Admin and Petani role can access
-    Route::middleware('role:admin,petani')->group(function () {
+    Route::middleware('role:admin,petani,superadmin')->group(function () {
         Route::get('/petani', [PetaniController::class, 'index']);
         Route::get('/petani/{id}', [PetaniController::class, 'show']);
         Route::get('/petani/export/excel', [PetaniController::class, 'export']);
@@ -27,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     // Penggilingan Routes - Admin and Penggilingan role can access
-    Route::middleware('role:admin,penggilingan')->group(function () {
+    Route::middleware('role:admin,penggilingan,superadmin')->group(function () {
         Route::get('/penggilingan', [PenggilinganController::class, 'index']);
         Route::get('/penggilingan/{id}', [PenggilinganController::class, 'show']);
         Route::get('/penggilingan/summary', [PenggilinganController::class, 'summary']);
@@ -36,5 +37,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/penggilingan/{id}', [PenggilinganController::class, 'update']);
         Route::post('/penggilingan/{id}', [PenggilinganController::class, 'update']); // For FormData
         Route::delete('/penggilingan/{id}', [PenggilinganController::class, 'destroy']);
+    });
+    
+    // User Management Routes - Only SuperAdmin can access
+    Route::middleware('role:superadmin')->group(function () {
+        Route::get('/users', [UserController::class, 'index']);
+        Route::post('/users', [UserController::class, 'store']);
+        Route::get('/users/{id}', [UserController::class, 'show']);
+        Route::put('/users/{id}', [UserController::class, 'update']);
+        Route::delete('/users/{id}', [UserController::class, 'destroy']);
     });
 });

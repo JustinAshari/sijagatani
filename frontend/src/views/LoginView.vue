@@ -44,7 +44,12 @@
         <h3>Akun Demo:</h3>
         <div class="demo-accounts">
           <div class="demo-account">
-            <strong>User Admin:</strong>
+            <strong>Super Administrator:</strong>
+            <p>Email: superadmin@sijagatani.com</p>
+            <p>Password: superadmin123</p>
+          </div>
+          <div class="demo-account">
+            <strong>Administrator:</strong>
             <p>Email: admin@sijagatani.com</p>
             <p>Password: admin123</p>
           </div>

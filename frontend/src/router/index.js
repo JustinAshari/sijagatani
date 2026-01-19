@@ -21,13 +21,19 @@ const router = createRouter({
       path: '/petani',
       name: 'petani',
       component: () => import('../views/PetaniView.vue'),
-      meta: { requiresAuth: true, roles: ['admin', 'petani'] }
+      meta: { requiresAuth: true, roles: ['admin', 'petani', 'superadmin'] }
     },
     {
       path: '/penggilingan',
       name: 'penggilingan',
       component: () => import('../views/PenggilinganView.vue'),
-      meta: { requiresAuth: true, roles: ['admin', 'penggilingan'] }
+      meta: { requiresAuth: true, roles: ['admin', 'penggilingan', 'superadmin'] }
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: () => import('../views/UserManagementView.vue'),
+      meta: { requiresAuth: true, roles: ['superadmin'] }
     },
     {
       path: '/about',

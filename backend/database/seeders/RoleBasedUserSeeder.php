@@ -13,6 +13,16 @@ class RoleBasedUserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create Super Admin user
+        User::firstOrCreate(
+            ['email' => 'superadmin@sijagatani.com'],
+            [
+                'name' => 'Super Administrator',
+                'password' => Hash::make('superadmin123'),
+                'role' => 'superadmin',
+            ]
+        );
+
         // Update existing users
         $existingAdmin = User::where('email', 'admin@sijagatani.com')->first();
         if ($existingAdmin) {
