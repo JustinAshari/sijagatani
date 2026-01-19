@@ -44,14 +44,19 @@
         <h3>Akun Demo:</h3>
         <div class="demo-accounts">
           <div class="demo-account">
-            <strong>Super Admin:</strong>
+            <strong>User Admin:</strong>
             <p>Email: admin@sijagatani.com</p>
             <p>Password: admin123</p>
           </div>
           <div class="demo-account">
-            <strong>User:</strong>
-            <p>Email: user@sijagatani.com</p>
-            <p>Password: user123</p>
+            <strong>User Petani:</strong>
+            <p>Email: petani@sijagatani.com</p>
+            <p>Password: petani123</p>
+          </div>
+          <div class="demo-account">
+            <strong>User Makloon:</strong>
+            <p>Email: penggilingan@sijagatani.com</p>
+            <p>Password: penggilingan123</p>
           </div>
         </div>
       </div>

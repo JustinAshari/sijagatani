@@ -21,13 +21,13 @@ const router = createRouter({
       path: '/petani',
       name: 'petani',
       component: () => import('../views/PetaniView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, roles: ['admin', 'petani'] }
     },
     {
       path: '/penggilingan',
       name: 'penggilingan',
       component: () => import('../views/PenggilinganView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, roles: ['admin', 'penggilingan'] }
     },
     {
       path: '/about',
@@ -51,6 +51,11 @@ router.beforeEach((to, from, next) => {
   }
   // If route is for guests only (like login) and user is authenticated
   else if (to.meta.requiresGuest && isAuthenticated) {
+    next({ name: 'home' })
+  }
+  // Check role-based access
+  else if (to.meta.roles && !to.meta.roles.includes(authStore.user?.role)) {
+    alert('Anda tidak memiliki akses ke halaman ini')
     next({ name: 'home' })
   }
   else {

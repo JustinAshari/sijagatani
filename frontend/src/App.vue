@@ -33,8 +33,12 @@ const handleLogout = async () => {
         <div class="navbar-right">
           <div class="user-info">
             <span class="user-name">{{ authStore.user?.name }}</span>
-            <span class="user-role" :class="authStore.isSuperAdmin ? 'role-admin' : 'role-user'">
-              {{ authStore.isSuperAdmin ? 'Super Admin' : 'User' }}
+            <span class="user-role" :class="{
+              'role-admin': authStore.isAdmin,
+              'role-petani': authStore.isPetani,
+              'role-penggilingan': authStore.isPenggilingan
+            }">
+              {{ authStore.isAdmin ? 'Administrator' : authStore.isPetani ? 'Petani' : authStore.isPenggilingan ? 'Penggilingan' : 'User' }}
             </span>
           </div>
           <button @click="handleLogout" class="btn-logout">

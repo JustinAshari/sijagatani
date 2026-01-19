@@ -6,8 +6,11 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const token = ref(localStorage.getItem('token') || null)
   const isAuthenticated = computed(() => !!token.value)
-  const isSuperAdmin = computed(() => user.value?.role === 'superadmin')
-  const isUser = computed(() => user.value?.role === 'user')
+  const isAdmin = computed(() => user.value?.role === 'admin')
+  const isPetani = computed(() => user.value?.role === 'petani')
+  const isPenggilingan = computed(() => user.value?.role === 'penggilingan')
+  const canAccessPetani = computed(() => ['admin', 'petani'].includes(user.value?.role))
+  const canAccessPenggilingan = computed(() => ['admin', 'penggilingan'].includes(user.value?.role))
 
   const login = async (email, password) => {
     try {
@@ -70,8 +73,11 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     token,
     isAuthenticated,
-    isSuperAdmin,
-    isUser,
+    isAdmin,
+    isPetani,
+    isPenggilingan,
+    canAccessPetani,
+    canAccessPenggilingan,
     login,
     logout,
     fetchUser,
