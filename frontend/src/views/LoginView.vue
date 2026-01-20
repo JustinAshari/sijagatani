@@ -54,14 +54,16 @@
             <p>Password: admin123</p>
           </div>
           <div class="demo-account">
-            <strong>User Petani:</strong>
+            <strong>Admin Lapangan Bulog:</strong>
             <p>Email: petani@sijagatani.com</p>
             <p>Password: petani123</p>
+            <p class="role-note">✓ Bisa CRUD data petani</p>
           </div>
           <div class="demo-account">
-            <strong>User Makloon:</strong>
+            <strong>Admin Penggilingan Makloon:</strong>
             <p>Email: penggilingan@sijagatani.com</p>
             <p>Password: penggilingan123</p>
+            <p class="role-note">✓ Bisa CRUD data penggilingan</p>
           </div>
         </div>
       </div>
@@ -246,6 +248,14 @@ const handleLogin = async () => {
   font-size: 13px;
   margin: 3px 0;
   font-family: 'Courier New', monospace;
+}
+
+.demo-account .role-note {
+  color: #10b981;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 @media (max-width: 480px) {
