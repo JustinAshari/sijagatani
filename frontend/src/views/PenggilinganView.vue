@@ -45,14 +45,6 @@
         </div>
         <div class="filter-item">
           <button @click="resetFilters" class="btn-reset">Reset Filter</button>
-          <button @click="exportExcel" class="btn-export">
-            <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Export Excel
-          </button>
         </div>
       </div>
     </div>
@@ -842,31 +834,6 @@ const formatDate = (dateString) => {
     month: 'long',
     year: 'numeric',
   })
-}
-
-const exportExcel = async () => {
-  try {
-    const params = new URLSearchParams()
-    if (filters.value.tanggalDari) params.append('tanggal_dari', filters.value.tanggalDari)
-    if (filters.value.tanggalSampai) params.append('tanggal_sampai', filters.value.tanggalSampai)
-    if (filters.value.namaPenggilingan)
-      params.append('nama_penggilingan', filters.value.namaPenggilingan)
-
-    const response = await api.get(`/penggilingan/export/excel?${params.toString()}`, {
-      responseType: 'blob',
-    })
-
-    const url = window.URL.createObjectURL(new Blob([response.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', `penggilingan_${new Date().getTime()}.xlsx`)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-  } catch (error) {
-    console.error('Error exporting:', error)
-    alert('Gagal export data')
-  }
 }
 
 const downloadMakloonGKP = async (penggilinganId) => {
