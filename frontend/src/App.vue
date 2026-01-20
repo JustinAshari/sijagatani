@@ -3,6 +3,7 @@ import { RouterView, useRoute } from 'vue-router'
 import { computed } from 'vue'
 import AppSidebar from './components/AppSidebar.vue'
 import { useAuthStore } from './stores/auth'
+import bulogLogo from './assets/Bulog Logo.PNG'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -27,7 +28,7 @@ const handleLogout = async () => {
     <header class="top-navbar">
       <div class="navbar-content">
         <div class="navbar-left">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Bulog.svg/1200px-Bulog.svg.png" alt="Bulog Logo" class="bulog-logo">
+          <img :src="bulogLogo" alt="Bulog Logo" class="bulog-logo">
           <h1 class="app-title">SiJagaTani</h1>
         </div>
         <div class="navbar-right">

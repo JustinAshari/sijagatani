@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -20,6 +21,7 @@ class MakloonGKPExport implements FromCollection, WithHeadings, WithStyles, With
     protected $year;
     protected $lastRow;
     protected $penggilinganId;
+    protected $penggilinganData;
 
     public function __construct($penggilinganId, $year = null)
     {
@@ -32,6 +34,9 @@ class MakloonGKPExport implements FromCollection, WithHeadings, WithStyles, With
         $penggilingan = Penggilingan::with(['transports' => function($query) {
             $query->orderBy('urutan');
         }])->findOrFail($this->penggilinganId);
+        
+        // Store penggilingan data for use in registerEvents
+        $this->penggilinganData = $penggilingan;
 
         $data = collect();
         $no = 1;
@@ -89,6 +94,9 @@ class MakloonGKPExport implements FromCollection, WithHeadings, WithStyles, With
             'D' => 20,  // Pengemudi
             'E' => 18,  // Kuantum (Kg)
             'F' => 20,  // Total Kuantum GKP (Kg)
+            'G' => 3,   // Gap column
+            'H' => 35,  // Lampiran (merged with I)
+            'I' => 35,  // Lampiran (merged with H)
         ];
     }
 
@@ -178,7 +186,172 @@ class MakloonGKPExport implements FromCollection, WithHeadings, WithStyles, With
                     $sheet->mergeCells("B{$catatanRow}:F{$catatanRow}");
                     $catatanRow++;
                 }
+                
+                // Add Lampiran section (beside the table, starting from column H)
+                // Calculate heights for each lampiran box
+                $boxHeight = 15; // rows per lampiran box
+                
+                // Lampiran 3 (Nota Timbang) - starts 1 row below header
+                $lampiran3Start = 3;
+                $lampiran3End = $lampiran3Start + $boxHeight - 1;
+                $sheet->setCellValue("H{$lampiran3Start}", 'CONTOH LAMPIRAN 3 (NOTA TIMBANG)');
+                $sheet->mergeCells("H{$lampiran3Start}:I{$lampiran3Start}");
+                $sheet->getStyle("H{$lampiran3Start}:I{$lampiran3Start}")->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 10],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'E7E6E6']
+                    ],
+                    'borders' => [
+                        'outline' => ['borderStyle' => Border::BORDER_THIN]
+                    ]
+                ]);
+                $lampiran3BoxStart = $lampiran3Start + 1;
+                $sheet->mergeCells("H{$lampiran3BoxStart}:I{$lampiran3End}");
+                $sheet->getStyle("H{$lampiran3BoxStart}:I{$lampiran3End}")->applyFromArray([
+                    'borders' => [
+                        'outline' => ['borderStyle' => Border::BORDER_THIN]
+                    ]
+                ]);
+                
+                // Lampiran 4 (Surat Jalan) - 1 row gap after Lampiran 3
+                $lampiran4Start = $lampiran3End + 2;
+                $lampiran4End = $lampiran4Start + $boxHeight;
+                $sheet->setCellValue("H{$lampiran4Start}", 'CONTOH LAMPIRAN 4 (SURAT JALAN)');
+                $sheet->mergeCells("H{$lampiran4Start}:I{$lampiran4Start}");
+                $sheet->getStyle("H{$lampiran4Start}:I{$lampiran4Start}")->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 10],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'E7E6E6']
+                    ],
+                    'borders' => [
+                        'outline' => ['borderStyle' => Border::BORDER_THIN]
+                    ]
+                ]);
+                $lampiran4BoxStart = $lampiran4Start + 1;
+                $sheet->mergeCells("H{$lampiran4BoxStart}:I{$lampiran4End}");
+                $sheet->getStyle("H{$lampiran4BoxStart}:I{$lampiran4End}")->applyFromArray([
+                    'borders' => [
+                        'outline' => ['borderStyle' => Border::BORDER_THIN]
+                    ]
+                ]);
+                
+                // Lampiran 5 (Foto Kegiatan) - 1 row gap after Lampiran 4
+                $lampiran5Start = $lampiran4End + 2;
+                $lampiran5End = $lampiran5Start + $boxHeight;
+                $sheet->setCellValue("H{$lampiran5Start}", 'CONTOH LAMPIRAN 5 (FOTO KEGIATAN)');
+                $sheet->mergeCells("H{$lampiran5Start}:I{$lampiran5Start}");
+                $sheet->getStyle("H{$lampiran5Start}:I{$lampiran5Start}")->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 10],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'E7E6E6']
+                    ],
+                    'borders' => [
+                        'outline' => ['borderStyle' => Border::BORDER_THIN]
+                    ]
+                ]);
+                $lampiran5BoxStart = $lampiran5Start + 1;
+                $sheet->mergeCells("H{$lampiran5BoxStart}:I{$lampiran5End}");
+                $sheet->getStyle("H{$lampiran5BoxStart}:I{$lampiran5End}")->applyFromArray([
+                    'borders' => [
+                        'outline' => ['borderStyle' => Border::BORDER_THIN]
+                    ]
+                ]);
+                
+                // Insert photos if available
+                $this->insertPhotos($sheet, $lampiran3BoxStart, $lampiran4BoxStart, $lampiran5BoxStart);
             },
         ];
+    }
+    
+    /**
+     * Insert photos into lampiran boxes
+     */
+    private function insertPhotos($sheet, $lampiran3Row, $lampiran4Row, $lampiran5Row)
+    {
+        $penggilingan = $this->penggilinganData;
+        $storagePath = storage_path('app/public/');
+        
+        // Lampiran 3: Nota Timbang (from ALL transports)
+        $notaOffsetY = 5;
+        foreach ($penggilingan->transports as $index => $transport) {
+            if ($transport->nota_timbang) {
+                $notaPath = $storagePath . $transport->nota_timbang;
+                if (file_exists($notaPath) && $this->isImageFile($notaPath)) {
+                    $this->addImageToCell($sheet, $notaPath, "H{$lampiran3Row}", 500, 200, 5, $notaOffsetY);
+                    $notaOffsetY += 210; // Stack vertically with 10px gap
+                }
+            }
+        }
+        
+        // Lampiran 4: Surat Jalan (from ALL transports)
+        $suratOffsetY = 5;
+        foreach ($penggilingan->transports as $index => $transport) {
+            if ($transport->surat_jalan) {
+                $suratPath = $storagePath . $transport->surat_jalan;
+                if (file_exists($suratPath) && $this->isImageFile($suratPath)) {
+                    $this->addImageToCell($sheet, $suratPath, "H{$lampiran4Row}", 500, 200, 5, $suratOffsetY);
+                    $suratOffsetY += 210; // Stack vertically with 10px gap
+                }
+            }
+        }
+        
+        // Lampiran 5: Foto Kegiatan GKP (foto_gkp_1 and foto_gkp_2)
+        $fotoOffsetY = 5;
+        
+        if ($penggilingan->foto_gkp_1) {
+            $foto1Path = $storagePath . $penggilingan->foto_gkp_1;
+            if (file_exists($foto1Path) && $this->isImageFile($foto1Path)) {
+                $this->addImageToCell($sheet, $foto1Path, "H{$lampiran5Row}", 500, 300, 5, $fotoOffsetY);
+                $fotoOffsetY += 310;
+            }
+        }
+        
+        if ($penggilingan->foto_gkp_2) {
+            $foto2Path = $storagePath . $penggilingan->foto_gkp_2;
+            if (file_exists($foto2Path) && $this->isImageFile($foto2Path)) {
+                $this->addImageToCell($sheet, $foto2Path, "H{$lampiran5Row}", 500, 300, 5, $fotoOffsetY);
+            }
+        }
+    }
+    
+    /**
+     * Check if file is an image
+     */
+    private function isImageFile($filePath)
+    {
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        return in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'bmp']);
+    }
+    
+    /**
+     * Add image to specific cell
+     */
+    private function addImageToCell($sheet, $imagePath, $coordinate, $width = 300, $height = 300, $offsetX = 5, $offsetY = 5)
+    {
+        $drawing = new Drawing();
+        $drawing->setName('Image');
+        $drawing->setDescription('Image');
+        $drawing->setPath($imagePath);
+        $drawing->setCoordinates($coordinate);
+        $drawing->setWidth($width);
+        $drawing->setHeight($height);
+        $drawing->setOffsetX($offsetX);
+        $drawing->setOffsetY($offsetY);
+        $drawing->setWorksheet($sheet);
     }
 }
