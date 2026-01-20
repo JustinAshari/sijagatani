@@ -110,8 +110,8 @@
             <td>{{ petani.nama }}</td>
             <td>{{ petani.kabupaten?.nama || '-' }}</td>
             <td>{{ petani.kecamatan?.nama || '-' }}</td>
-            <td class="text-right">{{ petani.luas_lahan }}</td>
-            <td class="text-right">{{ petani.potensi_panen }}</td>
+            <td class="text-right">{{ formatNumber(petani.luas_lahan) }}</td>
+            <td class="text-right">{{ formatNumber(petani.potensi_panen) }}</td>
             <td class="text-center">
               <span class="badge" :class="`badge-${petani.komoditi.toLowerCase()}`">
                 {{ petani.komoditi }}
@@ -163,7 +163,7 @@
             </h4>
             <div class="form-row">
               <div class="form-group">
-                <label>Tanggal *</label>
+                <label>Tanggal Penambahan Data *</label>
                 <input v-model="form.tanggal" type="date" required />
               </div>
               <div class="form-group">
@@ -277,7 +277,7 @@
                 <input v-model="form.luas_lahan" type="number" step="0.01" min="0" required />
               </div>
               <div class="form-group">
-                <label>Potensi Panen (KG) *</label>
+                <label>Potensi Panen (KG) Per Tahun *</label>
                 <input v-model="form.potensi_panen" type="number" step="0.01" min="0" required />
               </div>
               <div class="form-group">
@@ -365,7 +365,7 @@
             </h4>
             <div class="info-grid">
               <div class="info-item">
-                <strong>Tanggal:</strong>
+                <strong>Tanggal Penambahan Data:</strong>
                 <span>{{ formatDate(selectedPetani.tanggal) }}</span>
               </div>
               <div class="info-item">
@@ -454,11 +454,11 @@
               </div>
               <div class="info-item">
                 <strong>Luas Lahan:</strong>
-                <span>{{ selectedPetani.luas_lahan }} HA</span>
+                <span>{{ formatNumber(selectedPetani.luas_lahan) }} HA</span>
               </div>
               <div class="info-item">
-                <strong>Potensi Panen:</strong>
-                <span>{{ selectedPetani.potensi_panen }} KG</span>
+                <strong>Potensi Panen Per Tahun:</strong>
+                <span>{{ formatNumber(selectedPetani.potensi_panen) }} KG</span>
               </div>
               <div class="info-item">
                 <strong>Komoditi:</strong>
@@ -836,6 +836,14 @@ const formatDate = (date) => {
     month: 'long',
     year: 'numeric'
   })
+}
+
+const formatNumber = (value) => {
+  if (!value) return '0'
+  const num = parseFloat(value)
+  // Jika angka bulat, tampilkan tanpa desimal
+  // Jika ada desimal, tampilkan dengan desimal
+  return num % 1 === 0 ? num.toString() : num.toFixed(2)
 }
 
 // Wilayah functions
