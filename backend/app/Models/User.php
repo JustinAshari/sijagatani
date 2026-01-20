@@ -57,10 +57,60 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is regular user
+     * Check if user is admin
      */
-    public function isUser(): bool
+    public function isAdmin(): bool
     {
-        return $this->role === 'user';
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if user is admin lapangan Bulog (role petani)
+     * Bisa mengelola (tambah, edit, hapus) data petani
+     */
+    public function isAdminLapangan(): bool
+    {
+        return $this->role === 'petani';
+    }
+
+    /**
+     * Check if user is admin pekerja penggilingan (role penggilingan)
+     * Bisa mengelola (tambah, edit, hapus) data makloon/penggilingan
+     */
+    public function isAdminPenggilingan(): bool
+    {
+        return $this->role === 'penggilingan';
+    }
+
+    /**
+     * Check if user can manage petani data
+     * SuperAdmin, Admin, and Admin Lapangan (petani role) can manage
+     */
+    public function canManagePetani(): bool
+    {
+        return in_array($this->role, ['superadmin', 'admin', 'petani']);
+    }
+
+    /**
+     * Check if user can manage penggilingan data
+     * SuperAdmin, Admin, and Admin Penggilingan (penggilingan role) can manage
+     */
+    public function canManagePenggilingan(): bool
+    {
+        return in_array($this->role, ['superadmin', 'admin', 'penggilingan']);
+    }
+
+    /**
+     * Get human readable role name
+     */
+    public function getRoleName(): string
+    {
+        return match($this->role) {
+            'superadmin' => 'Super Admin',
+            'admin' => 'Admin',
+            'petani' => 'Admin Lapangan Bulog',
+            'penggilingan' => 'Admin Penggilingan',
+            default => ucfirst($this->role)
+        };
     }
 }
