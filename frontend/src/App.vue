@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import AppSidebar from './components/AppSidebar.vue'
 import { useAuthStore } from './stores/auth'
 import bulogLogo from './assets/Bulog Logo.PNG'
+import sijagataniLogo from './assets/Sijagatani Logo.PNG'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -29,7 +30,8 @@ const handleLogout = async () => {
       <div class="navbar-content">
         <div class="navbar-left">
           <img :src="bulogLogo" alt="Bulog Logo" class="bulog-logo">
-          <h1 class="app-title">SiJagaTani</h1>
+          <img :src="sijagataniLogo" alt="Sijagatani Logo" class="sijagatani-logo">
+          <h1 class="app-title">Sistem Jemput<br>Gabah Jagung Petani</h1>
         </div>
         <div class="navbar-right">
           <div class="user-info">
@@ -116,11 +118,18 @@ body {
   object-fit: contain;
 }
 
+.sijagatani-logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
 .app-title {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #2c3e50;
   margin: 0;
+  line-height: 1.3;
 }
 
 .navbar-right {
@@ -224,8 +233,8 @@ body {
     height: 35px;
   }
 
-  .app-title {
-    font-size: 1.2rem;
+  .sijagatani-logo {
+    height: 40px;
   }
 
   .navbar-subtitle {
@@ -242,12 +251,12 @@ body {
 }
 
 @media (max-width: 480px) {
-  .app-title {
-    font-size: 1rem;
-  }
-
   .bulog-logo {
     height: 30px;
+  }
+
+  .sijagatani-logo {
+    height: 35px;
   }
 
   .app-main {
