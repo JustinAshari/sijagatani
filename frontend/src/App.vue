@@ -119,7 +119,7 @@ body {
 }
 
 .sijagatani-logo {
-  height: 60px;
+  height: 53px;
   width: auto;
   object-fit: contain;
 }

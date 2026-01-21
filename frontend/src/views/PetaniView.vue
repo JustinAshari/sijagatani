@@ -90,7 +90,7 @@
             <th>Kabupaten</th>
             <th>Kecamatan</th>
             <th>Luas Lahan (HA)</th>
-            <th>Potensi Panen (KG)</th>
+            <th>Potensi Panen (KG) Per Tahun</th>
             <th>Komoditi</th>
             <th>No. Telp</th>
             <th>Aksi</th>
