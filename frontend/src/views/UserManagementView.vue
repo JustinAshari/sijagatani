@@ -88,7 +88,7 @@
             <select v-model="form.role" required>
               <option value="">Pilih Role</option>
               <option value="admin">Administrator</option>
-              <option value="petani">Petani</option>
+              <option value="lapangan">Admin Lapangan Bulog</option>
               <option value="penggilingan">Penggilingan/Makloon</option>
             </select>
           </div>
@@ -202,7 +202,7 @@ const getRoleLabel = (role) => {
   const labels = {
     superadmin: 'Super Admin',
     admin: 'Administrator',
-    petani: 'Petani',
+    lapangan: 'Admin Lapangan Bulog',
     penggilingan: 'Penggilingan'
   }
   return labels[role] || role
@@ -296,7 +296,7 @@ onMounted(() => {
   color: #7b1fa2;
 }
 
-.badge-petani {
+.badge-lapangan {
   background: #e8f5e9;
   color: #388e3c;
 }

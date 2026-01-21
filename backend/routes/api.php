@@ -18,8 +18,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     
-    // Petani Routes - Admin and Petani role can access
-    Route::middleware('role:admin,petani,superadmin')->group(function () {
+    // Petani Routes - Admin and Lapangan role can access
+    Route::middleware('role:admin,lapangan,superadmin')->group(function () {
         Route::get('/petani', [PetaniController::class, 'index']);
         Route::get('/petani/{id}', [PetaniController::class, 'show']);
         Route::get('/petani/export/excel', [PetaniController::class, 'export']);

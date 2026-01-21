@@ -45,13 +45,13 @@ class RoleBasedUserSeeder extends Seeder
             $existingUser->delete();
         }
 
-        // Create Petani user (Admin Lapangan Bulog)
+        // Create Lapangan user (Admin Lapangan Bulog)
         User::firstOrCreate(
             ['email' => 'petani@sijagatani.com'],
             [
                 'name' => 'Admin Lapangan Bulog',
                 'password' => Hash::make('petani123'),
-                'role' => 'petani',
+                'role' => 'lapangan',
             ]
         );
 

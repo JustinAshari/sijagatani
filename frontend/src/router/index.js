@@ -21,7 +21,7 @@ const router = createRouter({
       path: '/petani',
       name: 'petani',
       component: () => import('../views/PetaniView.vue'),
-      meta: { requiresAuth: true, roles: ['admin', 'petani', 'superadmin'] }
+      meta: { requiresAuth: true, roles: ['admin', 'lapangan', 'superadmin'] }
     },
     {
       path: '/penggilingan',

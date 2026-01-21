@@ -31,8 +31,8 @@ Data petani dan penggilingan dikelola oleh petugas Bulog, bukan oleh petani itu 
   - ❌ Tidak bisa manajemen user
   - ❌ Tidak bisa manajemen wilayah
 
-### 3. **Admin Lapangan Bulog** (Role: `petani`)
-- **Role Code:** `petani`
+### 3. **Admin Lapangan Bulog** (Role: `lapangan`)
+- **Role Code:** `lapangan`
 - **Pemegang:** Admin lapangan Bulog di lapangan
 - **Fungsi:** Mengelola data petani yang mengajukan komoditi
 - **Akses:**
@@ -46,7 +46,7 @@ Data petani dan penggilingan dikelola oleh petugas Bulog, bukan oleh petani itu 
   - ❌ Tidak bisa manajemen wilayah
 
 **CATATAN:** 
-- Role "petani" BUKAN untuk petani sesungguhnya
+- Role "lapangan" BUKAN untuk petani sesungguhnya
 - Ini adalah role untuk admin/petugas Bulog yang bertugas mencatat data petani
 - Satu akun bisa digunakan untuk mencatat banyak petani
 
@@ -110,7 +110,7 @@ Data petani dan penggilingan dikelola oleh petugas Bulog, bukan oleh petani itu 
 
 ```php
 // Petani Routes - Admin, Admin Lapangan, dan SuperAdmin bisa akses
-Route::middleware('role:admin,petani,superadmin')->group(function () {
+Route::middleware('role:admin,lapangan,superadmin')->group(function () {
     Route::get('/petani', [PetaniController::class, 'index']);
     Route::post('/petani', [PetaniController::class, 'store']);
     Route::put('/petani/{id}', [PetaniController::class, 'update']);
@@ -141,7 +141,7 @@ Route::middleware('role:superadmin')->group(function () {
 // Check role
 $user->isSuperAdmin()          // true jika role = superadmin
 $user->isAdmin()                // true jika role = admin
-$user->isAdminLapangan()        // true jika role = petani (Admin Lapangan Bulog)
+$user->isAdminLapangan()        // true jika role = lapangan (Admin Lapangan Bulog)
 $user->isAdminPenggilingan()    // true jika role = penggilingan
 
 // Check permission
@@ -157,11 +157,11 @@ $user->getRoleName()            // "Admin Lapangan Bulog", "Admin Penggilingan",
 ## Perubahan dari Sistem Sebelumnya
 
 ### ❌ Sistem Lama (Salah)
-- Role "petani" dan "penggilingan" **hanya bisa melihat data**
+- Role "lapangan" dan "penggilingan" **hanya bisa melihat data**
 - Role tersebut tidak bisa menambah/edit/hapus data
 
 ### ✅ Sistem Baru (Benar)
-- Role "petani" (Admin Lapangan) **bisa menambah, edit, hapus data petani**
+- Role "lapangan" (Admin Lapangan) **bisa menambah, edit, hapus data petani**
 - Role "penggilingan" (Admin Penggilingan) **bisa menambah, edit, hapus data penggilingan**
 - Petani dan masyarakat umum **TIDAK memiliki akun** dalam sistem
 - Semua data dikelola oleh petugas/admin Bulog dan penggilingan
@@ -171,7 +171,7 @@ $user->getRoleName()            // "Admin Lapangan Bulog", "Admin Penggilingan",
 ## Contoh Skenario Penggunaan
 
 ### Skenario 1: Admin Lapangan Bulog Mencatat Petani
-1. Admin lapangan login dengan akun role `petani`
+1. Admin lapangan login dengan akun role `lapangan`
 2. Petani datang ke kantor Bulog membawa komoditi
 3. Admin mencatat data petani (NIK, nama, alamat, jumlah komoditi, dll)
 4. Admin upload foto KTP petani, foto petani, foto komoditi
@@ -208,7 +208,7 @@ CREATE TABLE users (
     name VARCHAR(255),
     email VARCHAR(255) UNIQUE,
     password VARCHAR(255),
-    role ENUM('superadmin', 'admin', 'petani', 'penggilingan') DEFAULT 'petani',
+    role ENUM('superadmin', 'admin', 'lapangan', 'penggilingan') DEFAULT 'lapangan',
     email_verified_at TIMESTAMP NULL,
     remember_token VARCHAR(100),
     created_at TIMESTAMP,
@@ -219,7 +219,7 @@ CREATE TABLE users (
 ### Nilai Role yang Valid:
 - `superadmin` - Super Administrator
 - `admin` - Administrator umum  
-- `petani` - Admin Lapangan Bulog
+- `lapangan` - Admin Lapangan Bulog
 - `penggilingan` - Admin Penggilingan/Makloon
 
 ---
@@ -227,12 +227,12 @@ CREATE TABLE users (
 ## Catatan Penting untuk Developer
 
 1. **Jangan gunakan istilah "User Petani" atau "User Penggilingan"**
-   - Gunakan "Admin Lapangan Bulog" untuk role `petani`
+   - Gunakan "Admin Lapangan Bulog" untuk role `lapangan`
    - Gunakan "Admin Penggilingan" untuk role `penggilingan`
 
 2. **Di UI/Frontend:**
    - Tampilkan nama role yang lebih deskriptif
-   - "petani" → "Admin Lapangan Bulog"
+   - "lapangan" → "Admin Lapangan Bulog"
    - "penggilingan" → "Admin Penggilingan"
    
 3. **Saat membuat akun baru:**
@@ -250,8 +250,8 @@ CREATE TABLE users (
 **Q: Apakah petani punya akun?**  
 A: **TIDAK**. Petani tidak punya akun. Data petani dicatat oleh Admin Lapangan Bulog.
 
-**Q: Kenapa role-nya dinamakan "petani" padahal bukan untuk petani?**  
-A: Ini warisan dari sistem lama. Secara teknis role-nya tetap `petani` di database, tapi secara fungsional ini adalah role untuk Admin Lapangan Bulog yang mengelola data petani.
+**Q: Kenapa role-nya dinamakan "lapangan" padahal bukan untuk petani?**  
+A: Role "lapangan" menggambarkan fungsi sebenarnya yaitu Admin Lapangan Bulog yang bertugas di lapangan untuk mengelola data petani.
 
 **Q: Berapa akun yang perlu dibuat untuk 10 penggilingan?**  
 A: 10 akun, satu akun untuk setiap penggilingan dengan role `penggilingan`.
@@ -260,7 +260,7 @@ A: 10 akun, satu akun untuk setiap penggilingan dengan role `penggilingan`.
 A: Ya, role `admin` bisa mengelola kedua-duanya.
 
 **Q: Apakah Admin Lapangan bisa melihat data penggilingan?**  
-A: Tidak. Admin Lapangan (role `petani`) hanya bisa mengelola data petani saja.
+A: Tidak. Admin Lapangan (role `lapangan`) hanya bisa mengelola data petani saja.
 
 **Q: Bagaimana cara menambah role baru?**  
 A: 

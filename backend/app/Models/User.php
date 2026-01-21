@@ -65,12 +65,12 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is admin lapangan Bulog (role petani)
+     * Check if user is admin lapangan Bulog (role lapangan)
      * Bisa mengelola (tambah, edit, hapus) data petani
      */
     public function isAdminLapangan(): bool
     {
-        return $this->role === 'petani';
+        return $this->role === 'lapangan';
     }
 
     /**
@@ -84,11 +84,11 @@ class User extends Authenticatable
 
     /**
      * Check if user can manage petani data
-     * SuperAdmin, Admin, and Admin Lapangan (petani role) can manage
+     * SuperAdmin, Admin, and Admin Lapangan (lapangan role) can manage
      */
     public function canManagePetani(): bool
     {
-        return in_array($this->role, ['superadmin', 'admin', 'petani']);
+        return in_array($this->role, ['superadmin', 'admin', 'lapangan']);
     }
 
     /**
@@ -108,7 +108,7 @@ class User extends Authenticatable
         return match($this->role) {
             'superadmin' => 'Super Admin',
             'admin' => 'Admin',
-            'petani' => 'Admin Lapangan Bulog',
+            'lapangan' => 'Admin Lapangan Bulog',
             'penggilingan' => 'Admin Penggilingan',
             default => ucfirst($this->role)
         };

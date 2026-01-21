@@ -8,16 +8,16 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
   const isSuperAdmin = computed(() => user.value?.role === 'superadmin')
   const isAdmin = computed(() => user.value?.role === 'admin')
-  const isPetani = computed(() => user.value?.role === 'petani')
+  const isLapangan = computed(() => user.value?.role === 'lapangan')
   const isPenggilingan = computed(() => user.value?.role === 'penggilingan')
   
   // Access permission (can view)
-  const canAccessPetani = computed(() => ['admin', 'petani', 'superadmin'].includes(user.value?.role))
+  const canAccessPetani = computed(() => ['admin', 'lapangan', 'superadmin'].includes(user.value?.role))
   const canAccessPenggilingan = computed(() => ['admin', 'penggilingan', 'superadmin'].includes(user.value?.role))
   const canAccessUsers = computed(() => user.value?.role === 'superadmin')
   
   // CRUD permission (can create, update, delete)
-  const canManagePetani = computed(() => ['admin', 'petani', 'superadmin'].includes(user.value?.role))
+  const canManagePetani = computed(() => ['admin', 'lapangan', 'superadmin'].includes(user.value?.role))
   const canManagePenggilingan = computed(() => ['admin', 'penggilingan', 'superadmin'].includes(user.value?.role))
 
   const login = async (email, password) => {
@@ -83,7 +83,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isSuperAdmin,
     isAdmin,
-    isPetani,
+    isLapangan,
     isPenggilingan,
     canAccessPetani,
     canAccessPenggilingan,

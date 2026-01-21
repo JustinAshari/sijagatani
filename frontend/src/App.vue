@@ -37,12 +37,12 @@ const handleLogout = async () => {
             <span class="user-role" :class="{
               'role-superadmin': authStore.isSuperAdmin,
               'role-admin': authStore.isAdmin,
-              'role-petani': authStore.isPetani,
+              'role-lapangan': authStore.isLapangan,
               'role-penggilingan': authStore.isPenggilingan
             }">
               {{ authStore.isSuperAdmin ? 'Super Admin' : 
                  authStore.isAdmin ? 'Administrator' : 
-                 authStore.isPetani ? 'Petani' : 
+                 authStore.isLapangan ? 'Admin Lapangan' : 
                  authStore.isPenggilingan ? 'Penggilingan' : 'User' }}
             </span>
           </div>
@@ -159,7 +159,7 @@ body {
   color: #7b1fa2;
 }
 
-.role-petani {
+.role-lapangan {
   background: #e8f5e9;
   color: #388e3c;
 }
