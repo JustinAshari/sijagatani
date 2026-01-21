@@ -1,71 +1,79 @@
 <template>
   <div class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <h1>SIJAGATANI</h1>
-        <p>Sistem Informasi Jagung Petani</p>
+    <!-- Left Side - Branding -->
+    <div class="login-left">
+      <div class="branding-content">
+        <div class="logo-section">
+          <img src="../assets/Bulog Logo.png" alt="Bulog Logo" class="logo-bulog">
+          <img src="../assets/Sijagatani Logo.PNG" alt="Sijagatani Logo" class="logo-sijagatani">
+        </div>
+        <h1 class="main-title">Sistem Jemput<br>Gabah Jagung Petani</h1>
       </div>
-      
-      <form @submit.prevent="handleLogin" class="login-form">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            v-model="form.email"
-            type="email"
-            placeholder="Masukkan email"
-            required
-            autocomplete="email"
-          />
-        </div>
+    </div>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            placeholder="Masukkan password"
-            required
-            autocomplete="current-password"
-          />
-        </div>
+    <!-- Right Side - Login Form -->
+    <div class="login-right">
+      <div class="login-form-container">
+        <form @submit.prevent="handleLogin" class="login-form">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <input
+                id="email"
+                v-model="form.email"
+                type="email"
+                placeholder="name@gmail.com"
+                required
+                autocomplete="email"
+              />
+            </div>
+          </div>
 
-        <div v-if="error" class="error-message">
-          {{ error }}
-        </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input
+                id="password"
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="••••••••••••••"
+                required
+                autocomplete="current-password"
+              />
+              <button 
+                type="button" 
+                class="toggle-password" 
+                @click="showPassword = !showPassword"
+                tabindex="-1"
+              >
+                <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              </button>
+            </div>
+          </div>
 
-        <button type="submit" class="btn-login" :disabled="loading">
-          {{ loading ? 'Loading...' : 'Login' }}
-        </button>
-      </form>
+          <div v-if="error" class="error-message">
+            {{ error }}
+          </div>
 
-      <div class="login-info">
-        <h3>Akun Demo:</h3>
-        <div class="demo-accounts">
-          <div class="demo-account">
-            <strong>Super Administrator:</strong>
-            <p>Email: superadmin@sijagatani.com</p>
-            <p>Password: superadmin123</p>
-          </div>
-          <div class="demo-account">
-            <strong>Administrator:</strong>
-            <p>Email: admin@sijagatani.com</p>
-            <p>Password: admin123</p>
-          </div>
-          <div class="demo-account">
-            <strong>Admin Lapangan Bulog:</strong>
-            <p>Email: petani@sijagatani.com</p>
-            <p>Password: petani123</p>
-            <p class="role-note">✓ Bisa CRUD data petani</p>
-          </div>
-          <div class="demo-account">
-            <strong>Admin Penggilingan Makloon:</strong>
-            <p>Email: penggilingan@sijagatani.com</p>
-            <p>Password: penggilingan123</p>
-            <p class="role-note">✓ Bisa CRUD data penggilingan</p>
-          </div>
-        </div>
+          <button type="submit" class="btn-login" :disabled="loading">
+            {{ loading ? 'Loading...' : 'Masuk' }}
+          </button>
+        </form>
       </div>
     </div>
   </div>
@@ -86,6 +94,7 @@ const form = ref({
 
 const loading = ref(false)
 const error = ref('')
+const showPassword = ref(false)
 
 const handleLogin = async () => {
   loading.value = true
@@ -111,74 +120,147 @@ const handleLogin = async () => {
 .login-container {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  background: #f5f5f5;
+}
+
+/* Left Side - Branding */
+.login-left {
+  flex: 1;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  padding: 60px 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.branding-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
 }
 
-.login-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  padding: 40px;
-  width: 100%;
-  max-width: 450px;
-}
-
-.login-header {
-  text-align: center;
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 30px;
   margin-bottom: 30px;
 }
 
-.login-header h1 {
-  font-size: 32px;
-  color: #2c3e50;
-  margin-bottom: 5px;
-  font-weight: 700;
+.logo-bulog {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
 }
 
-.login-header p {
-  color: #7f8c8d;
-  font-size: 16px;
+.logo-sijagatani {
+  height: 120px;
+  width: auto;
+  object-fit: contain;
+}
+
+.main-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+  text-align: left;
+}
+
+/* Right Side - Login Form */
+.login-right {
+  flex: 1;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 400px;
 }
 
 .login-form {
-  margin-bottom: 30px;
+  width: 100%;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #2c3e50;
-  font-weight: 600;
+  color: #1a1a1a;
+  font-weight: 500;
   font-size: 14px;
 }
 
-.form-group input {
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  width: 20px;
+  height: 20px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: #6b7280;
+}
+
+.toggle-password svg {
+  width: 20px;
+  height: 20px;
+}
+
+.input-wrapper input {
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 14px;
-  transition: all 0.3s ease;
+  padding: 14px 16px 14px 48px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background: #f9fafb;
 }
 
-.form-group input:focus {
+.input-wrapper input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-wrapper input::placeholder {
+  color: #9ca3af;
 }
 
 .error-message {
   background-color: #fee;
   border: 1px solid #fcc;
   color: #c33;
-  padding: 12px;
+  padding: 12px 16px;
   border-radius: 8px;
   margin-bottom: 20px;
   font-size: 14px;
@@ -186,20 +268,22 @@ const handleLogin = async () => {
 
 .btn-login {
   width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  padding: 16px;
+  background: #3b82f6;
+  color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+  margin-top: 8px;
 }
 
 .btn-login:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .btn-login:active:not(:disabled) {
@@ -211,60 +295,61 @@ const handleLogin = async () => {
   cursor: not-allowed;
 }
 
-.login-info {
-  border-top: 2px solid #f0f0f0;
-  padding-top: 20px;
-}
-
-.login-info h3 {
-  color: #2c3e50;
-  font-size: 16px;
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.demo-accounts {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.demo-account {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 10px;
-  border-left: 4px solid #667eea;
-}
-
-.demo-account strong {
-  color: #2c3e50;
-  display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.demo-account p {
-  color: #555;
-  font-size: 13px;
-  margin: 3px 0;
-  font-family: 'Courier New', monospace;
-}
-
-.demo-account .role-note {
-  color: #10b981;
-  font-size: 12px;
-  font-weight: 600;
-  margin-top: 8px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-@media (max-width: 480px) {
-  .login-card {
-    padding: 30px 20px;
+/* Responsive */
+@media (max-width: 1024px) {
+  .login-container {
+    flex-direction: column;
   }
 
-  .login-header h1 {
+  .login-left {
+    padding: 30px;
+    min-height: 40vh;
+  }
+
+  .logo-section {
+    margin-bottom: 30px;
+  }
+
+  .logo-bulog,
+  .logo-sijagatani {
+    height: 45px;
+  }
+
+  .main-title {
+    font-size: 36px;
+    margin-bottom: 30px;
+  }
+
+  .login-right {
+    min-height: 60vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-left {
+    padding: 20px;
+  }
+
+  .logo-section {
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .logo-bulog,
+  .logo-sijagatani {
+    height: 35px;
+  }
+
+  .main-title {
     font-size: 28px;
+  }
+
+  .login-right {
+    padding: 20px;
+  }
+
+  .login-form-container {
+    max-width: 100%;
   }
 }
 </style>
