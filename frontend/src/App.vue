@@ -125,7 +125,7 @@ body {
 }
 
 .app-title {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #2c3e50;
   margin: 0;
