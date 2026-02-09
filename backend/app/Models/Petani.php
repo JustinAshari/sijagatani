@@ -29,7 +29,8 @@ class Petani extends Model
         'foto_ktp',
         'foto_petani',
         'foto_komoditi',
-        'kwitansi_pembayaran'
+        'kwitansi_pembayaran',
+        'surat_pernyataan'
     ];
 
     protected $casts = [

@@ -42,7 +42,8 @@ class PetaniRequest extends FormRequest
             'foto_ktp' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:5120'],
             'foto_petani' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:5120'],
             'foto_komoditi' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:5120'],
-            'kwitansi_pembayaran' => ['nullable', 'mimes:jpeg,png,jpg,pdf', 'max:5120']
+            'kwitansi_pembayaran' => ['nullable', 'mimes:jpeg,png,jpg,pdf', 'max:5120'],
+            'surat_pernyataan' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:5120']
         ];
     }
 }

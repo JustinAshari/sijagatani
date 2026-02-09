@@ -332,6 +332,14 @@
                 </p>
               </div>
             </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Surat Pernyataan (Opsional)</label>
+                <input type="file" @change="handleFileUpload($event, 'surat_pernyataan')" accept="image/*" />
+                <img v-if="previews.surat_pernyataan" :src="previews.surat_pernyataan" class="preview-image" />
+                <small class="help-text">Surat pernyataan yang telah ditandatangani petugas</small>
+              </div>
+            </div>
             <small class="help-text">* Format: JPG, PNG, PDF. Max: 5MB (akan dikompres otomatis)</small>
           </div>
 
@@ -495,6 +503,10 @@
                 <label>Kwitansi Pembayaran</label>
                 <img :src="getImageUrl(selectedPetani.kwitansi_pembayaran)" alt="Kwitansi" @click="openImage(getImageUrl(selectedPetani.kwitansi_pembayaran))" />
               </div>
+              <div class="photo-item" v-if="selectedPetani.surat_pernyataan">
+                <label>Surat Pernyataan</label>
+                <img :src="getImageUrl(selectedPetani.surat_pernyataan)" alt="Surat Pernyataan" @click="openImage(getImageUrl(selectedPetani.surat_pernyataan))" />
+              </div>
             </div>
           </div>
         </div>
@@ -554,14 +566,16 @@ const form = ref({
   foto_ktp: null,
   foto_petani: null,
   foto_komoditi: null,
-  kwitansi_pembayaran: null
+  kwitansi_pembayaran: null,
+  surat_pernyataan: null
 })
 
 const previews = ref({
   foto_ktp: null,
   foto_petani: null,
   foto_komoditi: null,
-  kwitansi_pembayaran: null
+  kwitansi_pembayaran: null,
+  surat_pernyataan: null
 })
 
 const filteredPetani = computed(() => {
@@ -715,7 +729,8 @@ const editPetani = (petani) => {
     foto_ktp: null,
     foto_petani: null,
     foto_komoditi: null,
-    kwitansi_pembayaran: null
+    kwitansi_pembayaran: null,
+    surat_pernyataan: null
   }
   
   // Load cascading options
@@ -734,6 +749,7 @@ const editPetani = (petani) => {
   if (petani.foto_petani) previews.value.foto_petani = getImageUrl(petani.foto_petani)
   if (petani.foto_komoditi) previews.value.foto_komoditi = getImageUrl(petani.foto_komoditi)
   if (petani.kwitansi_pembayaran) previews.value.kwitansi_pembayaran = getImageUrl(petani.kwitansi_pembayaran)
+  if (petani.surat_pernyataan) previews.value.surat_pernyataan = getImageUrl(petani.surat_pernyataan)
   
   showEditModal.value = true
 }
@@ -764,7 +780,8 @@ const closeModal = () => {
     foto_ktp: null,
     foto_petani: null,
     foto_komoditi: null,
-    kwitansi_pembayaran: null
+    kwitansi_pembayaran: null,
+    surat_pernyataan: null
   }
   form.value = {
     tanggal: new Date().toISOString().split('T')[0],
@@ -785,7 +802,8 @@ const closeModal = () => {
     foto_ktp: null,
     foto_petani: null,
     foto_komoditi: null,
-    kwitansi_pembayaran: null
+    kwitansi_pembayaran: null,
+    surat_pernyataan: null
   }
   kabupatenOptions.value = []
   kecamatanOptions.value = []

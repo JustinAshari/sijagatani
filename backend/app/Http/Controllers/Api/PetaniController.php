@@ -149,6 +149,15 @@ class PetaniController extends Controller
                 );
             }
 
+            if ($request->hasFile('surat_pernyataan')) {
+                $data['surat_pernyataan'] = $this->imageService->uploadAndCompress(
+                    $request->file('surat_pernyataan'),
+                    'petani/surat-pernyataan',
+                    800,
+                    70
+                );
+            }
+
             $petani = Petani::create($data);
 
             return response()->json([
@@ -251,6 +260,18 @@ class PetaniController extends Controller
                 );
             }
 
+            if ($request->hasFile('surat_pernyataan')) {
+                if ($petani->surat_pernyataan) {
+                    $this->imageService->delete($petani->surat_pernyataan);
+                }
+                $data['surat_pernyataan'] = $this->imageService->uploadAndCompress(
+                    $request->file('surat_pernyataan'),
+                    'petani/surat-pernyataan',
+                    800,
+                    70
+                );
+            }
+
             $petani->update($data);
 
             return response()->json([
@@ -294,6 +315,9 @@ class PetaniController extends Controller
             }
             if ($petani->kwitansi_pembayaran) {
                 $this->imageService->delete($petani->kwitansi_pembayaran);
+            }
+            if ($petani->surat_pernyataan) {
+                $this->imageService->delete($petani->surat_pernyataan);
             }
 
             $petani->delete();
