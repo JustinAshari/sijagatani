@@ -66,15 +66,13 @@ const stats = ref({
 
 const fetchStats = async () => {
   try {
-    const [petaniRes, lahanRes] = await Promise.all([
-      api.get('/petani'),
-      api.get('/lahan')
-    ])
+    const petaniRes = await api.get('/petani')
+    const petaniData = petaniRes.data.data || []
     
-    stats.value.totalPetani = petaniRes.data.data.length
-    stats.value.totalLahan = lahanRes.data.data.length
-    stats.value.totalLuas = lahanRes.data.data
-      .reduce((sum, lahan) => sum + parseFloat(lahan.luas || 0), 0)
+    stats.value.totalPetani = petaniData.length
+    stats.value.totalLahan = petaniData.length // Asumsi 1 petani = 1 lahan
+    stats.value.totalLuas = petaniData
+      .reduce((sum, petani) => sum + parseFloat(petani.luas_lahan || 0), 0)
       .toFixed(2)
   } catch (error) {
     console.error('Error fetching stats:', error)
