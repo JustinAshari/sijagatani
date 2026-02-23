@@ -20,40 +20,44 @@ class PetaniExport implements FromCollection, WithHeadings, WithMapping, WithSty
 
     public function collection()
     {
-        $query = Petani::with('lahan');
+        $query = Petani::with(['provinsi', 'kabupaten', 'kecamatan', 'kalurahan']);
 
         // Apply filters
         if (isset($this->filters['kabupaten'])) {
-            $query->where('kabupaten', $this->filters['kabupaten']);
+            $query->where('kabupaten_id', $this->filters['kabupaten']);
         }
         if (isset($this->filters['kecamatan'])) {
-            $query->where('kecamatan', $this->filters['kecamatan']);
+            $query->where('kecamatan_id', $this->filters['kecamatan']);
         }
         if (isset($this->filters['tanggal_dari'])) {
-            $query->whereDate('created_at', '>=', $this->filters['tanggal_dari']);
+            $query->whereDate('tanggal', '>=', $this->filters['tanggal_dari']);
         }
         if (isset($this->filters['tanggal_sampai'])) {
-            $query->whereDate('created_at', '<=', $this->filters['tanggal_sampai']);
+            $query->whereDate('tanggal', '<=', $this->filters['tanggal_sampai']);
         }
 
-        return $query->latest()->get();
+        return $query->latest('tanggal')->get();
     }
 
     public function headings(): array
     {
         return [
             'No',
+            'Tanggal',
             'NIK',
             'Nama',
-            'Alamat',
+            'No. Telepon',
+            'Bank',
+            'No. Rekening',
+            'Provinsi',
             'Kabupaten',
             'Kecamatan',
-            'Desa',
-            'No. Telepon',
-            'Jenis Kelamin',
-            'Tanggal Lahir',
-            'Jumlah Lahan',
-            'Tanggal Registrasi'
+            'Kalurahan',
+            'Alamat',
+            'Luas Lahan (Ha)',
+            'Alamat Lahan',
+            'Potensi Panen (Kg)',
+            'Komoditi',
         ];
     }
 
@@ -64,17 +68,21 @@ class PetaniExport implements FromCollection, WithHeadings, WithMapping, WithSty
 
         return [
             $no,
+            $petani->tanggal ? $petani->tanggal->format('d/m/Y') : '-',
             $petani->nik,
             $petani->nama,
-            $petani->alamat,
-            $petani->kabupaten,
-            $petani->kecamatan,
-            $petani->desa ?? '-',
             $petani->no_telepon ?? '-',
-            $petani->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan',
-            $petani->tanggal_lahir ? $petani->tanggal_lahir->format('d/m/Y') : '-',
-            $petani->lahan->count(),
-            $petani->created_at->format('d/m/Y H:i')
+            $petani->bank ?? '-',
+            $petani->no_rekening ?? '-',
+            $petani->provinsi->nama ?? '-',
+            $petani->kabupaten->nama ?? '-',
+            $petani->kecamatan->nama ?? '-',
+            $petani->kalurahan->nama ?? '-',
+            $petani->alamat ?? '-',
+            $petani->luas_lahan ?? 0,
+            $petani->alamat_lahan ?? '-',
+            $petani->potensi_panen ?? 0,
+            $petani->komoditi ?? '-',
         ];
     }
 

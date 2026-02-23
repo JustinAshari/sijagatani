@@ -45,8 +45,8 @@ class ImageService
         // Encode with compression (always to JPEG for smaller file size)
         $encoded = $image->toJpeg($quality);
 
-        // Save to storage
-        Storage::disk('public')->put($path, $encoded);
+        // Save to storage (explicit mimetype to avoid finfo PHP extension dependency)
+        Storage::disk('public')->put($path, $encoded, ['mimetype' => 'image/jpeg']);
 
         return $path;
     }

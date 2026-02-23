@@ -39,6 +39,8 @@ class Petani extends Model
         'potensi_panen' => 'decimal:2'
     ];
 
+    protected $appends = ['foto_ktp_url', 'foto_petani_url', 'foto_komoditi_url', 'kwitansi_pembayaran_url', 'surat_pernyataan_url'];
+
     public function penggilingan(): HasMany
     {
         return $this->hasMany(Penggilingan::class);
@@ -62,5 +64,50 @@ class Petani extends Model
     public function kalurahan(): BelongsTo
     {
         return $this->belongsTo(Kalurahan::class);
+    }
+
+    // Accessor untuk full URL foto KTP
+    public function getFotoKtpUrlAttribute(): ?string
+    {
+        if ($this->foto_ktp) {
+            return url('storage/' . $this->foto_ktp);
+        }
+        return null;
+    }
+
+    // Accessor untuk full URL foto petani
+    public function getFotoPetaniUrlAttribute(): ?string
+    {
+        if ($this->foto_petani) {
+            return url('storage/' . $this->foto_petani);
+        }
+        return null;
+    }
+
+    // Accessor untuk full URL foto komoditi
+    public function getFotoKomoditiUrlAttribute(): ?string
+    {
+        if ($this->foto_komoditi) {
+            return url('storage/' . $this->foto_komoditi);
+        }
+        return null;
+    }
+
+    // Accessor untuk full URL kwitansi pembayaran
+    public function getKwitansiPembayaranUrlAttribute(): ?string
+    {
+        if ($this->kwitansi_pembayaran) {
+            return url('storage/' . $this->kwitansi_pembayaran);
+        }
+        return null;
+    }
+
+    // Accessor untuk full URL surat pernyataan
+    public function getSuratPernyataanUrlAttribute(): ?string
+    {
+        if ($this->surat_pernyataan) {
+            return url('storage/' . $this->surat_pernyataan);
+        }
+        return null;
     }
 }

@@ -51,7 +51,7 @@ const handleLogout = async () => {
           <button @click="handleLogout" class="btn-logout">
             Logout
           </button>
-        </div>
+        </div> 
       </div>
     </header>
 

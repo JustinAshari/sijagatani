@@ -29,6 +29,8 @@ class Penggilingan extends Model
 
     protected $with = ['transports']; // Eager load transports by default
 
+    protected $appends = ['foto_gkp_1_url', 'foto_gkp_2_url'];
+
     // Removed petani relationship since we now store nama_petani as string
     // public function petani(): BelongsTo
     // {
@@ -46,5 +48,23 @@ class Penggilingan extends Model
         $this->total_tonase = $this->transports->sum('kuantum');
         $this->jumlah_angkutan = $this->transports->count();
         $this->save();
+    }
+
+    // Accessor untuk full URL foto GKP 1
+    public function getFotoGkp1UrlAttribute(): ?string
+    {
+        if ($this->foto_gkp_1) {
+            return url('storage/' . $this->foto_gkp_1);
+        }
+        return null;
+    }
+
+    // Accessor untuk full URL foto GKP 2
+    public function getFotoGkp2UrlAttribute(): ?string
+    {
+        if ($this->foto_gkp_2) {
+            return url('storage/' . $this->foto_gkp_2);
+        }
+        return null;
     }
 }
