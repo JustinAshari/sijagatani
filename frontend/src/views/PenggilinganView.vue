@@ -113,6 +113,7 @@
             <th v-if="visibleCols.status_verifikasi">status_verifikasi</th>
             <th v-if="visibleCols.catatan_verifikasi">catatan_verifikasi</th>
             <th>Aksi</th>
+            <th>Verifikasi</th>
           </tr>
         </thead>
         <tbody>
@@ -162,12 +163,15 @@
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
               </button>
-              <button v-if="authStore.canVerify" @click="openVerifikasiModal(item)" class="btn-verify" :title="'Verifikasi'">
+            </td>
+            <td class="verifikasi-cell">
+              <button v-if="authStore.canVerify" @click="openVerifikasiModal(item)" class="btn-verify" title="Verifikasi">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
               </button>
+              <span v-else class="no-verify">-</span>
             </td>
           </tr>
         </tbody>
@@ -533,7 +537,7 @@ const visibleCols = ref({
   lokasi_makloon: true, total_tonase: true, jumlah_angkutan: true,
   status_verifikasi: true, catatan_verifikasi: false
 })
-const colSpan = computed(() => 2 + Object.values(visibleCols.value).filter(Boolean).length)
+const colSpan = computed(() => 3 + Object.values(visibleCols.value).filter(Boolean).length)
 
 const showModal = ref(false)
 const showDetailModal = ref(false)
@@ -1168,6 +1172,16 @@ td {
   display: flex;
   gap: 8px;
   justify-content: center;
+}
+
+.verifikasi-cell {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.no-verify {
+  color: #aaa;
+  font-size: 13px;
 }
 
 .btn-view,
