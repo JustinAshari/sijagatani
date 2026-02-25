@@ -96,22 +96,31 @@
     </div>
 
     <!-- Table -->
-    <!-- Column Picker -->
     <div class="col-picker-bar">
       <div class="col-picker-wrapper">
         <div v-if="showColPicker" class="col-picker-overlay" @click="showColPicker = false"></div>
-        <button @click="showColPicker = !showColPicker" class="btn-col-picker">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button @click="showColPicker = !showColPicker" class="btn-col-picker" :class="{ active: showColPicker }">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
             <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
           </svg>
           Tampilkan Kolom
+          <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
         </button>
         <div v-if="showColPicker" class="col-picker-dropdown">
-          <div class="col-picker-header">Pilih Kolom</div>
-          <label v-for="col in colDefs" :key="col.key" class="col-picker-item">
-            <input type="checkbox" v-model="visibleCols[col.key]" />
-            <span>{{ col.label }}</span>
+          <div class="col-picker-header">
+            <span>Pilih Kolom Tampil</span>
+          </div>
+          <label v-for="col in colDefs" :key="col.key" class="col-picker-item" :class="{ 'col-active': visibleCols[col.key] }">
+            <span class="col-check-box">
+              <svg v-if="visibleCols[col.key]" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+            <input type="checkbox" v-model="visibleCols[col.key]" style="display:none" />
+            <span class="col-label">{{ col.label }}</span>
           </label>
         </div>
       </div>
@@ -876,23 +885,33 @@ tbody tr:hover {
 /* Column Picker */
 .col-picker-bar {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 8px;
+  justify-content: flex-start;
+  margin-bottom: 10px;
 }
 .col-picker-wrapper { position: relative; }
 .btn-col-picker {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 7px;
+  padding: 7px 14px;
   background: #fff;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
+  border: 1.5px solid #1565c0;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
-  color: #495057;
+  font-weight: 600;
+  color: #1565c0;
+  transition: all 0.18s;
+  box-shadow: 0 1px 4px rgba(21,101,192,0.08);
 }
-.btn-col-picker:hover { background: #f8f9fa; }
+.btn-col-picker:hover, .btn-col-picker.active {
+  background: #1565c0;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(21,101,192,0.22);
+}
+.btn-col-picker.active .chevron-icon {
+  transform: rotate(180deg);
+}
 .col-picker-overlay {
   position: fixed;
   inset: 0;
@@ -900,38 +919,71 @@ tbody tr:hover {
 }
 .col-picker-dropdown {
   position: absolute;
-  right: 0;
-  top: calc(100% + 4px);
+  left: 0;
+  top: calc(100% + 6px);
   background: #fff;
   border: 1px solid #dee2e6;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.13);
   z-index: 100;
-  min-width: 180px;
-  padding: 8px 0;
-  max-height: 320px;
+  min-width: 210px;
+  padding: 6px 0 8px 0;
+  max-height: 340px;
   overflow-y: auto;
 }
 .col-picker-header {
-  padding: 6px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px 8px 14px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #6c757d;
-  border-bottom: 1px solid #dee2e6;
+  letter-spacing: 0.05em;
+  color: #495057;
+  border-bottom: 1px solid #f0f0f0;
   margin-bottom: 4px;
+  background: #f5f8ff;
+  border-radius: 10px 10px 0 0;
 }
 .col-picker-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 14px;
+  gap: 10px;
+  padding: 7px 14px;
   cursor: pointer;
   font-size: 13px;
-  color: #212529;
+  color: #343a40;
+  transition: background 0.12s;
 }
-.col-picker-item:hover { background: #f8f9fa; }
-.col-picker-item input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
+.col-picker-item:hover { background: #f5f8ff; }
+.col-picker-item.col-active {
+  background: #e8f0fe;
+  color: #0d47a1;
+  font-weight: 600;
+}
+.col-check-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 2px solid #ced4da;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.col-picker-item.col-active .col-check-box {
+  background: #1565c0;
+  border-color: #1565c0;
+  color: #fff;
+}
+.col-label {
+  flex: 1;
+  font-family: monospace;
+  font-size: 12.5px;
+}
 
 /* ===== HERO BANNER ===== */
 .hero-banner {
