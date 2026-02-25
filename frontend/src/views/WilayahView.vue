@@ -1,5 +1,20 @@
 <template>
   <div class="wilayah-container">
+    <div class="page-card">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner teal">
+      <div class="hero-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <h2>Data Wilayah</h2>
+        <p>Kelola data wilayah administratif: provinsi, kabupaten, kecamatan, kalurahan</p>
+      </div>
+    </div>
+
     <div class="header">
       <h2>Data Wilayah</h2>
       <div class="header-actions">
@@ -284,6 +299,7 @@
           </button>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -847,5 +863,170 @@ onMounted(() => {
 .import-info li {
   margin: 5px 0;
   font-size: 14px;
+}
+
+/* ===== HERO BANNER ===== */
+.hero-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: white;
+  padding: 1.25rem 1.75rem;
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 20px -20px;
+}
+
+.hero-banner.teal {
+  background: linear-gradient(135deg, #00695c 0%, #26a69a 100%);
+}
+
+.page-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.hero-icon svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.hero-text h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.hero-text p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .wilayah-container {
+    padding: 8px;
+  }
+
+  .hero-banner {
+    padding: 1rem;
+    gap: 0.75rem;
+    margin: -12px -12px 12px -12px;
+  }
+
+  .page-card {
+    padding: 12px;
+  }
+
+  .hero-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-text h2 {
+    font-size: 1.1rem;
+  }
+
+  .hero-text p {
+    font-size: 0.8rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+    margin-bottom: 10px;
+  }
+
+  .header h2 {
+    font-size: 16px;
+  }
+
+  .header-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .header-actions button {
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+  }
+
+  .tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+    margin-bottom: 10px;
+  }
+
+  .section-header h3 {
+    font-size: 14px;
+  }
+
+  .section-header .header-actions button {
+    flex: 1;
+  }
+
+  .content-section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 400px;
+    font-size: 12px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 6px 8px;
+  }
+
+  .modal-overlay {
+    padding: 6px;
+  }
+
+  .modal-content {
+    width: 98%;
+    padding: 14px;
+    max-height: 93vh;
+    overflow-y: auto;
+  }
+
+  .form-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .form-actions button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 }
 </style>

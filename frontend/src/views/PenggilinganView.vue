@@ -1,5 +1,24 @@
 <template>
   <div class="penggilingan-container">
+    <div class="page-card">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner orange">
+      <div class="hero-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+          <path d="M9 22v-4h6v4"/>
+          <path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/>
+          <path d="M12 10h.01"/><path d="M16 10h.01"/><path d="M8 10h.01"/>
+          <path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 14h.01"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <h2>Data Makloon GKP</h2>
+        <p>Kelola data makloon dan distribusi hasil panen gabah kering panen</p>
+      </div>
+    </div>
+
     <div class="header">
       <h1>Data Makloon GKP</h1>
       <button v-if="authStore.canManagePenggilingan" @click="showModal = true" class="btn-add">
@@ -469,6 +488,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -1860,4 +1880,193 @@ td {
 }
 .col-picker-item:hover { background: #f8f9fa; }
 .col-picker-item input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
+
+/* ===== HERO BANNER ===== */
+.hero-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: white;
+  padding: 1.25rem 1.75rem;
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 20px -20px;
+}
+
+.hero-banner.orange {
+  background: linear-gradient(135deg, #e65100 0%, #ff9800 100%);
+}
+
+.page-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.hero-icon svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.hero-text h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.hero-text p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .penggilingan-container {
+    padding: 8px;
+  }
+
+  .hero-banner {
+    padding: 1rem;
+    gap: 0.75rem;
+    margin: -12px -12px 12px -12px;
+  }
+
+  .page-card {
+    padding: 12px;
+  }
+
+  .hero-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-text h2 {
+    font-size: 1.1rem;
+  }
+
+  .hero-text p {
+    font-size: 0.8rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+    margin-bottom: 10px;
+  }
+
+  .header h2 {
+    font-size: 16px;
+  }
+
+  .header-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .header-actions button,
+  .header button {
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .stats-bar {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .filter-section {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .filter-item {
+    width: 100%;
+  }
+
+  .filter-item input,
+  .filter-item select {
+    width: 100%;
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  .btn-reset {
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+    font-size: 12px;
+  }
+
+  th, td {
+    padding: 6px 8px;
+  }
+
+  .modal-overlay {
+    padding: 6px;
+  }
+
+  .modal-content,
+  .modal-detail,
+  .modal-verifikasi {
+    width: 98%;
+    max-height: 93vh;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .photo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .modal-footer button {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
 </style>

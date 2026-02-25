@@ -1,5 +1,24 @@
 <template>
   <div class="surat-pernyataan-view">
+    <div class="page-card">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner blue">
+      <div class="hero-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <h2>Surat Pernyataan</h2>
+        <p>Kelola dokumen surat pernyataan yang telah ditandatangani petugas</p>
+      </div>
+    </div>
+
     <div class="page-header">
       <div class="header-left">
         <h1>
@@ -233,6 +252,7 @@
           <img :src="getImageUrl(viewingPetani?.surat_pernyataan)" alt="Surat Pernyataan" class="full-image" />
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -912,4 +932,178 @@ tbody tr:hover {
 }
 .col-picker-item:hover { background: #f8f9fa; }
 .col-picker-item input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
+
+/* ===== HERO BANNER ===== */
+.hero-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: white;
+  padding: 1.25rem 1.75rem;
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 20px -20px;
+}
+
+.hero-banner.blue {
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
+}
+
+.page-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.hero-icon svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.hero-text h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.hero-text p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .surat-pernyataan-view {
+    padding: 8px;
+  }
+
+  .hero-banner {
+    padding: 1rem;
+    gap: 0.75rem;
+    margin: -12px -12px 12px -12px;
+  }
+
+  .page-card {
+    padding: 12px;
+  }
+
+  .hero-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-text h2 {
+    font-size: 1.1rem;
+  }
+
+  .hero-text p {
+    font-size: 0.8rem;
+  }
+
+  .page-header {
+    margin-bottom: 8px;
+  }
+
+  .header-left h1 {
+    font-size: 16px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .stat-card {
+    padding: 10px;
+  }
+
+  .stat-card h3 {
+    font-size: 11px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .search-box {
+    min-width: unset;
+    width: 100%;
+    flex: 1;
+  }
+
+  .filter-group {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .filter-group select {
+    width: 100%;
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  .toolbar-right button {
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-container table {
+    min-width: 520px;
+    font-size: 12px;
+  }
+
+  .table-container th,
+  .table-container td {
+    padding: 6px 8px;
+  }
+
+  .modal {
+    padding: 6px;
+  }
+
+  .modal-content {
+    width: 98%;
+    padding: 12px;
+    max-height: 93vh;
+    overflow-y: auto;
+  }
+
+  .modal-small {
+    width: 96%;
+  }
+
+  .modal-large {
+    width: 98%;
+  }
+}
 </style>

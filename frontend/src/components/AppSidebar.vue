@@ -10,6 +10,8 @@ defineProps({
     default: true
   }
 })
+
+const emit = defineEmits(['close'])
 </script>
 
 <template>
@@ -106,7 +108,7 @@ defineProps({
   color: #333;
   z-index: 1000;
   border-right: 1px solid #e0e0e0;
-  transition: transform 0.3s ease, width 0.3s ease;
+  transition: transform 0.3s ease;
   overflow: hidden;
 }
 
@@ -202,28 +204,26 @@ defineProps({
 }
 
 @media (max-width: 768px) {
+  /* On mobile: sidebar is an overlay drawer over the content */
   .sidebar {
-    width: 70px;
+    top: 56px;
+    height: calc(100vh - 56px);
+    width: 260px;
+    z-index: 1000;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
   }
 
   .sidebar.collapsed {
-    transform: translateX(-70px);
+    transform: translateX(-260px);
   }
 
-  .sidebar-header h2 {
-    font-size: 0;
-  }
-
-  .sidebar-header h2::first-letter {
-    font-size: 1.2rem;
-  }
-
+  /* Always show labels on mobile drawer */
   .sidebar-link .label {
-    display: none;
+    display: inline;
   }
 
   .sidebar-link {
-    justify-content: center;
+    justify-content: flex-start;
   }
 }
 </style>

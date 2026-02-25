@@ -7,7 +7,7 @@ import sijagataniLogo from './assets/Sijagatani Logo.PNG'
 
 const route = useRoute()
 const authStore = useAuthStore()
-const sidebarOpen = ref(true)
+const sidebarOpen = ref(window.innerWidth > 768)
 
 const showLayout = computed(() => route.name !== 'login')
 
@@ -49,20 +49,28 @@ const handleLogout = async () => {
               'role-penggilingan': authStore.isPenggilingan
             }">
               {{ authStore.isSuperAdmin ? 'Super Admin' : 
-                 authStore.isAdmin ? 'Administrator' : 
-                 authStore.isLapangan ? 'Admin Lapangan' : 
+                 authStore.isAdmin ? 'Admin' : 
+                 authStore.isLapangan ? 'Lapangan' : 
                  authStore.isPenggilingan ? 'Penggilingan' : 'User' }}
             </span>
           </div>
           <button @click="handleLogout" class="btn-logout">
-            Logout
+            <svg class="logout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span class="logout-text">Logout</span>
           </button>
         </div> 
       </div>
     </header>
 
     <!-- Sidebar -->
-    <AppSidebar :open="sidebarOpen" />
+    <AppSidebar :open="sidebarOpen" @close="sidebarOpen = false" />
+
+    <!-- Mobile Backdrop -->
+    <div v-if="sidebarOpen" class="mobile-backdrop" @click="sidebarOpen = false"></div>
 
     <!-- Main Content -->
     <div class="main-wrapper" :class="{ 'sidebar-closed': !sidebarOpen }">
@@ -190,6 +198,9 @@ body {
 }
 
 .btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 16px;
   background: #dc3545;
   color: white;
@@ -199,6 +210,12 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.logout-icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
 }
 
 .btn-logout:hover {
@@ -231,6 +248,11 @@ body {
   font-weight: 500;
 }
 
+/* Mobile Backdrop */
+.mobile-backdrop {
+  display: none;
+}
+
 /* Main Content */
 .main-wrapper {
   flex: 1;
@@ -254,46 +276,63 @@ body {
 }
 
 @media (max-width: 768px) {
-  .navbar-content {
-    padding: 0 1rem;
+  .top-navbar {
+    height: 56px;
   }
 
-  .bulog-logo {
-    height: 35px;
+  .navbar-content {
+    padding: 0 0.8rem;
   }
 
   .sijagatani-logo {
-    height: 40px;
+    height: 36px;
   }
 
-  .navbar-subtitle {
+  .app-title {
     display: none;
   }
-  
-  .main-wrapper {
-    margin-left: 70px;
+
+  .user-name {
+    display: none;
   }
 
+  .logout-text {
+    display: none;
+  }
+
+  .btn-logout {
+    padding: 8px 10px;
+  }
+
+  /* Mobile: sidebar is an overlay drawer, does NOT push content */
+  .main-wrapper,
   .main-wrapper.sidebar-closed {
     margin-left: 0;
+    margin-top: 56px;
+    min-height: calc(100vh - 56px);
   }
 
-  .app-main {
-    padding: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .bulog-logo {
-    height: 30px;
-  }
-
-  .sijagatani-logo {
-    height: 35px;
+  /* Backdrop shown behind drawer on mobile */
+  .mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 999;
   }
 
   .app-main {
     padding: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sijagatani-logo {
+    height: 30px;
+  }
+
+  .app-main {
+    padding: 0.6rem;
   }
 }
 </style>

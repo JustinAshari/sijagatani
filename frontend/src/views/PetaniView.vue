@@ -1,5 +1,21 @@
 <template>
   <div class="petani-list">
+    <div class="page-card">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="hero-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <h2>Data Petani</h2>
+        <p>Kelola dan pantau data petani yang terdaftar di sistem</p>
+      </div>
+    </div>
+
     <div class="header">
       <h2>
         <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -596,6 +612,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -1562,6 +1579,44 @@ td {
   transform: scale(1.05);
 }
 
+/* Hero Banner */
+.hero-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: white;
+  padding: 1.25rem 1.75rem;
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 20px -20px;
+}
+
+.page-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.hero-icon svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.hero-text h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.hero-text p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .table-wrapper {
@@ -1569,73 +1624,171 @@ td {
   }
   
   table {
-    min-width: 1200px;
+    min-width: 900px;
   }
 }
 
 @media (max-width: 768px) {
   .petani-list {
-    padding: 10px;
+    padding: 8px;
+  }
+
+  .hero-banner {
+    padding: 1rem;
+    gap: 0.75rem;
+    margin: -12px -12px 12px -12px;
+  }
+
+  .page-card {
+    padding: 12px;
+  }
+
+  .hero-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-text h2 {
+    font-size: 1.1rem;
+  }
+
+  .hero-text p {
+    font-size: 0.8rem;
   }
 
   .header {
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
     align-items: stretch;
+    margin-bottom: 10px;
+  }
+
+  .header h2 {
+    font-size: 16px;
+    margin-bottom: 0;
   }
 
   .header-actions {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
     width: 100%;
   }
 
   .header-actions button {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .filter-section {
+    padding: 10px;
+    margin-bottom: 10px;
   }
 
   .filter-row {
     flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
   }
 
   .search-input,
   .filter-select {
     width: 100%;
     min-width: 100%;
+    padding: 7px 10px;
+    font-size: 13px;
   }
 
   .date-filter {
     width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .date-filter label {
+    font-size: 12px;
+    white-space: nowrap;
+    min-width: 50px;
   }
 
   .date-input {
     flex: 1;
+    padding: 7px 8px;
+    font-size: 12px;
   }
 
   .btn-filter,
   .btn-reset {
-    width: 100%;
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 12px;
   }
 
   .stats-bar {
-    flex-direction: column;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  .modal {
+    padding: 6px;
   }
 
   .modal-content {
-    width: 95%;
-    padding: 20px;
+    width: 98%;
+    padding: 12px;
+    max-height: 94vh;
+    overflow-y: auto;
+  }
+
+  .large-modal {
+    width: 98%;
+    max-height: 95vh;
+    overflow-y: auto;
   }
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .info-grid {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .photo-grid {
     grid-template-columns: 1fr;
+  }
+
+  .detail-section {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .modal-footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-footer button {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 13px;
   }
 }
 

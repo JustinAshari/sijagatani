@@ -1,5 +1,23 @@
 <template>
   <div class="user-management">
+    <div class="page-card">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner purple">
+      <div class="hero-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <h2>Kelola Akun</h2>
+        <p>Kelola akun pengguna dan hak akses dalam sistem</p>
+      </div>
+    </div>
+
     <div class="header">
       <h2>Kelola Akun Pengguna</h2>
       <button @click="showModal = true" class="btn-primary">
@@ -98,6 +116,7 @@
           </div>
         </form>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -464,5 +483,141 @@ form {
 
 .btn-secondary:hover {
   background: #5a6268;
+}
+
+/* ===== HERO BANNER ===== */
+.hero-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  color: white;
+  padding: 1.25rem 1.75rem;
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 20px -20px;
+}
+
+.hero-banner.purple {
+  background: linear-gradient(135deg, #4527a0 0%, #9575cd 100%);
+}
+
+.page-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+.hero-icon svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.hero-text h2 {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.hero-text p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .user-management {
+    padding: 8px;
+  }
+
+  .hero-banner {
+    padding: 1rem;
+    gap: 0.75rem;
+    margin: -12px -12px 12px -12px;
+  }
+
+  .page-card {
+    padding: 12px;
+  }
+
+  .hero-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hero-text h2 {
+    font-size: 1.1rem;
+  }
+
+  .hero-text p {
+    font-size: 0.8rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+    margin-bottom: 10px;
+  }
+
+  .header h2 {
+    font-size: 16px;
+  }
+
+  .header .btn-primary {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 480px;
+    font-size: 12px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 6px 8px;
+  }
+
+  .modal-overlay {
+    padding: 6px;
+  }
+
+  .modal-content {
+    width: 98%;
+    padding: 14px;
+    max-height: 93vh;
+    overflow-y: auto;
+  }
+
+  .modal-header h3 {
+    font-size: 15px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .form-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .form-actions button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 }
 </style>
