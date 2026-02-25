@@ -31,11 +31,6 @@ class PenggilinganController extends Controller
     {
         $query = Penggilingan::with(['transports']);
 
-        // Filter by nama petani
-        if ($request->has('petani_id')) {
-            $query->where('nama_petani', 'LIKE', '%' . $request->petani_id . '%');
-        }
-
         // Filter by nama penggilingan
         if ($request->has('nama_penggilingan')) {
             $query->where('nama_penggilingan', 'LIKE', '%' . $request->nama_penggilingan . '%');

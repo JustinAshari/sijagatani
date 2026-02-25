@@ -105,7 +105,6 @@
           <tr>
             <th>No</th>
             <th v-if="visibleCols.tanggal_pengajuan">tanggal_pengajuan</th>
-            <th v-if="visibleCols.nama_petani">nama_petani</th>
             <th v-if="visibleCols.nama_penggilingan">nama_penggilingan</th>
             <th v-if="visibleCols.lokasi_makloon">lokasi_makloon</th>
             <th v-if="visibleCols.total_tonase">total_tonase</th>
@@ -126,7 +125,6 @@
           <tr v-else v-for="(item, index) in filteredData" :key="item.id">
             <td>{{ index + 1 }}</td>
             <td v-if="visibleCols.tanggal_pengajuan">{{ formatDate(item.tanggal_pengajuan) }}</td>
-            <td v-if="visibleCols.nama_petani">{{ item.nama_petani || '-' }}</td>
             <td v-if="visibleCols.nama_penggilingan">{{ item.nama_penggilingan }}</td>
             <td v-if="visibleCols.lokasi_makloon">{{ item.lokasi_makloon }}</td>
             <td v-if="visibleCols.total_tonase" class="text-right">{{ parseFloat(String(item.total_tonase)) }} KG</td>
@@ -524,7 +522,6 @@ const loading = ref(false)
 const showColPicker = ref(false)
 const colDefs = [
   { key: 'tanggal_pengajuan', label: 'tanggal_pengajuan' },
-  { key: 'nama_petani', label: 'nama_petani' },
   { key: 'nama_penggilingan', label: 'nama_penggilingan' },
   { key: 'lokasi_makloon', label: 'lokasi_makloon' },
   { key: 'total_tonase', label: 'total_tonase' },
@@ -533,7 +530,7 @@ const colDefs = [
   { key: 'catatan_verifikasi', label: 'catatan_verifikasi' },
 ]
 const visibleCols = ref({
-  tanggal_pengajuan: true, nama_petani: false, nama_penggilingan: true,
+  tanggal_pengajuan: true, nama_penggilingan: true,
   lokasi_makloon: true, total_tonase: true, jumlah_angkutan: true,
   status_verifikasi: true, catatan_verifikasi: false
 })

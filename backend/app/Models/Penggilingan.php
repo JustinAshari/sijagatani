@@ -12,7 +12,6 @@ class Penggilingan extends Model
 
     protected $fillable = [
         'tanggal_pengajuan',
-        'nama_petani',
         'nama_penggilingan',
         'foto_gkp_1',
         'foto_gkp_2',
