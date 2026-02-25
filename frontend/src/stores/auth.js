@@ -19,6 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
   // CRUD permission (can create, update, delete)
   const canManagePetani = computed(() => ['admin', 'lapangan', 'superadmin'].includes(user.value?.role))
   const canManagePenggilingan = computed(() => ['admin', 'penggilingan', 'superadmin'].includes(user.value?.role))
+  const canVerify = computed(() => ['admin', 'superadmin'].includes(user.value?.role))
 
   const login = async (username, password) => {
     try {
@@ -90,6 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
     canAccessUsers,
     canManagePetani,
     canManagePenggilingan,
+    canVerify,
     login,
     logout,
     fetchUser,

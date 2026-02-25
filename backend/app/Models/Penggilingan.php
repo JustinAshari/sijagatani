@@ -18,13 +18,18 @@ class Penggilingan extends Model
         'foto_gkp_2',
         'lokasi_makloon',
         'total_tonase',
-        'jumlah_angkutan'
+        'jumlah_angkutan',
+        'status_verifikasi',
+        'catatan_verifikasi',
+        'verified_at',
+        'verified_by'
     ];
 
     protected $casts = [
         'tanggal_pengajuan' => 'date',
         'total_tonase' => 'decimal:3',
-        'jumlah_angkutan' => 'integer'
+        'jumlah_angkutan' => 'integer',
+        'verified_at' => 'datetime'
     ];
 
     protected $with = ['transports']; // Eager load transports by default

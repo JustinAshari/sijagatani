@@ -42,6 +42,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/penggilingan/{id}', [PenggilinganController::class, 'destroy']);
     });
     
+    // Verifikasi Routes - Admin & SuperAdmin only
+    Route::middleware('role:admin,superadmin')->group(function () {
+        Route::post('/petani/{id}/verifikasi', [PetaniController::class, 'verifikasi']);
+        Route::post('/penggilingan/{id}/verifikasi', [PenggilinganController::class, 'verifikasi']);
+    });
+
+    // Wilayah Read-Only Routes - All authenticated users (for dropdowns)
+    Route::get('/provinsi', [WilayahController::class, 'getProvinsi']);
+    Route::get('/kabupaten', [WilayahController::class, 'getKabupaten']);
+    Route::get('/kecamatan', [WilayahController::class, 'getKecamatan']);
+    Route::get('/kalurahan', [WilayahController::class, 'getKalurahan']);
+
     // User Management Routes - Only SuperAdmin can access
     Route::middleware('role:superadmin')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
@@ -50,23 +62,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
         
-        // Wilayah Routes
-        Route::get('/provinsi', [WilayahController::class, 'getProvinsi']);
+        // Wilayah Write Routes
         Route::post('/provinsi', [WilayahController::class, 'storeProvinsi']);
         Route::put('/provinsi/{id}', [WilayahController::class, 'updateProvinsi']);
         Route::delete('/provinsi/{id}', [WilayahController::class, 'deleteProvinsi']);
         
-        Route::get('/kabupaten', [WilayahController::class, 'getKabupaten']);
         Route::post('/kabupaten', [WilayahController::class, 'storeKabupaten']);
         Route::put('/kabupaten/{id}', [WilayahController::class, 'updateKabupaten']);
         Route::delete('/kabupaten/{id}', [WilayahController::class, 'deleteKabupaten']);
         
-        Route::get('/kecamatan', [WilayahController::class, 'getKecamatan']);
         Route::post('/kecamatan', [WilayahController::class, 'storeKecamatan']);
         Route::put('/kecamatan/{id}', [WilayahController::class, 'updateKecamatan']);
         Route::delete('/kecamatan/{id}', [WilayahController::class, 'deleteKecamatan']);
         
-        Route::get('/kalurahan', [WilayahController::class, 'getKalurahan']);
         Route::post('/kalurahan', [WilayahController::class, 'storeKalurahan']);
         Route::put('/kalurahan/{id}', [WilayahController::class, 'updateKalurahan']);
         Route::delete('/kalurahan/{id}', [WilayahController::class, 'deleteKalurahan']);

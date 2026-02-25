@@ -30,13 +30,18 @@ class Petani extends Model
         'foto_petani',
         'foto_komoditi',
         'kwitansi_pembayaran',
-        'surat_pernyataan'
+        'surat_pernyataan',
+        'status_verifikasi',
+        'catatan_verifikasi',
+        'verified_at',
+        'verified_by'
     ];
 
     protected $casts = [
         'tanggal' => 'date',
         'luas_lahan' => 'decimal:2',
-        'potensi_panen' => 'decimal:2'
+        'potensi_panen' => 'decimal:2',
+        'verified_at' => 'datetime'
     ];
 
     protected $appends = ['foto_ktp_url', 'foto_petani_url', 'foto_komoditi_url', 'kwitansi_pembayaran_url', 'surat_pernyataan_url'];

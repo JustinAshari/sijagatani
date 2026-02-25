@@ -93,15 +93,16 @@
             <th>Potensi Panen (KG)</th>
             <th>Komoditi</th>
             <th>No. Telp</th>
+            <th>Status</th>
             <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="11" class="loading-cell">Loading...</td>
+            <td colspan="12" class="loading-cell">Loading...</td>
           </tr>
           <tr v-else-if="filteredPetani.length === 0">
-            <td colspan="11" class="empty-cell">Tidak ada data petani</td>
+            <td colspan="12" class="empty-cell">Tidak ada data petani</td>
           </tr>
           <tr v-else v-for="(petani, index) in filteredPetani" :key="petani.id">
             <td>{{ index + 1 }}</td>
@@ -118,6 +119,11 @@
               </span>
             </td>
             <td>{{ petani.no_telepon || '-' }}</td>
+            <td class="text-center">
+              <span :class="['badge-status', 'badge-' + petani.status_verifikasi]">
+                {{ petani.status_verifikasi === 'disetujui' ? 'Disetujui' : petani.status_verifikasi === 'ditolak' ? 'Ditolak' : 'Pending' }}
+              </span>
+            </td>
             <td class="action-buttons">
               <button @click="viewDetail(petani)" class="btn-view" title="Detail">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -135,6 +141,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"/>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+              <button v-if="authStore.canVerify" @click="openVerifikasiModal(petani)" class="btn-verify" title="Verifikasi">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
               </button>
             </td>
@@ -512,6 +524,45 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Verifikasi -->
+    <div v-if="showVerifikasiModal" class="modal-overlay" @click.self="showVerifikasiModal = false">
+      <div class="modal-content modal-verifikasi">
+        <div class="modal-header">
+          <h2>Verifikasi Data Petani</h2>
+          <button @click="showVerifikasiModal = false" class="btn-close">×</button>
+        </div>
+        <div class="modal-body">
+          <p class="verifikasi-info">
+            <strong>{{ verifikasiItem?.nama }}</strong><br>
+            <span>NIK: {{ verifikasiItem?.nik }}</span>
+          </p>
+          <div class="form-group">
+            <label>Status Verifikasi <span class="required">*</span></label>
+            <select v-model="verifikasiForm.status_verifikasi" class="select-status">
+              <option value="pending">Pending</option>
+              <option value="disetujui">Disetujui</option>
+              <option value="ditolak">Ditolak</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Catatan</label>
+            <textarea
+              v-model="verifikasiForm.catatan_verifikasi"
+              rows="3"
+              placeholder="Catatan verifikasi (opsional)..."
+              class="textarea-catatan"
+            ></textarea>
+          </div>
+          <div class="modal-footer-buttons">
+            <button @click="showVerifikasiModal = false" class="btn-cancel">Batal</button>
+            <button @click="submitVerifikasi" class="btn-submit-verifikasi" :disabled="verifikasiLoading">
+              {{ verifikasiLoading ? 'Menyimpan...' : 'Simpan Verifikasi' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -532,6 +583,14 @@ const showEditModal = ref(false)
 const showDetailModal = ref(false)
 const selectedPetani = ref(null)
 const loading = ref(false)
+
+const showVerifikasiModal = ref(false)
+const verifikasiItem = ref(null)
+const verifikasiLoading = ref(false)
+const verifikasiForm = ref({
+  status_verifikasi: 'pending',
+  catatan_verifikasi: ''
+})
 const kabupatenList = ref(kabupatenJawaTengah)
 const nikCheckTimeout = ref(null)
 const nikStatus = ref({ message: '', class: '', isDuplicate: false })
@@ -843,6 +902,31 @@ const getImageUrl = (path) => getStorageUrl(path)
 
 const openImage = (url) => {
   window.open(url, '_blank')
+}
+
+const openVerifikasiModal = (petani) => {
+  verifikasiItem.value = petani
+  verifikasiForm.value = {
+    status_verifikasi: petani.status_verifikasi || 'pending',
+    catatan_verifikasi: petani.catatan_verifikasi || ''
+  }
+  showVerifikasiModal.value = true
+}
+
+const submitVerifikasi = async () => {
+  if (!verifikasiItem.value) return
+  verifikasiLoading.value = true
+  try {
+    await api.post(`/petani/${verifikasiItem.value.id}/verifikasi`, verifikasiForm.value)
+    alert('Status verifikasi berhasil disimpan')
+    showVerifikasiModal.value = false
+    fetchPetani()
+  } catch (error) {
+    console.error('Error verifikasi:', error)
+    alert(error.response?.data?.message || 'Gagal menyimpan verifikasi')
+  } finally {
+    verifikasiLoading.value = false
+  }
 }
 
 const formatDate = (date) => {
@@ -1507,5 +1591,102 @@ td {
   width: 16px;
   height: 16px;
   margin-right: 4px;
+}
+/* Badge Status Verifikasi */
+.badge-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.badge-disetujui {
+  background: #d1e7dd;
+  color: #0a3622;
+}
+.badge-ditolak {
+  background: #f8d7da;
+  color: #58151c;
+}
+
+/* Tombol Verifikasi */
+.btn-verify {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #0d6efd;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.btn-verify:hover {
+  background: #e7f0ff;
+}
+.btn-verify svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Modal Verifikasi */
+.modal-verifikasi {
+  max-width: 480px;
+  width: 95%;
+}
+.verifikasi-info {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.select-status {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.textarea-catatan {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.modal-footer-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.btn-cancel {
+  padding: 8px 18px;
+  border: 1px solid #ced4da;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn-submit-verifikasi {
+  padding: 8px 18px;
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.btn-submit-verifikasi:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
