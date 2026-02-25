@@ -308,6 +308,7 @@ const submitUpload = async () => {
     if (selectedPetani.value.bank) formData.append('bank', selectedPetani.value.bank)
     if (selectedPetani.value.no_rekening) formData.append('no_rekening', selectedPetani.value.no_rekening)
     
+    formData.append('_method', 'PUT')
     await api.post(`/petani/${selectedPetani.value.id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })

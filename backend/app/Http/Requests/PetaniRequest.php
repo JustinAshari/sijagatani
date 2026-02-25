@@ -21,7 +21,7 @@ class PetaniRequest extends FormRequest
      */
     public function rules(): array
     {
-        $petaniId = $this->route('petani') ? $this->route('petani') : null;
+        $petaniId = $this->route('id') ?? $this->route('petani') ?? null;
         
         return [
             'tanggal' => ['required', 'date'],
