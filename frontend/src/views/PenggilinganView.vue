@@ -138,12 +138,10 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Lokasi Makloon <span class="required">*</span></label>
-                <input
-                  type="text"
-                  v-model="form.lokasi_makloon"
-                  required
-                  placeholder="Contoh: Makloon Desa Banyuurip"
-                />
+                <select v-model="form.lokasi_makloon" required>
+                  <option value="">Pilih Kabupaten</option>
+                  <option v-for="kab in kabupatenList" :key="kab.id" :value="kab.nama">{{ kab.nama }}</option>
+                </select>
               </div>
             </div>
           </div>
@@ -411,6 +409,7 @@ const authStore = useAuthStore()
 
 const data = ref([])
 const filteredData = ref([])
+const kabupatenList = ref([])
 const loading = ref(false)
 const showModal = ref(false)
 const showDetailModal = ref(false)
@@ -465,7 +464,17 @@ const openImage = (url) => {
 
 onMounted(() => {
   fetchData()
+  fetchKabupaten()
 })
+
+const fetchKabupaten = async () => {
+  try {
+    const response = await api.get('/kabupaten')
+    kabupatenList.value = response.data.data
+  } catch (error) {
+    console.error('Error fetching kabupaten:', error)
+  }
+}
 
 const fetchData = async () => {
   loading.value = true
