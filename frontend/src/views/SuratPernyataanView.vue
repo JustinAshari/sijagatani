@@ -77,41 +77,79 @@
     </div>
 
     <!-- Table -->
+    <!-- Column Picker -->
+    <div class="col-picker-bar">
+      <div class="col-picker-wrapper">
+        <div v-if="showColPicker" class="col-picker-overlay" @click="showColPicker = false"></div>
+        <button @click="showColPicker = !showColPicker" class="btn-col-picker">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          Tampilkan Kolom
+        </button>
+        <div v-if="showColPicker" class="col-picker-dropdown">
+          <div class="col-picker-header">Pilih Kolom</div>
+          <label v-for="col in colDefs" :key="col.key" class="col-picker-item">
+            <input type="checkbox" v-model="visibleCols[col.key]" />
+            <span>{{ col.label }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
     <div class="table-container">
       <table>
         <thead>
           <tr>
             <th>No</th>
-            <th>Tanggal</th>
-            <th>NIK</th>
-            <th>Nama Petani</th>
-            <th>Wilayah</th>
-            <th>No. Telepon</th>
-            <th>Status Upload</th>
+            <th v-if="visibleCols.tanggal">tanggal</th>
+            <th v-if="visibleCols.nik">nik</th>
+            <th v-if="visibleCols.nama">nama</th>
+            <th v-if="visibleCols.luas_lahan">luas_lahan</th>
+            <th v-if="visibleCols.alamat_lahan">alamat_lahan</th>
+            <th v-if="visibleCols.potensi_panen">potensi_panen</th>
+            <th v-if="visibleCols.komoditi">komoditi</th>
+            <th v-if="visibleCols.alamat">alamat</th>
+            <th v-if="visibleCols.provinsi_id">provinsi_id</th>
+            <th v-if="visibleCols.kabupaten_id">kabupaten_id</th>
+            <th v-if="visibleCols.kecamatan_id">kecamatan_id</th>
+            <th v-if="visibleCols.kalurahan_id">kalurahan_id</th>
+            <th v-if="visibleCols.no_telepon">no_telepon</th>
+            <th v-if="visibleCols.bank">bank</th>
+            <th v-if="visibleCols.no_rekening">no_rekening</th>
+            <th v-if="visibleCols.surat_pernyataan">surat_pernyataan</th>
+            <th v-if="visibleCols.status_verifikasi">status_verifikasi</th>
+            <th v-if="visibleCols.catatan_verifikasi">catatan_verifikasi</th>
             <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="8" class="text-center">
+            <td :colspan="colSpan" class="text-center">
               <div class="loading">Memuat data...</div>
             </td>
           </tr>
           <tr v-else-if="filteredPetani.length === 0">
-            <td colspan="8" class="text-center">Tidak ada data</td>
+            <td :colspan="colSpan" class="text-center">Tidak ada data</td>
           </tr>
           <tr v-else v-for="(petani, index) in filteredPetani" :key="petani.id">
             <td>{{ index + 1 }}</td>
-            <td>{{ formatDate(petani.tanggal) }}</td>
-            <td>{{ petani.nik }}</td>
-            <td>{{ petani.nama }}</td>
-            <td>
-              <div class="wilayah-info">
-                {{ petani.kalurahan?.nama || '-' }}, {{ petani.kecamatan?.nama || '-' }}
-              </div>
-            </td>
-            <td>{{ petani.no_telepon || '-' }}</td>
-            <td>
+            <td v-if="visibleCols.tanggal">{{ formatDate(petani.tanggal) }}</td>
+            <td v-if="visibleCols.nik">{{ petani.nik }}</td>
+            <td v-if="visibleCols.nama">{{ petani.nama }}</td>
+            <td v-if="visibleCols.luas_lahan">{{ petani.luas_lahan }}</td>
+            <td v-if="visibleCols.alamat_lahan">{{ petani.alamat_lahan || '-' }}</td>
+            <td v-if="visibleCols.potensi_panen">{{ petani.potensi_panen }}</td>
+            <td v-if="visibleCols.komoditi">{{ petani.komoditi || '-' }}</td>
+            <td v-if="visibleCols.alamat">{{ petani.alamat || '-' }}</td>
+            <td v-if="visibleCols.provinsi_id">{{ petani.provinsi?.nama || '-' }}</td>
+            <td v-if="visibleCols.kabupaten_id">{{ petani.kabupaten?.nama || '-' }}</td>
+            <td v-if="visibleCols.kecamatan_id">{{ petani.kecamatan?.nama || '-' }}</td>
+            <td v-if="visibleCols.kalurahan_id">{{ petani.kalurahan?.nama || '-' }}</td>
+            <td v-if="visibleCols.no_telepon">{{ petani.no_telepon || '-' }}</td>
+            <td v-if="visibleCols.bank">{{ petani.bank || '-' }}</td>
+            <td v-if="visibleCols.no_rekening">{{ petani.no_rekening || '-' }}</td>
+            <td v-if="visibleCols.surat_pernyataan">
               <span v-if="petani.surat_pernyataan" class="badge badge-success">
                 <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="20 6 9 17 4 12"/>
@@ -126,6 +164,8 @@
                 Belum Upload
               </span>
             </td>
+            <td v-if="visibleCols.status_verifikasi" class="text-center">{{ petani.status_verifikasi || 'pending' }}</td>
+            <td v-if="visibleCols.catatan_verifikasi">{{ petani.catatan_verifikasi || '-' }}</td>
             <td>
               <div class="action-buttons">
                 <button v-if="petani.surat_pernyataan" @click="viewSurat(petani)" class="btn-view" title="Lihat Surat">
@@ -207,6 +247,37 @@ const petaniList = ref([])
 const searchQuery = ref('')
 const filterStatus = ref('')
 const loading = ref(false)
+
+const showColPicker = ref(false)
+const colDefs = [
+  { key: 'tanggal', label: 'tanggal' },
+  { key: 'nik', label: 'nik' },
+  { key: 'nama', label: 'nama' },
+  { key: 'luas_lahan', label: 'luas_lahan' },
+  { key: 'alamat_lahan', label: 'alamat_lahan' },
+  { key: 'potensi_panen', label: 'potensi_panen' },
+  { key: 'komoditi', label: 'komoditi' },
+  { key: 'alamat', label: 'alamat' },
+  { key: 'provinsi_id', label: 'provinsi_id' },
+  { key: 'kabupaten_id', label: 'kabupaten_id' },
+  { key: 'kecamatan_id', label: 'kecamatan_id' },
+  { key: 'kalurahan_id', label: 'kalurahan_id' },
+  { key: 'no_telepon', label: 'no_telepon' },
+  { key: 'bank', label: 'bank' },
+  { key: 'no_rekening', label: 'no_rekening' },
+  { key: 'surat_pernyataan', label: 'surat_pernyataan' },
+  { key: 'status_verifikasi', label: 'status_verifikasi' },
+  { key: 'catatan_verifikasi', label: 'catatan_verifikasi' },
+]
+const visibleCols = ref({
+  tanggal: true, nik: true, nama: true, luas_lahan: false, alamat_lahan: false,
+  potensi_panen: false, komoditi: false, alamat: false, provinsi_id: false,
+  kabupaten_id: false, kecamatan_id: true, kalurahan_id: true,
+  no_telepon: true, bank: false, no_rekening: false,
+  surat_pernyataan: true, status_verifikasi: false, catatan_verifikasi: false
+})
+const colSpan = computed(() => 2 + Object.values(visibleCols.value).filter(Boolean).length)
+
 const showUploadModal = ref(false)
 const showImageModal = ref(false)
 const selectedPetani = ref(null)
@@ -781,4 +852,64 @@ tbody tr:hover {
 .text-center {
   text-align: center;
 }
+
+/* Column Picker */
+.col-picker-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.col-picker-wrapper { position: relative; }
+.btn-col-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #495057;
+}
+.btn-col-picker:hover { background: #f8f9fa; }
+.col-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+.col-picker-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  z-index: 100;
+  min-width: 180px;
+  padding: 8px 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.col-picker-header {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6c757d;
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 4px;
+}
+.col-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #212529;
+}
+.col-picker-item:hover { background: #f8f9fa; }
+.col-picker-item input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
 </style>

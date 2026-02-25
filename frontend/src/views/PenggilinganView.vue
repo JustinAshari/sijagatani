@@ -50,39 +50,63 @@
     </div>
 
     <!-- Table -->
+    <!-- Column Picker -->
+    <div class="col-picker-bar">
+      <div class="col-picker-wrapper">
+        <div v-if="showColPicker" class="col-picker-overlay" @click="showColPicker = false"></div>
+        <button @click="showColPicker = !showColPicker" class="btn-col-picker">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          Tampilkan Kolom
+        </button>
+        <div v-if="showColPicker" class="col-picker-dropdown">
+          <div class="col-picker-header">Pilih Kolom</div>
+          <label v-for="col in colDefs" :key="col.key" class="col-picker-item">
+            <input type="checkbox" v-model="visibleCols[col.key]" />
+            <span>{{ col.label }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
             <th>No</th>
-            <th>Tanggal</th>
-            <th>Nama Makloon/MPP</th>
-            <th>Lokasi Makloon</th>
-            <th>Total Tonase (KG)</th>
-            <th>Jumlah Angkutan</th>
-            <th>Status</th>
+            <th v-if="visibleCols.tanggal_pengajuan">tanggal_pengajuan</th>
+            <th v-if="visibleCols.nama_petani">nama_petani</th>
+            <th v-if="visibleCols.nama_penggilingan">nama_penggilingan</th>
+            <th v-if="visibleCols.lokasi_makloon">lokasi_makloon</th>
+            <th v-if="visibleCols.total_tonase">total_tonase</th>
+            <th v-if="visibleCols.jumlah_angkutan">jumlah_angkutan</th>
+            <th v-if="visibleCols.status_verifikasi">status_verifikasi</th>
+            <th v-if="visibleCols.catatan_verifikasi">catatan_verifikasi</th>
             <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="8" class="loading-cell">Loading...</td>
+            <td :colspan="colSpan" class="loading-cell">Loading...</td>
           </tr>
           <tr v-else-if="filteredData.length === 0">
-            <td colspan="8" class="empty-cell">Tidak ada data</td>
+            <td :colspan="colSpan" class="empty-cell">Tidak ada data</td>
           </tr>
           <tr v-else v-for="(item, index) in filteredData" :key="item.id">
             <td>{{ index + 1 }}</td>
-            <td>{{ formatDate(item.tanggal_pengajuan) }}</td>
-            <td>{{ item.nama_penggilingan }}</td>
-            <td>{{ item.lokasi_makloon }}</td>
-            <td class="text-right">{{ parseFloat(String(item.total_tonase)) }} KG</td>
-            <td class="text-center">{{ item.jumlah_angkutan }}</td>
-            <td class="text-center">
+            <td v-if="visibleCols.tanggal_pengajuan">{{ formatDate(item.tanggal_pengajuan) }}</td>
+            <td v-if="visibleCols.nama_petani">{{ item.nama_petani || '-' }}</td>
+            <td v-if="visibleCols.nama_penggilingan">{{ item.nama_penggilingan }}</td>
+            <td v-if="visibleCols.lokasi_makloon">{{ item.lokasi_makloon }}</td>
+            <td v-if="visibleCols.total_tonase" class="text-right">{{ parseFloat(String(item.total_tonase)) }} KG</td>
+            <td v-if="visibleCols.jumlah_angkutan" class="text-center">{{ item.jumlah_angkutan }}</td>
+            <td v-if="visibleCols.status_verifikasi" class="text-center">
               <span :class="['badge-status', 'badge-' + item.status_verifikasi]">
                 {{ item.status_verifikasi === 'disetujui' ? 'Disetujui' : item.status_verifikasi === 'ditolak' ? 'Ditolak' : 'Pending' }}
               </span>
             </td>
+            <td v-if="visibleCols.catatan_verifikasi">{{ item.catatan_verifikasi || '-' }}</td>
             <td class="action-buttons">
               <button @click="viewDetail(item)" class="btn-view" title="Lihat Detail">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -462,6 +486,25 @@ const data = ref([])
 const filteredData = ref([])
 const kabupatenList = ref([])
 const loading = ref(false)
+
+const showColPicker = ref(false)
+const colDefs = [
+  { key: 'tanggal_pengajuan', label: 'tanggal_pengajuan' },
+  { key: 'nama_petani', label: 'nama_petani' },
+  { key: 'nama_penggilingan', label: 'nama_penggilingan' },
+  { key: 'lokasi_makloon', label: 'lokasi_makloon' },
+  { key: 'total_tonase', label: 'total_tonase' },
+  { key: 'jumlah_angkutan', label: 'jumlah_angkutan' },
+  { key: 'status_verifikasi', label: 'status_verifikasi' },
+  { key: 'catatan_verifikasi', label: 'catatan_verifikasi' },
+]
+const visibleCols = ref({
+  tanggal_pengajuan: true, nama_petani: false, nama_penggilingan: true,
+  lokasi_makloon: true, total_tonase: true, jumlah_angkutan: true,
+  status_verifikasi: true, catatan_verifikasi: false
+})
+const colSpan = computed(() => 2 + Object.values(visibleCols.value).filter(Boolean).length)
+
 const showModal = ref(false)
 const showDetailModal = ref(false)
 const isEditing = ref(false)
@@ -1757,4 +1800,64 @@ td {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Column Picker */
+.col-picker-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.col-picker-wrapper { position: relative; }
+.btn-col-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #495057;
+}
+.btn-col-picker:hover { background: #f8f9fa; }
+.col-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+.col-picker-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  z-index: 100;
+  min-width: 180px;
+  padding: 8px 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.col-picker-header {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6c757d;
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 4px;
+}
+.col-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #212529;
+}
+.col-picker-item:hover { background: #f8f9fa; }
+.col-picker-item input[type="checkbox"] { width: 14px; height: 14px; cursor: pointer; }
 </style>
