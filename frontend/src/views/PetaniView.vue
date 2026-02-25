@@ -569,7 +569,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api, { getStorageUrl } from '@/services/api'
-import kabupatenJawaTengah from '@/data/kabupaten'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
@@ -591,7 +590,7 @@ const verifikasiForm = ref({
   status_verifikasi: 'pending',
   catatan_verifikasi: ''
 })
-const kabupatenList = ref(kabupatenJawaTengah)
+const kabupatenList = computed(() => allKabupaten.value.map(k => k.nama))
 const nikCheckTimeout = ref(null)
 const nikStatus = ref({ message: '', class: '', isDuplicate: false })
 
