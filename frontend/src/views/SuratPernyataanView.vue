@@ -623,23 +623,36 @@ table {
 }
 
 thead {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
+  color: white;
 }
 
 th, td {
-  padding: 1rem;
+  padding: 11px 14px;
   text-align: left;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #edf0f3;
+  border-right: 1px solid #edf0f3;
 }
 
 th {
   font-weight: 600;
-  color: #2c3e50;
+  font-size: 13px;
   white-space: nowrap;
+  color: white;
+  border-right: 1px solid rgba(255,255,255,0.15);
+  border-bottom: none;
+}
+
+td:last-child, th:last-child {
+  border-right: none;
+}
+
+tbody tr:nth-child(even) {
+  background: #f0f7ff;
 }
 
 tbody tr:hover {
-  background: #f8f9fa;
+  background: #dceeff;
 }
 
 .wilayah-info {

@@ -551,12 +551,12 @@ onMounted(() => {
 }
 
 .tab:hover {
-  color: #007bff;
+  color: #1565c0;
 }
 
 .tab.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
+  color: #1565c0;
+  border-bottom-color: #1565c0;
 }
 
 .content-section {
@@ -584,7 +584,7 @@ onMounted(() => {
 }
 
 .btn-export {
-  background: #28a745;
+  background: #1565c0;
   color: white;
   padding: 8px 16px;
   border: none;
@@ -594,11 +594,11 @@ onMounted(() => {
 }
 
 .btn-export:hover {
-  background: #218838;
+  background: #0d47a1;
 }
 
 .btn-import {
-  background: #17a2b8;
+  background: #1565c0;
   color: white;
   padding: 8px 16px;
   border: none;
@@ -608,7 +608,7 @@ onMounted(() => {
 }
 
 .btn-import:hover {
-  background: #138496;
+  background: #0d47a1;
 }
 
 .data-table {
@@ -617,24 +617,42 @@ onMounted(() => {
 }
 
 .data-table thead {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
 }
 
 .data-table th {
-  padding: 12px;
+  padding: 13px 14px;
   text-align: left;
   font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #dee2e6;
+  font-size: 13px;
+  color: white;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.15);
+  border-bottom: none;
+}
+
+.data-table th:last-child {
+  border-right: none;
 }
 
 .data-table td {
-  padding: 12px;
-  border-bottom: 1px solid #dee2e6;
+  padding: 11px 14px;
+  border-bottom: 1px solid #edf0f3;
+  border-right: 1px solid #edf0f3;
+  font-size: 13.5px;
+  color: #374151;
+}
+
+.data-table td:last-child {
+  border-right: none;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: #f0f7ff;
 }
 
 .data-table tbody tr:hover {
-  background: #f8f9fa;
+  background: #dceeff;
 }
 
 .loading-cell, .empty-cell {
@@ -649,7 +667,7 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #007bff;
+  background: #1565c0;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -659,7 +677,7 @@ onMounted(() => {
 }
 
 .btn-primary:hover {
-  background: #0056b3;
+  background: #0d47a1;
 }
 
 .btn-edit {
@@ -761,7 +779,7 @@ onMounted(() => {
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: #1565c0;
 }
 
 .form-actions {
@@ -870,7 +888,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
   color: white;
   padding: 1.25rem 1.75rem;
   border-radius: 12px 12px 0 0;
@@ -878,7 +896,7 @@ onMounted(() => {
 }
 
 .hero-banner.teal {
-  background: linear-gradient(135deg, #00695c 0%, #26a69a 100%);
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
 }
 
 .page-card {

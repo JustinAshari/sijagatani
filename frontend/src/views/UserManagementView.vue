@@ -266,9 +266,10 @@ onMounted(() => {
 
 .table-container {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
   overflow: hidden;
+  border: 1px solid #e8ecef;
 }
 
 .data-table {
@@ -277,24 +278,42 @@ onMounted(() => {
 }
 
 .data-table thead {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
 }
 
 .data-table th {
-  padding: 12px;
+  padding: 13px 14px;
   text-align: left;
   font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #dee2e6;
+  font-size: 13px;
+  color: white;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.15);
+  border-bottom: none;
+}
+
+.data-table th:last-child {
+  border-right: none;
 }
 
 .data-table td {
-  padding: 12px;
-  border-bottom: 1px solid #dee2e6;
+  padding: 11px 14px;
+  border-bottom: 1px solid #edf0f3;
+  border-right: 1px solid #edf0f3;
+  font-size: 13.5px;
+  color: #374151;
+}
+
+.data-table td:last-child {
+  border-right: none;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: #f0f7ff;
 }
 
 .data-table tbody tr:hover {
-  background: #f8f9fa;
+  background: #dceeff;
 }
 
 .badge {
@@ -331,7 +350,7 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #007bff;
+  background: #1565c0;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -344,7 +363,7 @@ onMounted(() => {
 }
 
 .btn-primary:hover {
-  background: #0056b3;
+  background: #0d47a1;
 }
 
 .btn-warning, .btn-danger {
@@ -460,8 +479,8 @@ form {
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+  border-color: #1565c0;
+  box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
 }
 
 .form-actions {
@@ -490,7 +509,7 @@ form {
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
   color: white;
   padding: 1.25rem 1.75rem;
   border-radius: 12px 12px 0 0;
@@ -498,7 +517,7 @@ form {
 }
 
 .hero-banner.purple {
-  background: linear-gradient(135deg, #4527a0 0%, #9575cd 100%);
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
 }
 
 .page-card {

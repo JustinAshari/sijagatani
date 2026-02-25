@@ -1177,7 +1177,7 @@ onMounted(() => {
 }
 
 .btn-filter {
-  background: #17a2b8;
+  background: #1565c0;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -1197,7 +1197,7 @@ onMounted(() => {
 }
 
 .btn-success {
-  background: #28a745;
+  background: #1565c0;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -1208,7 +1208,7 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #007bff;
+  background: #1565c0;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -1231,7 +1231,7 @@ onMounted(() => {
 .stats-bar {
   display: flex;
   gap: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
   padding: 15px 20px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -1297,9 +1297,10 @@ onMounted(() => {
 /* Table styling yang baru - mengikuti PenggilinganView */
 .table-wrapper {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
   overflow-x: auto;
+  border: 1px solid #e8ecef;
 }
 
 table {
@@ -1308,25 +1309,60 @@ table {
 }
 
 thead {
-  background: #34495e;
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
   color: white;
+}
+
+thead th {
+  padding: 13px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,0.15);
+  border-bottom: none;
+}
+
+thead th:last-child {
+  border-right: none;
 }
 
 th,
 td {
-  padding: 12px;
+  padding: 11px 14px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
 }
 
 th {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 td {
-  font-size: 14px;
-  color: #2c3e50;
+  font-size: 13.5px;
+  color: #374151;
+  border-bottom: 1px solid #edf0f3;
+  border-right: 1px solid #edf0f3;
+}
+
+td:last-child {
+  border-right: none;
+}
+
+tbody tr {
+  transition: background 0.15s;
+}
+
+tbody tr:nth-child(even) {
+  background: #f0f7ff;
+}
+
+tbody tr:hover {
+  background: #dceeff;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .text-right {
@@ -1608,7 +1644,7 @@ td {
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
   color: white;
   padding: 1.25rem 1.75rem;
   border-radius: 12px 12px 0 0;
@@ -1942,19 +1978,19 @@ td {
   gap: 7px;
   padding: 7px 14px;
   background: #fff;
-  border: 1.5px solid #2e7d32;
+  border: 1.5px solid #1565c0;
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  color: #2e7d32;
+  color: #1565c0;
   transition: all 0.18s;
-  box-shadow: 0 1px 4px rgba(46,125,50,0.08);
+  box-shadow: 0 1px 4px rgba(21,101,192,0.08);
 }
 .btn-col-picker:hover, .btn-col-picker.active {
-  background: #2e7d32;
+  background: #1565c0;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(46,125,50,0.22);
+  box-shadow: 0 2px 8px rgba(21,101,192,0.22);
 }
 .btn-col-picker.active .chevron-icon {
   transform: rotate(180deg);
@@ -1990,7 +2026,7 @@ td {
   color: #495057;
   border-bottom: 1px solid #f0f0f0;
   margin-bottom: 4px;
-  background: #f8faf8;
+  background: #f5f8ff;
   border-radius: 10px 10px 0 0;
 }
 .col-picker-item {
@@ -2004,10 +2040,10 @@ td {
   transition: background 0.12s;
   border-radius: 0;
 }
-.col-picker-item:hover { background: #f4f9f4; }
+.col-picker-item:hover { background: #f5f8ff; }
 .col-picker-item.col-active {
-  background: #f0f8f0;
-  color: #1b5e20;
+  background: #e8f0fe;
+  color: #0d47a1;
   font-weight: 600;
 }
 .col-check-box {
@@ -2023,8 +2059,8 @@ td {
   transition: all 0.15s;
 }
 .col-picker-item.col-active .col-check-box {
-  background: #2e7d32;
-  border-color: #2e7d32;
+  background: #1565c0;
+  border-color: #1565c0;
   color: #fff;
 }
 .col-label {
