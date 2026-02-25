@@ -102,7 +102,6 @@ class PenggilinganController extends Controller
         try {
             $data = [
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
-                'nama_petani' => $request->petani_id,  // Save as nama_petani
                 'nama_penggilingan' => $request->nama_penggilingan,
                 'lokasi_makloon' => $request->lokasi_makloon
             ];
@@ -223,7 +222,6 @@ class PenggilinganController extends Controller
 
         $validator = Validator::make($data, [
             'tanggal_pengajuan' => 'required|date',
-            'petani_id' => 'required|string|max:255',  // Changed to string (nama petani)
             'nama_penggilingan' => 'required|string|max:255',
             'lokasi_makloon' => 'required|string|max:255',
             'foto_gkp_1' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
@@ -257,7 +255,6 @@ class PenggilinganController extends Controller
 
             $data = [
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
-                'nama_petani' => $request->petani_id,  // Save as nama_petani
                 'nama_penggilingan' => $request->nama_penggilingan,
                 'lokasi_makloon' => $request->lokasi_makloon
             ];

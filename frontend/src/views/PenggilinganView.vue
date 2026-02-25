@@ -35,12 +35,12 @@
           <input type="date" v-model="filters.tanggalSampai" @change="applyFilters" />
         </div>
         <div class="filter-item">
-          <label>Nama Makloon:</label>
+          <label>Nama Makloon/MPP:</label>
           <input
             type="text"
             v-model="filters.namaPenggilingan"
             @input="applyFilters"
-            placeholder="Cari nama makloon..."
+            placeholder="Cari nama makloon/MPP..."
           />
         </div>
         <div class="filter-item">
@@ -56,8 +56,7 @@
           <tr>
             <th>No</th>
             <th>Tanggal</th>
-            <th>Nama Makloon</th>
-            <th>Nama Petani</th>
+            <th>Nama Makloon/MPP</th>
             <th>Lokasi Makloon</th>
             <th>Total Tonase (KG)</th>
             <th>Jumlah Angkutan</th>
@@ -66,16 +65,15 @@
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="8" class="loading-cell">Loading...</td>
+            <td colspan="7" class="loading-cell">Loading...</td>
           </tr>
           <tr v-else-if="filteredData.length === 0">
-            <td colspan="8" class="empty-cell">Tidak ada data</td>
+            <td colspan="7" class="empty-cell">Tidak ada data</td>
           </tr>
           <tr v-else v-for="(item, index) in filteredData" :key="item.id">
             <td>{{ index + 1 }}</td>
             <td>{{ formatDate(item.tanggal_pengajuan) }}</td>
             <td>{{ item.nama_penggilingan }}</td>
-            <td>{{ item.nama_petani || '-' }}</td>
             <td>{{ item.lokasi_makloon }}</td>
             <td class="text-right">{{ parseFloat(String(item.total_tonase)) }} KG</td>
             <td class="text-center">{{ item.jumlah_angkutan }}</td>
@@ -128,18 +126,7 @@
                 <input type="date" v-model="form.tanggal_pengajuan" required />
               </div>
               <div class="form-group">
-                <label>Petani <span class="required">*</span></label>
-                <input
-                  type="text"
-                  v-model="form.petani_id"
-                  required
-                  placeholder="Contoh: Budi Santoso"
-                />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Nama Makloon <span class="required">*</span></label>
+                <label>Nama Makloon/MPP <span class="required">*</span></label>
                 <input
                   type="text"
                   v-model="form.nama_penggilingan"
@@ -147,6 +134,8 @@
                   placeholder="Contoh: UD Sumber Rezeki"
                 />
               </div>
+            </div>
+            <div class="form-row">
               <div class="form-group">
                 <label>Lokasi Makloon <span class="required">*</span></label>
                 <input
@@ -311,7 +300,7 @@
                 <span class="detail-value">{{ formatDate(selectedItem.tanggal_pengajuan) }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Nama Makloon:</span>
+                <span class="detail-label">Nama Makloon/MPP:</span>
                 <span class="detail-value">{{ selectedItem.nama_penggilingan }}</span>
               </div>
               <div class="detail-item">
@@ -321,15 +310,7 @@
             </div>
           </div>
 
-          <div class="detail-section">
-            <h3>Informasi Petani</h3>
-            <div class="detail-grid">
-              <div class="detail-item">
-                <span class="detail-label">Nama Petani:</span>
-                <span class="detail-value">{{ selectedItem.nama_petani || '-' }}</span>
-              </div>
-            </div>
-          </div>
+
 
           <div class="detail-section">
             <h3>Data Transportasi</h3>
@@ -430,7 +411,6 @@ const authStore = useAuthStore()
 
 const data = ref([])
 const filteredData = ref([])
-const petaniList = ref([])
 const loading = ref(false)
 const showModal = ref(false)
 const showDetailModal = ref(false)
@@ -446,7 +426,6 @@ const filters = ref({
 const form = ref({
   id: null,
   tanggal_pengajuan: '',
-  petani_id: '',
   nama_penggilingan: '',
   lokasi_makloon: '',
   foto_gkp_1: null,
@@ -486,7 +465,6 @@ const openImage = (url) => {
 
 onMounted(() => {
   fetchData()
-  fetchPetani()
 })
 
 const fetchData = async () => {
@@ -500,15 +478,6 @@ const fetchData = async () => {
     alert('Gagal memuat data')
   } finally {
     loading.value = false
-  }
-}
-
-const fetchPetani = async () => {
-  try {
-    const response = await api.get('/petani')
-    petaniList.value = response.data.data
-  } catch (error) {
-    console.error('Error fetching petani:', error)
   }
 }
 
@@ -626,10 +595,6 @@ const submitForm = async () => {
       alert('Tanggal pengajuan harus diisi')
       return
     }
-    if (!form.value.petani_id) {
-      alert('Petani harus dipilih')
-      return
-    }
     if (!form.value.nama_penggilingan) {
       alert('Nama penggilingan harus diisi')
       return
@@ -664,7 +629,6 @@ const submitForm = async () => {
 
     const formData = new FormData()
     formData.append('tanggal_pengajuan', form.value.tanggal_pengajuan)
-    formData.append('petani_id', form.value.petani_id)
     formData.append('nama_penggilingan', form.value.nama_penggilingan)
     formData.append('lokasi_makloon', form.value.lokasi_makloon)
 
@@ -744,7 +708,6 @@ const editItem = (item) => {
   form.value = {
     id: item.id,
     tanggal_pengajuan: tanggalFormatted,
-    petani_id: item.nama_petani || '',  // Use nama_petani
     nama_penggilingan: item.nama_penggilingan,
     lokasi_makloon: item.lokasi_makloon,
     foto_gkp_1: null,
@@ -800,7 +763,6 @@ const closeModal = () => {
   form.value = {
     id: null,
     tanggal_pengajuan: '',
-    petani_id: '',
     nama_penggilingan: '',
     lokasi_makloon: '',
     foto_gkp_1: null,
