@@ -1,13 +1,13 @@
 <script setup>
 import { RouterView, useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import AppSidebar from './components/AppSidebar.vue'
 import { useAuthStore } from './stores/auth'
-import bulogLogo from './assets/Bulog Logo.PNG'
 import sijagataniLogo from './assets/Sijagatani Logo.PNG'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const sidebarOpen = ref(true)
 
 const showLayout = computed(() => route.name !== 'login')
 
@@ -29,7 +29,13 @@ const handleLogout = async () => {
     <header class="top-navbar">
       <div class="navbar-content">
         <div class="navbar-left">
-          <img :src="bulogLogo" alt="Bulog Logo" class="bulog-logo">
+          <button @click="sidebarOpen = !sidebarOpen" class="btn-toggle-sidebar" :title="sidebarOpen ? 'Tutup Sidebar' : 'Buka Sidebar'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
           <img :src="sijagataniLogo" alt="Sijagatani Logo" class="sijagatani-logo">
           <h1 class="app-title">Sistem Jemput<br>Gabah Jagung Petani</h1>
         </div>
@@ -56,10 +62,10 @@ const handleLogout = async () => {
     </header>
 
     <!-- Sidebar -->
-    <AppSidebar />
+    <AppSidebar :open="sidebarOpen" />
 
     <!-- Main Content -->
-    <div class="main-wrapper">
+    <div class="main-wrapper" :class="{ 'sidebar-closed': !sidebarOpen }">
       <main class="app-main">
         <RouterView />
       </main>
@@ -200,6 +206,25 @@ body {
   transform: translateY(-1px);
 }
 
+.btn-toggle-sidebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #2c3e50;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-toggle-sidebar:hover {
+  background: #f0f0f0;
+}
+
 .navbar-subtitle {
   font-size: 0.9rem;
   color: #666;
@@ -216,6 +241,10 @@ body {
   flex-direction: column;
   transition: margin-left 0.3s ease;
   background: #f5f5f5;
+}
+
+.main-wrapper.sidebar-closed {
+  margin-left: 0;
 }
 
 .app-main {
@@ -243,6 +272,10 @@ body {
   
   .main-wrapper {
     margin-left: 70px;
+  }
+
+  .main-wrapper.sidebar-closed {
+    margin-left: 0;
   }
 
   .app-main {

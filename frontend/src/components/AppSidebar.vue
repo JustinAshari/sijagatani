@@ -3,15 +3,19 @@ import { RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
+
+defineProps({
+  open: {
+    type: Boolean,
+    default: true
+  }
+})
 </script>
 
 <template>
-  <aside class="sidebar">
+  <aside class="sidebar" :class="{ collapsed: !open }">
     <div class="sidebar-content">
-      <div class="sidebar-header">
-        <h2>Menu</h2>
-      </div>
-
+      
       <nav class="sidebar-nav">
         <RouterLink to="/" class="sidebar-link">
           <span class="icon">
@@ -102,6 +106,12 @@ const authStore = useAuthStore()
   color: #333;
   z-index: 1000;
   border-right: 1px solid #e0e0e0;
+  transition: transform 0.3s ease, width 0.3s ease;
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-250px);
 }
 
 .sidebar-content {
@@ -194,6 +204,10 @@ const authStore = useAuthStore()
 @media (max-width: 768px) {
   .sidebar {
     width: 70px;
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-70px);
   }
 
   .sidebar-header h2 {
