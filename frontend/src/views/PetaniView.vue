@@ -90,7 +90,7 @@
             <th>Kabupaten</th>
             <th>Kecamatan</th>
             <th>Luas Lahan (HA)</th>
-            <th>Potensi Panen (KG) Per Tahun</th>
+            <th>Potensi Panen (KG)</th>
             <th>Komoditi</th>
             <th>No. Telp</th>
             <th>Aksi</th>
@@ -277,7 +277,7 @@
                 <input v-model="form.luas_lahan" type="number" step="0.01" min="0" required />
               </div>
               <div class="form-group">
-                <label>Potensi Panen (KG) Per Tahun *</label>
+                <label>Potensi Panen (KG) *</label>
                 <input v-model="form.potensi_panen" type="number" step="0.01" min="0" required />
               </div>
               <div class="form-group">
@@ -465,7 +465,7 @@
                 <span>{{ formatNumber(selectedPetani.luas_lahan) }} HA</span>
               </div>
               <div class="info-item">
-                <strong>Potensi Panen Per Tahun:</strong>
+                <strong>Potensi Panen:</strong>
                 <span>{{ formatNumber(selectedPetani.potensi_panen) }} KG</span>
               </div>
               <div class="info-item">
@@ -517,7 +517,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import api from '@/services/api'
+import api, { getStorageUrl } from '@/services/api'
 import kabupatenJawaTengah from '@/data/kabupaten'
 import { useAuthStore } from '@/stores/auth'
 
@@ -839,9 +839,7 @@ const exportExcel = async () => {
   }
 }
 
-const getImageUrl = (path) => {
-  return `http://localhost:8000/storage/${path}`
-}
+const getImageUrl = (path) => getStorageUrl(path)
 
 const openImage = (url) => {
   window.open(url, '_blank')

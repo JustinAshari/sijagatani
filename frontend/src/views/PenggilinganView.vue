@@ -421,7 +421,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import api from '../services/api'
+import api, { getStorageUrl } from '../services/api'
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
@@ -478,9 +478,7 @@ const totalAngkutan = computed(() => {
   return filteredData.value.reduce((sum, item) => sum + item.jumlah_angkutan, 0)
 })
 
-const getImageUrl = (path) => {
-  return `http://localhost:8000/storage/${path}`
-}
+const getImageUrl = (path) => getStorageUrl(path)
 
 const openImage = (url) => {
   window.open(url, '_blank')

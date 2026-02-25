@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -34,5 +36,11 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+export const getStorageUrl = (path) => {
+  if (!path) return null
+  const base = API_URL.replace('/api', '')
+  return `${base}/storage/${path}`
+}
 
 export default api

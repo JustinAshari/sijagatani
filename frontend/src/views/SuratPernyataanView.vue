@@ -199,7 +199,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import api from '@/services/api'
+import api, { getStorageUrl } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
@@ -308,7 +308,6 @@ const submitUpload = async () => {
     if (selectedPetani.value.bank) formData.append('bank', selectedPetani.value.bank)
     if (selectedPetani.value.no_rekening) formData.append('no_rekening', selectedPetani.value.no_rekening)
     
-    formData.append('_method', 'PUT')
     await api.post(`/petani/${selectedPetani.value.id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
@@ -340,11 +339,7 @@ const formatDate = (date) => {
   })
 }
 
-const getImageUrl = (path) => {
-  if (!path) return ''
-  const baseURL = import.meta.env.VITE_API_URL || 'https://bulog.dev.sijagatani.com/api'
-  return baseURL.replace('/api', '') + '/storage/' + path
-}
+const getImageUrl = (path) => getStorageUrl(path)
 
 onMounted(() => {
   fetchPetani()
