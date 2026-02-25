@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'username' => 'required|string',
             'password' => 'required|string|min:6',
         ]);
 
@@ -30,12 +30,12 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('username', $request->username)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Email atau password salah'
+                'message' => 'Username atau password salah'
             ], 401);
         }
 
@@ -49,7 +49,7 @@ class AuthController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'email' => $user->email,
+                    'username' => $user->username,
                     'role' => $user->role,
                 ],
                 'token' => $token,
@@ -80,7 +80,7 @@ class AuthController extends Controller
             'data' => [
                 'id' => $request->user()->id,
                 'name' => $request->user()->name,
-                'email' => $request->user()->email,
+                'username' => $request->user()->username,
                 'role' => $request->user()->role,
             ]
         ]);

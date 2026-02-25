@@ -20,9 +20,9 @@ export const useAuthStore = defineStore('auth', () => {
   const canManagePetani = computed(() => ['admin', 'lapangan', 'superadmin'].includes(user.value?.role))
   const canManagePenggilingan = computed(() => ['admin', 'penggilingan', 'superadmin'].includes(user.value?.role))
 
-  const login = async (email, password) => {
+  const login = async (username, password) => {
     try {
-      const response = await api.post('/login', { email, password })
+      const response = await api.post('/login', { username, password })
       if (response.data.success) {
         token.value = response.data.data.token
         user.value = response.data.data.user

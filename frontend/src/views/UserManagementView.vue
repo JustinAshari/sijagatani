@@ -14,7 +14,7 @@
           <tr>
             <th>No</th>
             <th>Nama</th>
-            <th>Email</th>
+            <th>Username</th>
             <th>Role</th>
             <th>Dibuat</th>
             <th>Aksi</th>
@@ -24,7 +24,7 @@
           <tr v-for="(user, index) in users" :key="user.id">
             <td>{{ index + 1 }}</td>
             <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
+            <td>{{ user.username }}</td>
             <td>
               <span class="badge" :class="'badge-' + user.role">
                 {{ getRoleLabel(user.role) }}
@@ -71,8 +71,8 @@
             <input v-model="form.name" type="text" required />
           </div>
           <div class="form-group">
-            <label>Email</label>
-            <input v-model="form.email" type="email" required />
+            <label>Username</label>
+            <input v-model="form.username" type="text" required />
           </div>
           <div class="form-group">
             <label>Password {{ isEdit ? '(kosongkan jika tidak diubah)' : '' }}</label>
@@ -113,7 +113,7 @@ const isEdit = ref(false)
 const form = ref({
   id: null,
   name: '',
-  email: '',
+  username: '',
   password: '',
   role: ''
 })
@@ -138,7 +138,7 @@ const editUser = (user) => {
   form.value = {
     id: user.id,
     name: user.name,
-    email: user.email,
+    username: user.username,
     password: '',
     role: user.role
   }
@@ -149,7 +149,7 @@ const submitForm = async () => {
   try {
     const data = {
       name: form.value.name,
-      email: form.value.email,
+      username: form.value.username,
       role: form.value.role
     }
     
@@ -192,7 +192,7 @@ const closeModal = () => {
   form.value = {
     id: null,
     name: '',
-    email: '',
+    username: '',
     password: '',
     role: ''
   }
