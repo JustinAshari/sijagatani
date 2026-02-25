@@ -17,20 +17,12 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('email_verified_at');
         });
-
-        Schema::table('penggilingan', function (Blueprint $table) {
-            $table->dropColumn('nama_petani');
-        });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
             $table->timestamp('email_verified_at')->nullable()->after('username');
-        });
-
-        Schema::table('penggilingan', function (Blueprint $table) {
-            $table->string('nama_petani', 255)->after('tanggal_pengajuan');
         });
     }
 };
