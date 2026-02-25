@@ -84,41 +84,31 @@
         <thead>
           <tr>
             <th>No</th>
-            <th>Tanggal</th>
             <th>NIK</th>
             <th>Nama</th>
             <th>Kabupaten</th>
-            <th>Kecamatan</th>
-            <th>Luas Lahan (HA)</th>
-            <th>Potensi Panen (KG)</th>
             <th>Komoditi</th>
-            <th>No. Telp</th>
             <th>Status</th>
             <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="12" class="loading-cell">Loading...</td>
+            <td colspan="7" class="loading-cell">Loading...</td>
           </tr>
           <tr v-else-if="filteredPetani.length === 0">
-            <td colspan="12" class="empty-cell">Tidak ada data petani</td>
+            <td colspan="7" class="empty-cell">Tidak ada data petani</td>
           </tr>
           <tr v-else v-for="(petani, index) in filteredPetani" :key="petani.id">
             <td>{{ index + 1 }}</td>
-            <td>{{ formatDate(petani.tanggal) }}</td>
             <td>{{ petani.nik }}</td>
             <td>{{ petani.nama }}</td>
             <td>{{ petani.kabupaten?.nama || '-' }}</td>
-            <td>{{ petani.kecamatan?.nama || '-' }}</td>
-            <td class="text-right">{{ formatNumber(petani.luas_lahan) }}</td>
-            <td class="text-right">{{ formatNumber(petani.potensi_panen) }}</td>
             <td class="text-center">
               <span class="badge" :class="`badge-${petani.komoditi.toLowerCase()}`">
                 {{ petani.komoditi }}
               </span>
             </td>
-            <td>{{ petani.no_telepon || '-' }}</td>
             <td class="text-center">
               <span :class="['badge-status', 'badge-' + petani.status_verifikasi]">
                 {{ petani.status_verifikasi === 'disetujui' ? 'Disetujui' : petani.status_verifikasi === 'ditolak' ? 'Ditolak' : 'Pending' }}
@@ -526,11 +516,11 @@
     </div>
 
     <!-- Modal Verifikasi -->
-    <div v-if="showVerifikasiModal" class="modal-overlay" @click.self="showVerifikasiModal = false">
+    <div v-if="showVerifikasiModal" class="modal" @click.self="showVerifikasiModal = false">
       <div class="modal-content modal-verifikasi">
         <div class="modal-header">
-          <h2>Verifikasi Data Petani</h2>
-          <button @click="showVerifikasiModal = false" class="btn-close">×</button>
+          <h3>Verifikasi Data Petani</h3>
+          <button @click="showVerifikasiModal = false" class="close-btn">&times;</button>
         </div>
         <div class="modal-body">
           <p class="verifikasi-info">
