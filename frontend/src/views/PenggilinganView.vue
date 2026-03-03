@@ -104,13 +104,13 @@
         <thead>
           <tr>
             <th>No</th>
-            <th v-if="visibleCols.tanggal_pengajuan">tanggal_pengajuan</th>
-            <th v-if="visibleCols.nama_penggilingan">nama_penggilingan</th>
-            <th v-if="visibleCols.lokasi_makloon">lokasi_makloon</th>
-            <th v-if="visibleCols.total_tonase">total_tonase</th>
-            <th v-if="visibleCols.jumlah_angkutan">jumlah_angkutan</th>
-            <th v-if="visibleCols.status_verifikasi">status_verifikasi</th>
-            <th v-if="visibleCols.catatan_verifikasi">catatan_verifikasi</th>
+            <th v-if="visibleCols.tanggal_pengajuan">Tanggal Pengajuan</th>
+            <th v-if="visibleCols.nama_penggilingan">Nama Penggilingan</th>
+            <th v-if="visibleCols.lokasi_makloon">Lokasi Makloon</th>
+            <th v-if="visibleCols.total_tonase">Total Tonase</th>
+            <th v-if="visibleCols.jumlah_angkutan">Jumlah Angkutan</th>
+            <th v-if="visibleCols.status_verifikasi">Status Verifikasi</th>
+            <th v-if="visibleCols.catatan_verifikasi">Catatan Verifikasi</th>
             <th>Aksi</th>
             <th>Verifikasi</th>
           </tr>
@@ -521,13 +521,13 @@ const loading = ref(false)
 
 const showColPicker = ref(false)
 const colDefs = [
-  { key: 'tanggal_pengajuan', label: 'tanggal_pengajuan' },
-  { key: 'nama_penggilingan', label: 'nama_penggilingan' },
-  { key: 'lokasi_makloon', label: 'lokasi_makloon' },
-  { key: 'total_tonase', label: 'total_tonase' },
-  { key: 'jumlah_angkutan', label: 'jumlah_angkutan' },
-  { key: 'status_verifikasi', label: 'status_verifikasi' },
-  { key: 'catatan_verifikasi', label: 'catatan_verifikasi' },
+  { key: 'tanggal_pengajuan', label: 'Tanggal Pengajuan' },
+  { key: 'nama_penggilingan', label: 'Nama Penggilingan' },
+  { key: 'lokasi_makloon', label: 'Lokasi Makloon' },
+  { key: 'total_tonase', label: 'Total Tonase' },
+  { key: 'jumlah_angkutan', label: 'Jumlah Angkutan' },
+  { key: 'status_verifikasi', label: 'Status Verifikasi' },
+  { key: 'catatan_verifikasi', label: 'Catatan Verifikasi' },
 ]
 const visibleCols = ref({
   tanggal_pengajuan: true, nama_penggilingan: true,

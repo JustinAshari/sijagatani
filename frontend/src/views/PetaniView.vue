@@ -130,23 +130,23 @@
         <thead>
           <tr>
             <th>No</th>
-            <th v-if="visibleCols.tanggal">tanggal</th>
-            <th v-if="visibleCols.nik">nik</th>
-            <th v-if="visibleCols.nama">nama</th>
-            <th v-if="visibleCols.luas_lahan">luas_lahan</th>
-            <th v-if="visibleCols.alamat_lahan">alamat_lahan</th>
-            <th v-if="visibleCols.potensi_panen">potensi_panen</th>
-            <th v-if="visibleCols.komoditi">komoditi</th>
-            <th v-if="visibleCols.alamat">alamat</th>
-            <th v-if="visibleCols.provinsi_id">provinsi_id</th>
-            <th v-if="visibleCols.kabupaten_id">kabupaten_id</th>
-            <th v-if="visibleCols.kecamatan_id">kecamatan_id</th>
-            <th v-if="visibleCols.kalurahan_id">kalurahan_id</th>
-            <th v-if="visibleCols.no_telepon">no_telepon</th>
-            <th v-if="visibleCols.bank">bank</th>
-            <th v-if="visibleCols.no_rekening">no_rekening</th>
-            <th v-if="visibleCols.status_verifikasi">status_verifikasi</th>
-            <th v-if="visibleCols.catatan_verifikasi">catatan_verifikasi</th>
+            <th v-if="visibleCols.tanggal">Tanggal</th>
+            <th v-if="visibleCols.nik">NIK</th>
+            <th v-if="visibleCols.nama">Nama</th>
+            <th v-if="visibleCols.luas_lahan">Luas Lahan</th>
+            <th v-if="visibleCols.alamat_lahan">Alamat Lahan</th>
+            <th v-if="visibleCols.potensi_panen">Potensi Panen</th>
+            <th v-if="visibleCols.komoditi">Komoditi</th>
+            <th v-if="visibleCols.alamat">Alamat</th>
+            <th v-if="visibleCols.provinsi_id">Provinsi</th>
+            <th v-if="visibleCols.kabupaten_id">Kabupaten</th>
+            <th v-if="visibleCols.kecamatan_id">Kecamatan</th>
+            <th v-if="visibleCols.kalurahan_id">Kalurahan</th>
+            <th v-if="visibleCols.no_telepon">No Telepon</th>
+            <th v-if="visibleCols.bank">Bank</th>
+            <th v-if="visibleCols.no_rekening">No Rekening</th>
+            <th v-if="visibleCols.status_verifikasi">Status Verifikasi</th>
+            <th v-if="visibleCols.catatan_verifikasi">Catatan Verifikasi</th>
             <th>Aksi</th>
             <th>Verifikasi</th>
           </tr>
@@ -650,23 +650,23 @@ const loading = ref(false)
 
 const showColPicker = ref(false)
 const colDefs = [
-  { key: 'tanggal', label: 'tanggal' },
-  { key: 'nik', label: 'nik' },
-  { key: 'nama', label: 'nama' },
-  { key: 'luas_lahan', label: 'luas_lahan' },
-  { key: 'alamat_lahan', label: 'alamat_lahan' },
-  { key: 'potensi_panen', label: 'potensi_panen' },
-  { key: 'komoditi', label: 'komoditi' },
-  { key: 'alamat', label: 'alamat' },
-  { key: 'provinsi_id', label: 'provinsi_id' },
-  { key: 'kabupaten_id', label: 'kabupaten_id' },
-  { key: 'kecamatan_id', label: 'kecamatan_id' },
-  { key: 'kalurahan_id', label: 'kalurahan_id' },
-  { key: 'no_telepon', label: 'no_telepon' },
-  { key: 'bank', label: 'bank' },
-  { key: 'no_rekening', label: 'no_rekening' },
-  { key: 'status_verifikasi', label: 'status_verifikasi' },
-  { key: 'catatan_verifikasi', label: 'catatan_verifikasi' },
+  { key: 'tanggal', label: 'Tanggal' },
+  { key: 'nik', label: 'NIK' },
+  { key: 'nama', label: 'Nama' },
+  { key: 'luas_lahan', label: 'Luas Lahan' },
+  { key: 'alamat_lahan', label: 'Alamat Lahan' },
+  { key: 'potensi_panen', label: 'Potensi Panen' },
+  { key: 'komoditi', label: 'Komoditi' },
+  { key: 'alamat', label: 'Alamat' },
+  { key: 'provinsi_id', label: 'Provinsi' },
+  { key: 'kabupaten_id', label: 'Kabupaten' },
+  { key: 'kecamatan_id', label: 'Kecamatan' },
+  { key: 'kalurahan_id', label: 'Kalurahan' },
+  { key: 'no_telepon', label: 'No Telepon' },
+  { key: 'bank', label: 'Bank' },
+  { key: 'no_rekening', label: 'No Rekening' },
+  { key: 'status_verifikasi', label: 'Status Verifikasi' },
+  { key: 'catatan_verifikasi', label: 'Catatan Verifikasi' },
 ]
 const visibleCols = ref({
   tanggal: false, nik: true, nama: true, luas_lahan: false, alamat_lahan: false,
