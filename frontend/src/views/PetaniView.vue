@@ -16,17 +16,19 @@
       </div>
     </div>
 
-    <div class="header">
-      <h2>
-        <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-          <polyline points="10 9 9 9 8 9"/>
-        </svg>
-        Data Petani
-      </h2>
+    <div class="page-header">
+      <div class="header-left">
+        <h1>
+          <svg class="icon-title" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Data Petani
+        </h1>
+        <p class="subtitle">Kelola dan pantau data petani yang terdaftar di sistem</p>
+      </div>
       <div class="header-actions">
         <button @click="exportExcel" class="btn-success" :disabled="loading">
           <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -41,6 +43,7 @@
         </button>
       </div>
     </div>
+    <!-- end page-header -->
 
     <div class="filter-section">
       <div class="filter-row">
@@ -1105,21 +1108,41 @@ onMounted(() => {
   padding: 20px;
 }
 
-.header {
+.page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 20px;
+  gap: 1rem;
 }
 
-.header h2 {
+.header-left h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.75rem;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+}
+
+.icon-title {
+  width: 32px;
+  height: 32px;
+  color: #3498db;
+  flex-shrink: 0;
+}
+
+.subtitle {
+  color: #7f8c8d;
   margin: 0;
-  color: #2e7d32;
+  font-size: 0.9rem;
 }
 
 .header-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .filter-section {
@@ -1480,7 +1503,7 @@ tbody tr:last-child td {
 
 .modal-header h3 {
   margin: 0;
-  color: #2e7d32;
+  color: #2c3e50;
 }
 
 .close-btn {
@@ -1716,16 +1739,16 @@ tbody tr:last-child td {
     font-size: 0.8rem;
   }
 
-  .header {
+  .page-header {
     flex-direction: column;
     gap: 6px;
     align-items: stretch;
     margin-bottom: 10px;
   }
 
-  .header h2 {
-    font-size: 16px;
-    margin-bottom: 0;
+  .header-left h1 {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
   }
 
   .header-actions {
