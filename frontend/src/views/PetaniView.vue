@@ -163,9 +163,9 @@
             <td v-if="visibleCols.tanggal">{{ formatDate(petani.tanggal) }}</td>
             <td v-if="visibleCols.nik">{{ petani.nik }}</td>
             <td v-if="visibleCols.nama">{{ petani.nama }}</td>
-            <td v-if="visibleCols.luas_lahan">{{ petani.luas_lahan }}</td>
+            <td v-if="visibleCols.luas_lahan">{{ formatNumber(petani.luas_lahan) }} HA</td>
             <td v-if="visibleCols.alamat_lahan">{{ petani.alamat_lahan || '-' }}</td>
-            <td v-if="visibleCols.potensi_panen">{{ petani.potensi_panen }}</td>
+            <td v-if="visibleCols.potensi_panen">{{ formatNumber(petani.potensi_panen) }} KG</td>
             <td v-if="visibleCols.komoditi" class="text-center">
               <span class="badge" :class="`badge-${petani.komoditi.toLowerCase()}`">
                 {{ petani.komoditi }}
