@@ -21,7 +21,7 @@
 
     <div class="header">
       <h1>Data Makloon GKP</h1>
-      <button v-if="authStore.canManagePenggilingan" @click="showModal = true" class="btn-add">
+      <button v-if="authStore.canManagePenggilingan" @click="openAddModal" class="btn-add">
         <span>+</span> Tambah Makloon
       </button>
     </div>
@@ -53,7 +53,7 @@
           <label>Tanggal Sampai:</label>
           <input type="date" v-model="filters.tanggalSampai" @change="applyFilters" />
         </div>
-        <div class="filter-item">
+        <div v-if="!authStore.isPenggilingan" class="filter-item">
           <label>Nama Makloon/MPP:</label>
           <input
             type="text"
@@ -112,7 +112,7 @@
             <th v-if="visibleCols.status_verifikasi">Status Verifikasi</th>
             <th v-if="visibleCols.catatan_verifikasi">Catatan Verifikasi</th>
             <th>Aksi</th>
-            <th>Verifikasi</th>
+            <th v-if="authStore.canVerify">Verifikasi</th>
           </tr>
         </thead>
         <tbody>
@@ -162,14 +162,13 @@
                 </svg>
               </button>
             </td>
-            <td class="verifikasi-cell">
-              <button v-if="authStore.canVerify" @click="openVerifikasiModal(item)" class="btn-verify" title="Verifikasi">
+            <td v-if="authStore.canVerify" class="verifikasi-cell">
+              <button @click="openVerifikasiModal(item)" class="btn-verify" title="Verifikasi">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
               </button>
-              <span v-else class="no-verify">-</span>
             </td>
           </tr>
         </tbody>
@@ -195,10 +194,19 @@
               <div class="form-group">
                 <label>Nama Makloon/MPP <span class="required">*</span></label>
                 <input
+                  v-if="!authStore.isPenggilingan"
                   type="text"
                   v-model="form.nama_penggilingan"
                   required
                   placeholder="Contoh: UD Sumber Rezeki"
+                />
+                <!-- Untuk role penggilingan: nama dikunci sesuai akun -->
+                <input
+                  v-else
+                  type="text"
+                  :value="authStore.namaPenggilingan"
+                  readonly
+                  class="input-readonly"
                 />
               </div>
             </div>
@@ -520,21 +528,25 @@ const kabupatenList = ref([])
 const loading = ref(false)
 
 const showColPicker = ref(false)
-const colDefs = [
-  { key: 'tanggal_pengajuan', label: 'Tanggal Pengajuan' },
-  { key: 'nama_penggilingan', label: 'Nama Penggilingan' },
-  { key: 'lokasi_makloon', label: 'Lokasi Makloon' },
-  { key: 'total_tonase', label: 'Total Tonase' },
-  { key: 'jumlah_angkutan', label: 'Jumlah Angkutan' },
-  { key: 'status_verifikasi', label: 'Status Verifikasi' },
-  { key: 'catatan_verifikasi', label: 'Catatan Verifikasi' },
+const allColDefs = [
+  { key: 'tanggal_pengajuan', label: 'Tanggal Pengajuan', adminOnly: false },
+  { key: 'nama_penggilingan', label: 'Nama Penggilingan', adminOnly: false },
+  { key: 'lokasi_makloon', label: 'Lokasi Makloon', adminOnly: false },
+  { key: 'total_tonase', label: 'Total Tonase', adminOnly: false },
+  { key: 'jumlah_angkutan', label: 'Jumlah Angkutan', adminOnly: false },
+  { key: 'status_verifikasi', label: 'Status Verifikasi', adminOnly: false },
+  { key: 'catatan_verifikasi', label: 'Catatan Verifikasi', adminOnly: false },
 ]
+// Kolom verifikasi hanya tampil di col-picker untuk admin & superadmin
+const colDefs = computed(() =>
+  allColDefs.filter(c => !c.adminOnly || authStore.canVerify)
+)
 const visibleCols = ref({
   tanggal_pengajuan: true, nama_penggilingan: true,
   lokasi_makloon: true, total_tonase: true, jumlah_angkutan: true,
   status_verifikasi: true, catatan_verifikasi: false
 })
-const colSpan = computed(() => 3 + Object.values(visibleCols.value).filter(Boolean).length)
+const colSpan = computed(() => 2 + Object.values(visibleCols.value).filter(Boolean).length + (authStore.canVerify ? 1 : 0))
 
 const showModal = ref(false)
 const showDetailModal = ref(false)
@@ -737,7 +749,7 @@ const submitForm = async () => {
       alert('Tanggal pengajuan harus diisi')
       return
     }
-    if (!form.value.nama_penggilingan) {
+    if (!authStore.isPenggilingan && !form.value.nama_penggilingan) {
       alert('Nama penggilingan harus diisi')
       return
     }
@@ -899,13 +911,22 @@ const viewDetail = (item) => {
   showDetailModal.value = true
 }
 
+const openAddModal = () => {
+  showModal.value = true
+  // Untuk role penggilingan, langsung pre-fill nama penggilingan dari profil
+  if (authStore.isPenggilingan) {
+    form.value.nama_penggilingan = authStore.namaPenggilingan || ''
+  }
+}
+
 const closeModal = () => {
   showModal.value = false
   isEditing.value = false
   form.value = {
     id: null,
     tanggal_pengajuan: '',
-    nama_penggilingan: '',
+    // Pre-fill untuk role penggilingan
+    nama_penggilingan: authStore.isPenggilingan ? (authStore.namaPenggilingan || '') : '',
     lokasi_makloon: '',
     foto_gkp_1: null,
     foto_gkp_2: null,
@@ -1396,6 +1417,13 @@ tbody tr:last-child td {
 .form-group select:focus {
   outline: none;
   border-color: #3498db;
+}
+
+.input-readonly {
+  background-color: #f5f5f5;
+  color: #555;
+  cursor: not-allowed;
+  border-color: #e0e0e0 !important;
 }
 
 .image-preview {

@@ -10,6 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => user.value?.role === 'admin')
   const isLapangan = computed(() => user.value?.role === 'lapangan')
   const isPenggilingan = computed(() => user.value?.role === 'penggilingan')
+  const namaPenggilingan = computed(() => user.value?.nama_penggilingan || null)
   
   // Access permission (can view)
   const canAccessPetani = computed(() => ['admin', 'lapangan', 'superadmin'].includes(user.value?.role))
@@ -86,6 +87,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     isLapangan,
     isPenggilingan,
+    namaPenggilingan,
     canAccessPetani,
     canAccessPenggilingan,
     canAccessUsers,

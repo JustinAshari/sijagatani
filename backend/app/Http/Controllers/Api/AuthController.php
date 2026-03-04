@@ -82,6 +82,7 @@ class AuthController extends Controller
                 'name' => $request->user()->name,
                 'username' => $request->user()->username,
                 'role' => $request->user()->role,
+                'nama_penggilingan' => $request->user()->nama_penggilingan,
             ]
         ]);
     }

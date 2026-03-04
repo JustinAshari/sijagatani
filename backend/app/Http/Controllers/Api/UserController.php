@@ -28,19 +28,36 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:6',
-            'role' => ['required', Rule::in(['admin', 'lapangan', 'penggilingan'])]
-        ]);
+            'role' => ['required', Rule::in(['admin', 'lapangan', 'penggilingan'])],
+            'nama_penggilingan' => 'nullable|string|max:255',
+        ];
 
-        $user = User::create([
+        $request->validate($rules);
+
+        $userData = [
             'name' => $request->name,
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-        ]);
+        ];
+
+        // Wajib isi nama_penggilingan untuk role penggilingan
+        if ($request->role === 'penggilingan') {
+            if (empty($request->nama_penggilingan)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nama penggilingan wajib diisi untuk role Penggilingan',
+                    'errors' => ['nama_penggilingan' => ['Nama penggilingan wajib diisi']]
+                ], 422);
+            }
+            $userData['nama_penggilingan'] = $request->nama_penggilingan;
+        }
+
+        $user = User::create($userData);
 
         return response()->json([
             'success' => true,
@@ -73,12 +90,23 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:6',
-            'role' => ['required', Rule::in(['admin', 'lapangan', 'penggilingan'])]
+            'role' => ['required', Rule::in(['admin', 'lapangan', 'penggilingan'])],
+            'nama_penggilingan' => 'nullable|string|max:255',
         ]);
+
+        // Wajib isi nama_penggilingan untuk role penggilingan
+        if ($request->role === 'penggilingan' && empty($request->nama_penggilingan)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nama penggilingan wajib diisi untuk role Penggilingan',
+                'errors' => ['nama_penggilingan' => ['Nama penggilingan wajib diisi']]
+            ], 422);
+        }
 
         $user->name = $request->name;
         $user->username = $request->username;
         $user->role = $request->role;
+        $user->nama_penggilingan = $request->role === 'penggilingan' ? $request->nama_penggilingan : null;
         
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);

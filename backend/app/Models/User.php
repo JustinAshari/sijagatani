@@ -23,6 +23,7 @@ class User extends Authenticatable
         'username',
         'password',
         'role',
+        'nama_penggilingan', // Hanya diisi untuk role 'penggilingan'
     ];
 
     /**

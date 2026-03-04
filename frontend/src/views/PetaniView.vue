@@ -151,7 +151,7 @@
             <th v-if="visibleCols.status_verifikasi">Status Verifikasi</th>
             <th v-if="visibleCols.catatan_verifikasi">Catatan Verifikasi</th>
             <th>Aksi</th>
-            <th>Verifikasi</th>
+            <th v-if="authStore.canVerify">Verifikasi</th>
           </tr>
         </thead>
         <tbody>
@@ -208,14 +208,13 @@
                 </svg>
               </button>
             </td>
-            <td class="verifikasi-cell">
-              <button v-if="authStore.canVerify" @click="openVerifikasiModal(petani)" class="btn-verify" title="Verifikasi">
+            <td v-if="authStore.canVerify" class="verifikasi-cell">
+              <button @click="openVerifikasiModal(petani)" class="btn-verify" title="Verifikasi">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                   <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
               </button>
-              <span v-else class="no-verify">-</span>
             </td>
           </tr>
         </tbody>
@@ -652,8 +651,8 @@ const selectedPetani = ref(null)
 const loading = ref(false)
 
 const showColPicker = ref(false)
-const colDefs = [
-  { key: 'tanggal', label: 'Tanggal' },
+const allColDefs = [
+  { key: 'tanggal', label: 'Tanggal', adminOnly: false },
   { key: 'nik', label: 'NIK' },
   { key: 'nama', label: 'Nama' },
   { key: 'luas_lahan', label: 'Luas Lahan' },
@@ -667,10 +666,13 @@ const colDefs = [
   { key: 'kalurahan_id', label: 'Kalurahan' },
   { key: 'no_telepon', label: 'No Telepon' },
   { key: 'bank', label: 'Bank' },
-  { key: 'no_rekening', label: 'No Rekening' },
-  { key: 'status_verifikasi', label: 'Status Verifikasi' },
-  { key: 'catatan_verifikasi', label: 'Catatan Verifikasi' },
+  { key: 'no_rekening', label: 'No Rekening', adminOnly: false },
+  { key: 'status_verifikasi', label: 'Status Verifikasi', adminOnly: false },
+  { key: 'catatan_verifikasi', label: 'Catatan Verifikasi', adminOnly: false },
 ]
+const colDefs = computed(() =>
+  allColDefs.filter(c => !c.adminOnly || authStore.canVerify)
+)
 const visibleCols = ref({
   tanggal: false, nik: true, nama: true, luas_lahan: false, alamat_lahan: false,
   potensi_panen: false, komoditi: true, alamat: false, provinsi_id: false,
@@ -678,7 +680,7 @@ const visibleCols = ref({
   no_telepon: false, bank: false, no_rekening: false,
   status_verifikasi: true, catatan_verifikasi: false
 })
-const colSpan = computed(() => 3 + Object.values(visibleCols.value).filter(Boolean).length)
+const colSpan = computed(() => 2 + Object.values(visibleCols.value).filter(Boolean).length + (authStore.canVerify ? 1 : 0))
 
 const showVerifikasiModal = ref(false)
 const verifikasiItem = ref(null)

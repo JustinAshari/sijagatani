@@ -34,6 +34,7 @@
             <th>Nama</th>
             <th>Username</th>
             <th>Role</th>
+            <th>Nama Penggilingan</th>
             <th>Dibuat</th>
             <th>Aksi</th>
           </tr>
@@ -47,6 +48,12 @@
               <span class="badge" :class="'badge-' + user.role">
                 {{ getRoleLabel(user.role) }}
               </span>
+            </td>
+            <td>
+              <span v-if="user.role === 'penggilingan'" class="penggilingan-name">
+                {{ user.nama_penggilingan || '-' }}
+              </span>
+              <span v-else class="text-muted">-</span>
             </td>
             <td>{{ formatDate(user.created_at) }}</td>
             <td class="actions">
@@ -110,6 +117,17 @@
               <option value="penggilingan">Penggilingan/Makloon</option>
             </select>
           </div>
+          <!-- Nama penggilingan hanya untuk role penggilingan -->
+          <div v-if="form.role === 'penggilingan'" class="form-group">
+            <label>Nama Penggilingan <span class="required">*</span></label>
+            <input 
+              v-model="form.nama_penggilingan" 
+              type="text" 
+              placeholder="Contoh: Penggilingan Maju Bersama"
+              :required="form.role === 'penggilingan'"
+            />
+            <small class="form-hint">Akun ini hanya dapat mengelola data dengan nama penggilingan tersebut.</small>
+          </div>
           <div class="form-actions">
             <button type="button" @click="closeModal" class="btn-secondary">Batal</button>
             <button type="submit" class="btn-primary">{{ isEdit ? 'Update' : 'Simpan' }}</button>
@@ -134,7 +152,8 @@ const form = ref({
   name: '',
   username: '',
   password: '',
-  role: ''
+  role: '',
+  nama_penggilingan: ''
 })
 
 const fetchUsers = async () => {
@@ -159,7 +178,8 @@ const editUser = (user) => {
     name: user.name,
     username: user.username,
     password: '',
-    role: user.role
+    role: user.role,
+    nama_penggilingan: user.nama_penggilingan || ''
   }
   showModal.value = true
 }
@@ -174,6 +194,10 @@ const submitForm = async () => {
     
     if (form.value.password) {
       data.password = form.value.password
+    }
+
+    if (form.value.role === 'penggilingan') {
+      data.nama_penggilingan = form.value.nama_penggilingan
     }
 
     if (isEdit.value) {
@@ -213,7 +237,8 @@ const closeModal = () => {
     name: '',
     username: '',
     password: '',
-    role: ''
+    role: '',
+    nama_penggilingan: ''
   }
 }
 
@@ -342,6 +367,28 @@ onMounted(() => {
 .badge-penggilingan {
   background: #fff3e0;
   color: #f57c00;
+}
+
+.penggilingan-name {
+  font-weight: 600;
+  color: #f57c00;
+}
+
+.text-muted {
+  color: #aaa;
+}
+
+.required {
+  color: #dc3545;
+  margin-left: 2px;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6c757d;
+  font-style: italic;
 }
 
 .actions {

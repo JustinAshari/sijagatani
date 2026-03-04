@@ -25,15 +25,33 @@ class PenggilinganController extends Controller
     }
 
     /**
+     * Helper: cek apakah user penggilingan punya akses ke record ini
+     */
+    private function checkOwnership(Penggilingan $penggilingan, Request $request): bool
+    {
+        $user = $request->user();
+        if ($user->isAdminPenggilingan()) {
+            return $penggilingan->nama_penggilingan === $user->nama_penggilingan;
+        }
+        return true; // admin & superadmin bebas akses
+    }
+
+    /**
      * Display a listing of penggilingan with filters
      */
     public function index(Request $request): JsonResponse
     {
         $query = Penggilingan::with(['transports']);
+        $user = $request->user();
 
-        // Filter by nama penggilingan
-        if ($request->has('nama_penggilingan')) {
-            $query->where('nama_penggilingan', 'LIKE', '%' . $request->nama_penggilingan . '%');
+        // Jika role penggilingan, hanya tampilkan data milik penggilingannya sendiri
+        if ($user->isAdminPenggilingan()) {
+            $query->where('nama_penggilingan', $user->nama_penggilingan);
+        } else {
+            // Filter by nama penggilingan (untuk admin/superadmin)
+            if ($request->has('nama_penggilingan')) {
+                $query->where('nama_penggilingan', 'LIKE', '%' . $request->nama_penggilingan . '%');
+            }
         }
 
         // Filter by tanggal
@@ -69,10 +87,14 @@ class PenggilinganController extends Controller
         }
 
 
+        $user = $request->user();
+        // Untuk role penggilingan, nama_penggilingan diambil dari profil user (tidak perlu dikirim)
+        $namaPenggilinganRule = $user->isAdminPenggilingan() ? 'nullable|string|max:255' : 'required|string|max:255';
+
         $validator = Validator::make($data, [
             'tanggal_pengajuan' => 'required|date',
             'petani_id' => 'required|string|max:255',  // Changed to string (nama petani)
-            'nama_penggilingan' => 'required|string|max:255',
+            'nama_penggilingan' => $namaPenggilinganRule,
             'lokasi_makloon' => 'required|string|max:255',
             'foto_gkp_1' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
             'foto_gkp_2' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
@@ -95,9 +117,14 @@ class PenggilinganController extends Controller
 
         DB::beginTransaction();
         try {
+            // Untuk role penggilingan, nama_penggilingan diambil dari profil user (tidak bisa diubah)
+            $namaPenggilingan = $user->isAdminPenggilingan()
+                ? $user->nama_penggilingan
+                : $request->nama_penggilingan;
+
             $data = [
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
-                'nama_penggilingan' => $request->nama_penggilingan,
+                'nama_penggilingan' => $namaPenggilingan,
                 'lokasi_makloon' => $request->lokasi_makloon
             ];
 
@@ -184,15 +211,22 @@ class PenggilinganController extends Controller
     /**
      * Display the specified penggilingan
      */
-    public function show(string $id): JsonResponse
+    public function show(Request $request, string $id): JsonResponse
     {
-        $penggilingan = Penggilingan::with(['petani', 'transports'])->find($id);
+        $penggilingan = Penggilingan::with(['transports'])->find($id);
 
         if (!$penggilingan) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data penggilingan tidak ditemukan'
             ], 404);
+        }
+
+        if (!$this->checkOwnership($penggilingan, $request)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses ke data penggilingan ini'
+            ], 403);
         }
 
         return response()->json([
@@ -215,9 +249,11 @@ class PenggilinganController extends Controller
             unset($data['foto_gkp_2']);
         }
 
+        $namaPenggilinganRuleUpdate = $request->user()->isAdminPenggilingan() ? 'nullable|string|max:255' : 'required|string|max:255';
+
         $validator = Validator::make($data, [
             'tanggal_pengajuan' => 'required|date',
-            'nama_penggilingan' => 'required|string|max:255',
+            'nama_penggilingan' => $namaPenggilinganRuleUpdate,
             'lokasi_makloon' => 'required|string|max:255',
             'foto_gkp_1' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
             'foto_gkp_2' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
@@ -248,9 +284,22 @@ class PenggilinganController extends Controller
                 ], 404);
             }
 
+            if (!$this->checkOwnership($penggilingan, $request)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke data penggilingan ini'
+                ], 403);
+            }
+
+            $user = $request->user();
+            // Untuk role penggilingan, nama_penggilingan tidak boleh diubah
+            $namaPenggilingan = $user->isAdminPenggilingan()
+                ? $user->nama_penggilingan
+                : $request->nama_penggilingan;
+
             $data = [
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
-                'nama_penggilingan' => $request->nama_penggilingan,
+                'nama_penggilingan' => $namaPenggilingan,
                 'lokasi_makloon' => $request->lokasi_makloon
             ];
 
@@ -361,7 +410,7 @@ class PenggilinganController extends Controller
     /**
      * Remove the specified penggilingan
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -372,6 +421,13 @@ class PenggilinganController extends Controller
                     'success' => false,
                     'message' => 'Data penggilingan tidak ditemukan'
                 ], 404);
+            }
+
+            if (!$this->checkOwnership($penggilingan, $request)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke data penggilingan ini'
+                ], 403);
             }
 
             // Delete all images
@@ -413,15 +469,28 @@ class PenggilinganController extends Controller
     public function summary(Request $request): JsonResponse
     {
         $query = Penggilingan::query();
+        $user = $request->user();
 
-        if ($request->has('tanggal_dari')) {
+        // Untuk role penggilingan, hanya hitung data miliknya sendiri
+        if ($user->isAdminPenggilingan()) {
+            $query->where('nama_penggilingan', $user->nama_penggilingan);
+        } else {
+            if ($request->has('tanggal_dari')) {
+                $query->whereDate('tanggal_pengajuan', '>=', $request->tanggal_dari);
+            }
+            if ($request->has('tanggal_sampai')) {
+                $query->whereDate('tanggal_pengajuan', '<=', $request->tanggal_sampai);
+            }
+            if ($request->has('nama_penggilingan')) {
+                $query->where('nama_penggilingan', 'LIKE', '%' . $request->nama_penggilingan . '%');
+            }
+        }
+
+        if ($user->isAdminPenggilingan() && $request->has('tanggal_dari')) {
             $query->whereDate('tanggal_pengajuan', '>=', $request->tanggal_dari);
         }
-        if ($request->has('tanggal_sampai')) {
+        if ($user->isAdminPenggilingan() && $request->has('tanggal_sampai')) {
             $query->whereDate('tanggal_pengajuan', '<=', $request->tanggal_sampai);
-        }
-        if ($request->has('nama_penggilingan')) {
-            $query->where('nama_penggilingan', 'LIKE', '%' . $request->nama_penggilingan . '%');
         }
 
         $totalTonase = $query->sum('total_tonase');
@@ -444,7 +513,12 @@ class PenggilinganController extends Controller
     public function export(Request $request)
     {
         $filters = $request->only(['tanggal_dari', 'tanggal_sampai', 'nama_penggilingan', 'kabupaten']);
-        
+
+        // Paksa filter nama_penggilingan untuk role penggilingan
+        if ($request->user()->isAdminPenggilingan()) {
+            $filters['nama_penggilingan'] = $request->user()->nama_penggilingan;
+        }
+
         return Excel::download(
             new PenggilinganExport($filters),
             'data_penggilingan_' . date('Y-m-d_His') . '.xlsx'
