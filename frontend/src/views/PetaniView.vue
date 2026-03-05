@@ -1039,9 +1039,9 @@ const formatDate = (date) => {
 const formatNumber = (value) => {
   if (!value) return '0'
   const num = parseFloat(value)
-  // Jika angka bulat, tampilkan tanpa desimal
-  // Jika ada desimal, tampilkan dengan desimal
-  return num % 1 === 0 ? num.toString() : num.toFixed(2)
+  return num % 1 === 0
+    ? num.toLocaleString('id-ID')
+    : num.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 // Wilayah functions

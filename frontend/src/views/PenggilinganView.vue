@@ -127,7 +127,7 @@
             <td v-if="visibleCols.tanggal_pengajuan">{{ formatDate(item.tanggal_pengajuan) }}</td>
             <td v-if="visibleCols.nama_penggilingan">{{ item.nama_penggilingan }}</td>
             <td v-if="visibleCols.lokasi_makloon">{{ item.lokasi_makloon }}</td>
-            <td v-if="visibleCols.total_tonase" class="text-right">{{ parseFloat(String(item.total_tonase)) }} KG</td>
+            <td v-if="visibleCols.total_tonase" class="text-right">{{ formatNumber(item.total_tonase) }} KG</td>
             <td v-if="visibleCols.jumlah_angkutan" class="text-center">{{ item.jumlah_angkutan }}</td>
             <td v-if="visibleCols.status_verifikasi" class="text-center">
               <span :class="['badge-status', 'badge-' + item.status_verifikasi]">
@@ -458,7 +458,7 @@
               <div class="resume-item">
                 <span class="resume-label">Total Tonase (dalam KG):</span>
                 <span class="resume-value">
-                  {{ parseFloat(String(selectedItem.total_tonase)) }} KG
+                  {{ formatNumber(selectedItem.total_tonase) }} KG
                 </span>
               </div>
               <div class="resume-item">
@@ -594,7 +594,8 @@ const form = ref({
 })
 
 const totalTonase = computed(() => {
-  return filteredData.value.reduce((sum, item) => sum + parseFloat(String(item.total_tonase)), 0)
+  const sum = filteredData.value.reduce((sum, item) => sum + parseFloat(String(item.total_tonase)), 0)
+  return sum.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 })
 
 const totalAngkutan = computed(() => {
@@ -739,7 +740,7 @@ const calculateTotalTonase = () => {
   const total = form.value.transports.reduce((sum, transport) => {
     return sum + (parseFloat(String(transport.kuantum)) || 0)
   }, 0)
-  return total
+  return total.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 const submitForm = async () => {
@@ -973,6 +974,14 @@ const submitVerifikasi = async () => {
   } finally {
     verifikasiLoading.value = false
   }
+}
+
+const formatNumber = (value) => {
+  if (!value) return '0'
+  const num = parseFloat(String(value))
+  return num % 1 === 0
+    ? num.toLocaleString('id-ID')
+    : num.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 const formatDate = (dateString) => {

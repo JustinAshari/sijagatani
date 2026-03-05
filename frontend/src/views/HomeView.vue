@@ -57,7 +57,8 @@ const petaniByStatus = computed(() => ({
 }))
 const penggilinganTotal = computed(() => penggilinganData.value.length)
 const totalTonase = computed(() =>
-  penggilinganData.value.reduce((s, p) => s + parseFloat(p.total_tonase || 0), 0).toFixed(2)
+  penggilinganData.value.reduce((s, p) => s + parseFloat(p.total_tonase || 0), 0)
+    .toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 )
 const totalAngkutan = computed(() =>
   penggilinganData.value.reduce((s, p) => s + parseInt(p.jumlah_angkutan || 0), 0)
@@ -69,7 +70,8 @@ const penggilinganByStatus = computed(() => ({
 }))
 
 const totalLahan = computed(() =>
-  petaniData.value.reduce((s, p) => s + parseFloat(p.luas_lahan || 0), 0).toFixed(2)
+  petaniData.value.reduce((s, p) => s + parseFloat(p.luas_lahan || 0), 0)
+    .toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 )
 const totalPotensiPanen = computed(() =>
   Math.round(petaniData.value.reduce((s, p) => s + parseFloat(p.potensi_panen || 0), 0))
