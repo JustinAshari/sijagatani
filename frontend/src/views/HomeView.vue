@@ -72,8 +72,10 @@ const totalLahan = computed(() =>
   petaniData.value.reduce((s, p) => s + parseFloat(p.luas_lahan || 0), 0).toFixed(2)
 )
 const totalPotensiPanen = computed(() =>
-  petaniData.value.reduce((s, p) => s + parseFloat(p.potensi_panen || 0), 0).toFixed(2)
+  Math.round(petaniData.value.reduce((s, p) => s + parseFloat(p.potensi_panen || 0), 0))
 )
+
+const formatRibuan = (val) => Number(val).toLocaleString('id-ID')
 
 const usersTotal = computed(() => usersData.value.length)
 const usersByRole = computed(() => {
@@ -254,38 +256,6 @@ const roleDesc = computed(() => {
             </div>
             <div class="chart-foot"><span class="rtdot"></span> Real-time</div>
           </div>
-
-          <div v-if="authStore.canAccessUsers" class="chart-card">
-            <div class="chart-card__header">
-              <p class="chart-card__label">Distribusi Role Pengguna</p>
-              <p class="chart-card__sub">Total: {{ usersTotal }} pengguna</p>
-            </div>
-            <div class="chart-body">
-              <div class="donut-wrap">
-                <svg viewBox="0 0 120 120" class="donut-svg">
-                  <circle cx="60" cy="60" r="45" fill="none" stroke="#f0f3f8" stroke-width="16"/>
-                  <circle v-for="(seg, i) in roleSegments" :key="i" cx="60" cy="60" r="45" fill="none"
-                    :stroke="seg.color" stroke-width="16"
-                    :stroke-dasharray="`${seg.dash} ${seg.gap}`"
-                    :stroke-dashoffset="-seg.offset"
-                    style="transform:rotate(-90deg);transform-origin:60px 60px"/>
-                  <text x="60" y="56" text-anchor="middle" class="donut-top">Total</text>
-                  <text x="60" y="70" text-anchor="middle" class="donut-num">{{ usersTotal }}</text>
-                </svg>
-              </div>
-              <div class="legend">
-                <div v-for="(seg, i) in roleSegments" :key="i" class="legend-row">
-                  <span class="ldot" :style="{background:seg.color}"></span>
-                  <div class="ltext">
-                    <span class="lname">{{ seg.label }}</span>
-                    <span class="lpct">{{ seg.pct }}% dari total</span>
-                  </div>
-                  <span class="lval">{{ seg.value }}<br><small>user</small></span>
-                </div>
-              </div>
-            </div>
-            <div class="chart-foot"><span class="rtdot"></span> Real-time</div>
-          </div>
         </div>
 
         <p v-if="authStore.canAccessPetani || authStore.canAccessUsers" class="note">
@@ -301,36 +271,6 @@ const roleDesc = computed(() => {
           <p class="section-sub">Data terkini sistem pengadaan dan manajemen pengguna</p>
         </div>
         <div class="stat-grid">
-          <div v-if="authStore.canAccessPetani" class="stat-card sblue">
-            <div class="sbg-dots"></div>
-            <div class="sicon sicon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            <div class="snum">{{ petaniTotal }}</div>
-            <div class="slabel">Total Petani</div>
-            <div class="ssub">Data bulan berjalan</div>
-          </div>
-          <div v-if="authStore.canAccessPenggilingan" class="stat-card sdark">
-            <div class="sbg-dots"></div>
-            <div class="sicon sicon-dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M12 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M12 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg></div>
-            <div class="snum">{{ penggilinganTotal }}</div>
-            <div class="slabel">Total Makloon</div>
-            <div class="ssub">Seluruh data makloon</div>
-          </div>
-          <div v-if="authStore.canAccessPetani" class="stat-card sgreen">
-            <div class="sbg-dots"></div>
-            <span class="slive slive-green"></span>
-            <div class="sicon sicon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-            <div class="snum">{{ petaniByStatus.Disetujui }}</div>
-            <div class="slabel">Petani Disetujui</div>
-            <div class="ssub">Status terverifikasi</div>
-          </div>
-          <div v-if="authStore.canAccessPetani" class="stat-card sred">
-            <div class="sbg-dots"></div>
-            <span class="slive slive-red"></span>
-            <div class="sicon sicon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-            <div class="snum">{{ petaniByStatus.Pending }}</div>
-            <div class="slabel">Petani Pending</div>
-            <div class="ssub">Menunggu verifikasi</div>
-          </div>
           <!-- Petani: total lahan & potensi panen -->
           <div v-if="authStore.canAccessPetani" class="stat-card sindigo">
             <div class="sbg-dots"></div>
@@ -342,7 +282,7 @@ const roleDesc = computed(() => {
           <div v-if="authStore.canAccessPetani" class="stat-card sorange">
             <div class="sbg-dots"></div>
             <div class="sicon sicon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l3 3"/><path d="M22 2L12 12"/></svg></div>
-            <div class="snum">{{ totalPotensiPanen }} <span class="sunit">Ton</span></div>
+            <div class="snum">{{ formatRibuan(totalPotensiPanen) }} <span class="sunit">KG</span></div>
             <div class="slabel">Potensi Panen</div>
             <div class="ssub">Total estimasi panen</div>
           </div>
@@ -350,7 +290,7 @@ const roleDesc = computed(() => {
           <div v-if="authStore.canAccessPenggilingan" class="stat-card steal">
             <div class="sbg-dots"></div>
             <div class="sicon sicon-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
-            <div class="snum">{{ totalTonase }} <span class="sunit">Ton</span></div>
+            <div class="snum">{{ totalTonase }} <span class="sunit">KG</span></div>
             <div class="slabel">Total Tonase GKP</div>
             <div class="ssub">Akumulasi tonase makloon</div>
           </div>
@@ -360,29 +300,6 @@ const roleDesc = computed(() => {
             <div class="snum">{{ totalAngkutan }}</div>
             <div class="slabel">Total Angkutan</div>
             <div class="ssub">Jumlah kendaraan makloon</div>
-          </div>
-          <div v-if="authStore.canAccessPenggilingan" class="stat-card sgreen">
-            <div class="sbg-dots"></div>
-            <span class="slive slive-green"></span>
-            <div class="sicon sicon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-            <div class="snum">{{ penggilinganByStatus.Disetujui }}</div>
-            <div class="slabel">Makloon Disetujui</div>
-            <div class="ssub">Status terverifikasi</div>
-          </div>
-          <div v-if="authStore.canAccessPenggilingan" class="stat-card sred">
-            <div class="sbg-dots"></div>
-            <span class="slive slive-red"></span>
-            <div class="sicon sicon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-            <div class="snum">{{ penggilinganByStatus.Pending }}</div>
-            <div class="slabel">Makloon Pending</div>
-            <div class="ssub">Menunggu verifikasi</div>
-          </div>
-          <div v-if="authStore.canAccessUsers" class="stat-card sdark">
-            <div class="sbg-dots"></div>
-            <div class="sicon sicon-dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-            <div class="snum">{{ usersTotal }}</div>
-            <div class="slabel">Total Pengguna</div>
-            <div class="ssub">Seluruh pengguna sistem</div>
           </div>
         </div>
       </section>
