@@ -40,6 +40,18 @@
         <span class="stat-label">Total Angkutan:</span>
         <span class="stat-value">{{ totalAngkutan }}</span>
       </div>
+      <div class="stat-item stat-disetujui">
+        <span class="stat-label">Disetujui:</span>
+        <span class="stat-value">{{ verifikasiStats.disetujui }}</span>
+      </div>
+      <div class="stat-item stat-pending">
+        <span class="stat-label">Pending:</span>
+        <span class="stat-value">{{ verifikasiStats.pending }}</span>
+      </div>
+      <div class="stat-item stat-ditolak">
+        <span class="stat-label">Ditolak:</span>
+        <span class="stat-value">{{ verifikasiStats.ditolak }}</span>
+      </div>
     </div>
 
     <!-- Filter Section -->
@@ -601,6 +613,12 @@ const totalAngkutan = computed(() => {
   return filteredData.value.reduce((sum, item) => sum + item.jumlah_angkutan, 0)
 })
 
+const verifikasiStats = computed(() => ({
+  disetujui: filteredData.value.filter(i => i.status_verifikasi === 'disetujui').length,
+  pending: filteredData.value.filter(i => !i.status_verifikasi || i.status_verifikasi === 'pending').length,
+  ditolak: filteredData.value.filter(i => i.status_verifikasi === 'ditolak').length,
+}))
+
 const getImageUrl = (path) => getStorageUrl(path)
 
 const openImage = (url) => {
@@ -1069,6 +1087,13 @@ const downloadMakloonGKP = async (penggilinganId) => {
   font-size: 24px;
   font-weight: bold;
 }
+
+.stat-disetujui .stat-label { color: #a8f0c6; }
+.stat-disetujui .stat-value { color: #d4f5e2; }
+.stat-pending .stat-label { color: #ffe8a3; }
+.stat-pending .stat-value { color: #fff3cd; }
+.stat-ditolak .stat-label { color: #ffb3b3; }
+.stat-ditolak .stat-value { color: #ffd5d5; }
 
 .filter-section {
   background: white;

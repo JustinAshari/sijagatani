@@ -51,9 +51,9 @@ const petaniByKomoditi = computed(() => {
   return map
 })
 const petaniByStatus = computed(() => ({
-  Disetujui: petaniData.value.filter(p => p.status_verifikasi === 'Disetujui').length,
-  Pending:   petaniData.value.filter(p => p.status_verifikasi === 'Pending').length,
-  Ditolak:   petaniData.value.filter(p => p.status_verifikasi === 'Ditolak').length,
+  Disetujui: petaniData.value.filter(p => p.status_verifikasi === 'disetujui').length,
+  Pending:   petaniData.value.filter(p => !p.status_verifikasi || p.status_verifikasi === 'pending').length,
+  Ditolak:   petaniData.value.filter(p => p.status_verifikasi === 'ditolak').length,
 }))
 const penggilinganTotal = computed(() => penggilinganData.value.length)
 const totalTonase = computed(() =>
@@ -63,9 +63,9 @@ const totalAngkutan = computed(() =>
   penggilinganData.value.reduce((s, p) => s + parseInt(p.jumlah_angkutan || 0), 0)
 )
 const penggilinganByStatus = computed(() => ({
-  Disetujui: penggilinganData.value.filter(p => p.status_verifikasi === 'Disetujui').length,
-  Pending:   penggilinganData.value.filter(p => p.status_verifikasi === 'Pending').length,
-  Ditolak:   penggilinganData.value.filter(p => p.status_verifikasi === 'Ditolak').length,
+  Disetujui: penggilinganData.value.filter(p => p.status_verifikasi === 'disetujui').length,
+  Pending:   penggilinganData.value.filter(p => !p.status_verifikasi || p.status_verifikasi === 'pending').length,
+  Ditolak:   penggilinganData.value.filter(p => p.status_verifikasi === 'ditolak').length,
 }))
 
 const totalLahan = computed(() =>
