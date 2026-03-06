@@ -56,6 +56,7 @@ const petaniByStatus = computed(() => ({
   Ditolak:   petaniData.value.filter(p => p.status_verifikasi === 'ditolak').length,
 }))
 const penggilinganTotal = computed(() => penggilinganData.value.length)
+const penggilinganUnikTotal = computed(() => new Set(penggilinganData.value.map(p => p.nama_penggilingan).filter(Boolean)).size)
 const totalTonase = computed(() =>
   penggilinganData.value.reduce((s, p) => s + parseFloat(p.total_tonase || 0), 0)
     .toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -267,6 +268,47 @@ const roleDesc = computed(() => {
         </p>
       </section>
 
+      <!-- Seksi Data Terdaftar -->
+      <section v-if="authStore.canAccessPetani || authStore.canAccessPenggilingan" class="section">
+        <div class="section-head">
+          <h2 class="section-title">Data Terdaftar</h2>
+          <p class="section-sub">Jumlah data yang telah terdaftar dalam sistem</p>
+        </div>
+        <div class="reg-grid">
+
+          <!-- Kartu Petani -->
+          <div v-if="authStore.canAccessPetani" class="reg-card">
+            <div class="reg-card__accent reg-card__accent--blue"></div>
+            <div class="reg-card__left">
+              <div class="reg-icon reg-icon--blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div>
+                <div class="reg-num reg-num--blue">{{ petaniTotal }}</div>
+                <div class="reg-label">Petani Terdaftar</div>
+                <div class="reg-sub">Total petani yang terdaftar dalam sistem</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kartu Penggilingan -->
+          <div v-if="authStore.canAccessPenggilingan" class="reg-card">
+            <div class="reg-card__accent reg-card__accent--green"></div>
+            <div class="reg-card__left">
+              <div class="reg-icon reg-icon--green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+              </div>
+              <div>
+                <div class="reg-num reg-num--green">{{ penggilinganUnikTotal }}</div>
+                <div class="reg-label">Penggilingan Terdaftar</div>
+                <div class="reg-sub">Total penggilingan yang terdaftar dalam sistem</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       <section class="section">
         <div class="section-head">
           <h2 class="section-title">Ringkasan Statistik</h2>
@@ -408,6 +450,61 @@ const roleDesc = computed(() => {
 .sicon-indigo { background:#e0e7ff;color:#4f46e5; }
 .sicon-orange { background:#ffedd5;color:#ea580c; }
 .sicon-teal   { background:#ccfbf1;color:#0d9488; }
+.sreg-blue  { background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#93c5fd; }
+.sreg-green { background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac; }
+.sicon-reg-blue  { background:#2563eb;color:#fff; }
+.sicon-reg-green { background:#16a34a;color:#fff; }
+
+/* Registration Cards */
+.reg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:1.5rem; }
+.reg-card {
+  position:relative; background:#fff; border-radius:16px;
+  border:1px solid #e8ecf0; box-shadow:0 2px 16px rgba(0,0,0,.06);
+  display:flex; align-items:stretch; overflow:hidden;
+  transition:box-shadow .2s, transform .2s;
+}
+.reg-card:hover { box-shadow:0 8px 32px rgba(0,0,0,.1); transform:translateY(-2px); }
+.reg-card__accent {
+  width:6px; flex-shrink:0; border-radius:0;
+}
+.reg-card__accent--blue  { background:linear-gradient(180deg,#2563eb,#60a5fa); }
+.reg-card__accent--green { background:linear-gradient(180deg,#16a34a,#4ade80); }
+.reg-card__left {
+  flex:1; display:flex; align-items:center; gap:1.25rem;
+  padding:1.6rem 1.4rem;
+}
+.reg-icon {
+  flex-shrink:0; width:60px; height:60px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+}
+.reg-icon--blue  { background:#eff6ff; }
+.reg-icon--green { background:#f0fdf4; }
+.reg-icon--blue svg  { width:28px; height:28px; stroke:#2563eb; }
+.reg-icon--green svg { width:28px; height:28px; stroke:#16a34a; }
+.reg-num { font-size:3rem; font-weight:900; line-height:1; margin-bottom:.2rem; }
+.reg-num--blue  { color:#2563eb; }
+.reg-num--green { color:#16a34a; }
+.reg-label { font-size:.95rem; font-weight:700; color:#1a2332; margin-bottom:.25rem; }
+.reg-sub   { font-size:.75rem; color:#9ea9b8; line-height:1.4; }
+.reg-divider { width:1px; background:#f0f3f7; margin:1.2rem 0; flex-shrink:0; }
+.reg-card__right {
+  flex-shrink:0; display:flex; flex-direction:column; justify-content:center;
+  gap:.55rem; padding:1.4rem 1.4rem 1.4rem 1.2rem; min-width:140px;
+}
+.reg-stat-row { display:flex; align-items:center; gap:.55rem; }
+.reg-stat-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.reg-stat-name { flex:1; font-size:.8rem; color:#6b7280; }
+.reg-stat-val  { font-size:.9rem; font-weight:700; color:#1a2332; }
+.reg-badge {
+  display:inline-flex; align-items:center; gap:5px; margin-top:.4rem;
+  background:#f0f7ff; border:1px solid #bfdbfe; border-radius:99px;
+  padding:3px 10px; font-size:.7rem; font-weight:600; color:#2563eb; align-self:flex-start;
+}
+.reg-dot { width:6px; height:6px; border-radius:50%; background:#10b981; box-shadow:0 0 0 2px rgba(16,185,129,.3); display:inline-block; animation:pulse 2s infinite; }
+@media (max-width:600px) {
+  .reg-grid { grid-template-columns:1fr; }
+  .reg-card__right { min-width:110px; }
+}
 .snum   { font-size:2rem;font-weight:800;color:#1a2332;line-height:1;margin-bottom:.3rem; }
 .sunit  { font-size:1rem;font-weight:600;color:#6b7280; }
 .slabel { font-size:.9rem;font-weight:600;color:#374151;margin-bottom:.2rem; }
