@@ -31,6 +31,7 @@ const greetingEmoji = computed(() => {
 const petaniData = ref([])
 const penggilinganData = ref([])
 const usersData = ref([])
+const subAdminData = ref([])
 const loading = ref(true)
 
 const fetchAll = async () => {
@@ -39,6 +40,7 @@ const fetchAll = async () => {
   if (authStore.canAccessPetani)       tasks.push(api.get('/petani').then(r => { petaniData.value = r.data.data || [] }))
   if (authStore.canAccessPenggilingan) tasks.push(api.get('/penggilingan').then(r => { penggilinganData.value = r.data.data || [] }))
   if (authStore.canAccessUsers)        tasks.push(api.get('/users').then(r => { usersData.value = r.data.data || [] }))
+  if (authStore.canManageSubAdmins)    tasks.push(api.get('/my-sub-admins').then(r => { subAdminData.value = r.data.data || [] }))
   await Promise.allSettled(tasks)
   loading.value = false
 }
@@ -81,6 +83,14 @@ const totalPotensiPanen = computed(() =>
 const formatRibuan = (val) => Number(val).toLocaleString('id-ID')
 
 const usersTotal = computed(() => usersData.value.length)
+
+// Sub-admin stats: for superadmin derived from usersData; for penggilingan parent from /my-sub-admins
+const subAdminTotal = computed(() => {
+  if (authStore.canAccessUsers) return usersData.value.filter(u => u.parent_id).length
+  return subAdminData.value.length
+})
+const subAdminAktif = computed(() => subAdminTotal.value)
+
 const usersByRole = computed(() => {
   const map = {}
   for (const u of usersData.value) { map[u.role] = (map[u.role] || 0) + 1 }
@@ -189,16 +199,16 @@ const roleDesc = computed(() => {
           </div>
         </div>
 
-        <div v-if="authStore.canAccessPenggilingan" class="kpi-card kpi-green">
+        <div v-if="authStore.canAccessUsers || authStore.canManageSubAdmins" class="kpi-card kpi-green">
           <div class="kpi-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
           </div>
           <div class="kpi-body">
-            <div class="kpi-label">Penggilingan Terdaftar</div>
-            <div class="kpi-value">{{ penggilinganUnikTotal }}</div>
+            <div class="kpi-label">Jumlah Sub Admin</div>
+            <div class="kpi-value">{{ subAdminTotal }}</div>
           </div>
           <div class="kpi-trend">
-            <span class="kpi-badge kpi-badge-green">Aktif</span>
+            <span class="kpi-badge kpi-badge-green">Total</span>
           </div>
         </div>
 
@@ -568,6 +578,7 @@ const roleDesc = computed(() => {
 .kpi-teal::before   { background: #0d9488; }
 .kpi-dark::before   { background: #374151; }
 .kpi-purple::before { background: #7c3aed; }
+.kpi-rose::before   { background: #e11d48; }
 
 .kpi-blue   .kpi-icon { background: #eff6ff; color: #2563eb; }
 .kpi-green  .kpi-icon { background: #f0fdf4; color: #16a34a; }
@@ -576,6 +587,7 @@ const roleDesc = computed(() => {
 .kpi-teal   .kpi-icon { background: #f0fdfa; color: #0d9488; }
 .kpi-dark   .kpi-icon { background: #f1f5f9; color: #374151; }
 .kpi-purple .kpi-icon { background: #f5f3ff; color: #7c3aed; }
+.kpi-rose   .kpi-icon { background: #fff1f2; color: #e11d48; }
 
 .kpi-badge-blue   { background: #dbeafe; color: #1d4ed8; }
 .kpi-badge-green  { background: #dcfce7; color: #15803d; }
@@ -584,6 +596,7 @@ const roleDesc = computed(() => {
 .kpi-badge-teal   { background: #ccfbf1; color: #0f766e; }
 .kpi-badge-dark   { background: #e5e7eb; color: #374151; }
 .kpi-badge-purple { background: #ede9fe; color: #6d28d9; }
+.kpi-badge-rose   { background: #ffe4e6; color: #be123c; }
 
 /* ─── Section Header ─────────────────────────────────── */
 .section-header {
