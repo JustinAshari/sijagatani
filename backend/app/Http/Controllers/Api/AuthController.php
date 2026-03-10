@@ -47,10 +47,12 @@ class AuthController extends Controller
             'message' => 'Login berhasil',
             'data' => [
                 'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'username' => $user->username,
-                    'role' => $user->role,
+                    'id'               => $user->id,
+                    'name'             => $user->name,
+                    'username'         => $user->username,
+                    'role'             => $user->role,
+                    'nama_penggilingan' => $user->nama_penggilingan,
+                    'parent_id'        => $user->parent_id,
                 ],
                 'token' => $token,
             ]
@@ -75,14 +77,16 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
+        $user = $request->user();
         return response()->json([
             'success' => true,
             'data' => [
-                'id' => $request->user()->id,
-                'name' => $request->user()->name,
-                'username' => $request->user()->username,
-                'role' => $request->user()->role,
-                'nama_penggilingan' => $request->user()->nama_penggilingan,
+                'id'               => $user->id,
+                'name'             => $user->name,
+                'username'         => $user->username,
+                'role'             => $user->role,
+                'nama_penggilingan' => $user->nama_penggilingan,
+                'parent_id'        => $user->parent_id,
             ]
         ]);
     }

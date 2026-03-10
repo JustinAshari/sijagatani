@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PetaniController;
 use App\Http\Controllers\Api\PenggilinganController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\SubAdminController;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\WilayahController as WilayahExportImportController;
 
@@ -53,6 +54,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/kabupaten', [WilayahController::class, 'getKabupaten']);
     Route::get('/kecamatan', [WilayahController::class, 'getKecamatan']);
     Route::get('/kalurahan', [WilayahController::class, 'getKalurahan']);
+
+    // Sub-Admin Management - Only parent penggilingan admin (no parent_id)
+    Route::middleware('role:penggilingan')->group(function () {
+        Route::get('/my-sub-admins', [SubAdminController::class, 'index']);
+        Route::post('/my-sub-admins', [SubAdminController::class, 'store']);
+        Route::put('/my-sub-admins/{id}', [SubAdminController::class, 'update']);
+        Route::delete('/my-sub-admins/{id}', [SubAdminController::class, 'destroy']);
+    });
 
     // User Management Routes - Only SuperAdmin can access
     Route::middleware('role:superadmin')->group(function () {

@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'role',
         'nama_penggilingan', // Hanya diisi untuk role 'penggilingan'
+        'parent_id',         // Diisi untuk sub-admin penggilingan
     ];
 
     /**
@@ -75,11 +76,43 @@ class User extends Authenticatable
 
     /**
      * Check if user is admin pekerja penggilingan (role penggilingan)
-     * Bisa mengelola (tambah, edit, hapus) data makloon/penggilingan
+     * Berlaku untuk parent admin maupun sub-admin penggilingan
      */
     public function isAdminPenggilingan(): bool
     {
         return $this->role === 'penggilingan';
+    }
+
+    /**
+     * Check if this is the main/parent penggilingan account (not a sub-admin)
+     */
+    public function isParentPenggilingan(): bool
+    {
+        return $this->role === 'penggilingan' && is_null($this->parent_id);
+    }
+
+    /**
+     * Check if this is a sub-admin of a penggilingan company
+     */
+    public function isSubAdmin(): bool
+    {
+        return $this->role === 'penggilingan' && !is_null($this->parent_id);
+    }
+
+    /**
+     * Relationship: parent account (for sub-admins)
+     */
+    public function parent()
+    {
+        return $this->belongsTo(User::class, 'parent_id');
+    }
+
+    /**
+     * Relationship: sub-admin accounts (for parent penggilingan)
+     */
+    public function subAdmins()
+    {
+        return $this->hasMany(User::class, 'parent_id');
     }
 
     /**
