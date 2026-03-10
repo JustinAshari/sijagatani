@@ -131,407 +131,547 @@ const roleDesc = computed(() => {
 <template>
   <div class="home-view">
 
+    <!-- ══════════════════ HERO BANNER ══════════════════ -->
     <section class="hero">
-      <div class="hero-blob hero-blob--1"></div>
-      <div class="hero-blob hero-blob--2"></div>
-      <div class="hero-badge"><span class="badge-dot"></span> Dashboard Active</div>
-      <h1 class="hero-greeting">{{ greeting }}, {{ authStore.user?.name }}! {{ greetingEmoji }}</h1>
-      <p class="hero-time">{{ timeStr }}</p>
-      <div class="hero-meta">
-        <span class="hero-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          Sistem Aktif
-        </span>
-        <span class="hero-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          {{ dateStr }}
-        </span>
+      <div class="hero-blur hero-blur--1"></div>
+      <div class="hero-blur hero-blur--2"></div>
+      <div class="hero-blur hero-blur--3"></div>
+      <div class="hero-inner">
+        <div class="hero-left">
+          <div class="hero-badge"><span class="badge-dot"></span> Sistem Aktif</div>
+          <h1 class="hero-greeting">{{ greeting }}, <span class="hero-name">{{ authStore.user?.name }}</span>! {{ greetingEmoji }}</h1>
+          <p class="hero-role-tag">{{ roleLabel }} &mdash; {{ roleDesc }}</p>
+          <div class="hero-chips">
+            <span class="chip chip-white">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {{ dateStr }}
+            </span>
+            <span class="chip chip-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {{ timeStr }}
+            </span>
+            <span class="chip chip-yellow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Periode {{ periodLabel }}
+            </span>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-clock">{{ timeStr }}</div>
+          <div class="hero-date">{{ dateStr }}</div>
+        </div>
       </div>
     </section>
 
-    <div v-if="loading" class="loading-wrap"><div class="spinner"></div></div>
+    <!-- ══════════════════ LOADING ══════════════════ -->
+    <div v-if="loading" class="loading-wrap">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <p>Memuat data...</p>
+      </div>
+    </div>
 
     <template v-else>
 
-      <section class="section">
-        <div class="section-head">
-          <h2 class="section-title">Ringkasan Dashboard</h2>
-          <p class="section-sub">Overview data utama sistem pengadaan untuk monitoring dan analisis performa</p>
-          <div class="periode-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Periode: <strong>{{ periodLabel }}</strong>
+      <!-- ══════════════════ KPI CARDS ══════════════════ -->
+      <div class="kpi-grid">
+
+        <div v-if="authStore.canAccessPetani" class="kpi-card kpi-blue">
+          <div class="kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-label">Petani Terdaftar</div>
+            <div class="kpi-value">{{ petaniTotal }}</div>
+          </div>
+          <div class="kpi-trend">
+            <span class="kpi-badge kpi-badge-blue">Aktif</span>
           </div>
         </div>
 
-        <div class="chart-grid">
-          <div v-if="authStore.canAccessPetani" class="chart-card">
-            <div class="chart-card__header">
-              <p class="chart-card__label">Distribusi Komoditi Petani</p>
-              <p class="chart-card__sub">Total: {{ petaniTotal }} petani</p>
+        <div v-if="authStore.canAccessPenggilingan" class="kpi-card kpi-green">
+          <div class="kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-label">Penggilingan Terdaftar</div>
+            <div class="kpi-value">{{ penggilinganUnikTotal }}</div>
+          </div>
+          <div class="kpi-trend">
+            <span class="kpi-badge kpi-badge-green">Aktif</span>
+          </div>
+        </div>
+
+        <div v-if="authStore.canAccessPetani" class="kpi-card kpi-indigo">
+          <div class="kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-label">Total Lahan</div>
+            <div class="kpi-value">{{ totalLahan }} <span class="kpi-unit">Ha</span></div>
+          </div>
+          <div class="kpi-trend">
+            <span class="kpi-badge kpi-badge-indigo">Luas</span>
+          </div>
+        </div>
+
+        <div v-if="authStore.canAccessPetani" class="kpi-card kpi-orange">
+          <div class="kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l3 3"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-label">Potensi Panen</div>
+            <div class="kpi-value">{{ formatRibuan(totalPotensiPanen) }} <span class="kpi-unit">KG</span></div>
+          </div>
+          <div class="kpi-trend">
+            <span class="kpi-badge kpi-badge-orange">Estimasi</span>
+          </div>
+        </div>
+
+        <div v-if="authStore.canAccessPenggilingan" class="kpi-card kpi-teal">
+          <div class="kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-label">Total Tonase GKP</div>
+            <div class="kpi-value">{{ totalTonase }} <span class="kpi-unit">KG</span></div>
+          </div>
+          <div class="kpi-trend">
+            <span class="kpi-badge kpi-badge-teal">Akumulasi</span>
+          </div>
+        </div>
+
+        <div v-if="authStore.canAccessPenggilingan" class="kpi-card kpi-dark">
+          <div class="kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-label">Total Angkutan</div>
+            <div class="kpi-value">{{ totalAngkutan }}</div>
+          </div>
+          <div class="kpi-trend">
+            <span class="kpi-badge kpi-badge-dark">Kendaraan</span>
+          </div>
+        </div>
+
+        <div v-if="authStore.canAccessUsers" class="kpi-card kpi-purple">
+          <div class="kpi-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-label">Total Pengguna</div>
+            <div class="kpi-value">{{ usersTotal }}</div>
+          </div>
+          <div class="kpi-trend">
+            <span class="kpi-badge kpi-badge-purple">Akun</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════ DONUT CHARTS ══════════════════ -->
+      <div v-if="authStore.canAccessPetani || authStore.canAccessPenggilingan" class="section-header">
+        <div class="sh-line"></div>
+        <h2 class="sh-title">Distribusi &amp; Verifikasi</h2>
+        <div class="sh-line"></div>
+      </div>
+
+      <div class="chart-grid">
+
+        <!-- Komoditi Petani -->
+        <div v-if="authStore.canAccessPetani" class="chart-card">
+          <div class="cc-top">
+            <div class="cc-dot cc-dot-blue"></div>
+            <div>
+              <p class="cc-title">Distribusi Komoditi</p>
+              <p class="cc-sub">{{ petaniTotal }} petani terdaftar</p>
             </div>
-            <div class="chart-body">
-              <div class="donut-wrap">
-                <svg viewBox="0 0 120 120" class="donut-svg">
-                  <circle cx="60" cy="60" r="45" fill="none" stroke="#f0f3f8" stroke-width="16"/>
-                  <circle v-for="(seg, i) in komoditiSegments" :key="i" cx="60" cy="60" r="45" fill="none"
-                    :stroke="seg.color" stroke-width="16"
-                    :stroke-dasharray="`${seg.dash} ${seg.gap}`"
-                    :stroke-dashoffset="-seg.offset"
-                    style="transform:rotate(-90deg);transform-origin:60px 60px"/>
-                  <text x="60" y="56" text-anchor="middle" class="donut-top">Total</text>
-                  <text x="60" y="70" text-anchor="middle" class="donut-num">{{ petaniTotal }}</text>
-                </svg>
-              </div>
-              <div class="legend">
-                <div v-for="(seg, i) in komoditiSegments" :key="i" class="legend-row">
-                  <span class="ldot" :style="{background:seg.color}"></span>
-                  <div class="ltext">
-                    <span class="lname">{{ seg.label }}</span>
-                    <span class="lpct">{{ seg.pct }}% dari total</span>
-                  </div>
-                  <span class="lval">{{ seg.value }}<br><small>petani</small></span>
+            <span class="cc-live"><span class="rtdot"></span> Live</span>
+          </div>
+          <div class="cc-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 120 120" class="donut-svg">
+                <circle cx="60" cy="60" r="42" fill="none" stroke="#f0f3f8" stroke-width="14"/>
+                <circle v-for="(seg, i) in komoditiSegments" :key="i" cx="60" cy="60" r="42" fill="none"
+                  :stroke="seg.color" stroke-width="14"
+                  :stroke-dasharray="`${seg.dash} ${seg.gap}`"
+                  :stroke-dashoffset="-seg.offset"
+                  stroke-linecap="round"
+                  style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dasharray .6s ease"/>
+                <text x="60" y="55" text-anchor="middle" class="donut-label">Total</text>
+                <text x="60" y="70" text-anchor="middle" class="donut-value">{{ petaniTotal }}</text>
+              </svg>
+            </div>
+            <div class="legend">
+              <div v-for="(seg, i) in komoditiSegments" :key="i" class="legend-row">
+                <span class="ldot" :style="{background:seg.color}"></span>
+                <div class="ltext">
+                  <span class="lname">{{ seg.label }}</span>
+                  <div class="lbar-wrap"><div class="lbar" :style="{width:seg.pct+'%',background:seg.color}"></div></div>
+                </div>
+                <div class="lright">
+                  <span class="lval">{{ seg.value }}</span>
+                  <span class="lpct">{{ seg.pct }}%</span>
                 </div>
               </div>
+              <div v-if="!komoditiSegments.length" class="empty-legend">Belum ada data</div>
             </div>
-            <div class="chart-foot"><span class="rtdot"></span> Real-time</div>
           </div>
+        </div>
 
-          <div v-if="authStore.canAccessPetani" class="chart-card">
-            <div class="chart-card__header">
-              <p class="chart-card__label">Status Verifikasi Petani</p>
-              <p class="chart-card__sub">Total: {{ petaniTotal }} petani</p>
+        <!-- Status Verifikasi Petani -->
+        <div v-if="authStore.canAccessPetani" class="chart-card">
+          <div class="cc-top">
+            <div class="cc-dot cc-dot-green"></div>
+            <div>
+              <p class="cc-title">Verifikasi Petani</p>
+              <p class="cc-sub">{{ petaniTotal }} petani terdaftar</p>
             </div>
-            <div class="chart-body">
-              <div class="donut-wrap">
-                <svg viewBox="0 0 120 120" class="donut-svg">
-                  <circle cx="60" cy="60" r="45" fill="none" stroke="#f0f3f8" stroke-width="16"/>
-                  <circle v-for="(seg, i) in statusSegments" :key="i" cx="60" cy="60" r="45" fill="none"
-                    :stroke="seg.color" stroke-width="16"
-                    :stroke-dasharray="`${seg.dash} ${seg.gap}`"
-                    :stroke-dashoffset="-seg.offset"
-                    style="transform:rotate(-90deg);transform-origin:60px 60px"/>
-                  <text x="60" y="56" text-anchor="middle" class="donut-top">Total</text>
-                  <text x="60" y="70" text-anchor="middle" class="donut-num">{{ petaniTotal }}</text>
-                </svg>
-              </div>
-              <div class="legend">
-                <div v-for="(seg, i) in statusSegments" :key="i" class="legend-row">
-                  <span class="ldot" :style="{background:seg.color}"></span>
-                  <div class="ltext">
-                    <span class="lname">{{ seg.label }}</span>
-                    <span class="lpct">{{ seg.pct }}% dari total</span>
-                  </div>
-                  <span class="lval">{{ seg.value }}<br><small>petani</small></span>
+            <span class="cc-live"><span class="rtdot"></span> Live</span>
+          </div>
+          <div class="cc-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 120 120" class="donut-svg">
+                <circle cx="60" cy="60" r="42" fill="none" stroke="#f0f3f8" stroke-width="14"/>
+                <circle v-for="(seg, i) in statusSegments" :key="i" cx="60" cy="60" r="42" fill="none"
+                  :stroke="seg.color" stroke-width="14"
+                  :stroke-dasharray="`${seg.dash} ${seg.gap}`"
+                  :stroke-dashoffset="-seg.offset"
+                  stroke-linecap="round"
+                  style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dasharray .6s ease"/>
+                <text x="60" y="55" text-anchor="middle" class="donut-label">Total</text>
+                <text x="60" y="70" text-anchor="middle" class="donut-value">{{ petaniTotal }}</text>
+              </svg>
+            </div>
+            <div class="legend">
+              <div v-for="(seg, i) in statusSegments" :key="i" class="legend-row">
+                <span class="ldot" :style="{background:seg.color}"></span>
+                <div class="ltext">
+                  <span class="lname">{{ seg.label }}</span>
+                  <div class="lbar-wrap"><div class="lbar" :style="{width:seg.pct+'%',background:seg.color}"></div></div>
+                </div>
+                <div class="lright">
+                  <span class="lval">{{ seg.value }}</span>
+                  <span class="lpct">{{ seg.pct }}%</span>
                 </div>
               </div>
+              <div v-if="!statusSegments.length" class="empty-legend">Belum ada data</div>
             </div>
-            <div class="chart-foot"><span class="rtdot"></span> Real-time</div>
           </div>
+        </div>
 
-          <div v-if="authStore.canAccessPenggilingan" class="chart-card">
-            <div class="chart-card__header">
-              <p class="chart-card__label">Status Verifikasi Makloon</p>
-              <p class="chart-card__sub">Total: {{ penggilinganTotal }} pengajuan</p>
+        <!-- Status Verifikasi Makloon -->
+        <div v-if="authStore.canAccessPenggilingan" class="chart-card">
+          <div class="cc-top">
+            <div class="cc-dot cc-dot-orange"></div>
+            <div>
+              <p class="cc-title">Verifikasi Makloon</p>
+              <p class="cc-sub">{{ penggilinganTotal }} pengajuan</p>
             </div>
-            <div class="chart-body">
-              <div class="donut-wrap">
-                <svg viewBox="0 0 120 120" class="donut-svg">
-                  <circle cx="60" cy="60" r="45" fill="none" stroke="#f0f3f8" stroke-width="16"/>
-                  <circle v-for="(seg, i) in gkpSegments" :key="i" cx="60" cy="60" r="45" fill="none"
-                    :stroke="seg.color" stroke-width="16"
-                    :stroke-dasharray="`${seg.dash} ${seg.gap}`"
-                    :stroke-dashoffset="-seg.offset"
-                    style="transform:rotate(-90deg);transform-origin:60px 60px"/>
-                  <text x="60" y="56" text-anchor="middle" class="donut-top">Total</text>
-                  <text x="60" y="70" text-anchor="middle" class="donut-num">{{ penggilinganTotal }}</text>
-                </svg>
-              </div>
-              <div class="legend">
-                <div v-for="(seg, i) in gkpSegments" :key="i" class="legend-row">
-                  <span class="ldot" :style="{background:seg.color}"></span>
-                  <div class="ltext">
-                    <span class="lname">{{ seg.label }}</span>
-                    <span class="lpct">{{ seg.pct }}% dari total</span>
-                  </div>
-                  <span class="lval">{{ seg.value }}<br><small>GKP</small></span>
+            <span class="cc-live"><span class="rtdot"></span> Live</span>
+          </div>
+          <div class="cc-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 120 120" class="donut-svg">
+                <circle cx="60" cy="60" r="42" fill="none" stroke="#f0f3f8" stroke-width="14"/>
+                <circle v-for="(seg, i) in gkpSegments" :key="i" cx="60" cy="60" r="42" fill="none"
+                  :stroke="seg.color" stroke-width="14"
+                  :stroke-dasharray="`${seg.dash} ${seg.gap}`"
+                  :stroke-dashoffset="-seg.offset"
+                  stroke-linecap="round"
+                  style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dasharray .6s ease"/>
+                <text x="60" y="55" text-anchor="middle" class="donut-label">Total</text>
+                <text x="60" y="70" text-anchor="middle" class="donut-value">{{ penggilinganTotal }}</text>
+              </svg>
+            </div>
+            <div class="legend">
+              <div v-for="(seg, i) in gkpSegments" :key="i" class="legend-row">
+                <span class="ldot" :style="{background:seg.color}"></span>
+                <div class="ltext">
+                  <span class="lname">{{ seg.label }}</span>
+                  <div class="lbar-wrap"><div class="lbar" :style="{width:seg.pct+'%',background:seg.color}"></div></div>
+                </div>
+                <div class="lright">
+                  <span class="lval">{{ seg.value }}</span>
+                  <span class="lpct">{{ seg.pct }}%</span>
                 </div>
               </div>
-            </div>
-            <div class="chart-foot"><span class="rtdot"></span> Real-time</div>
-          </div>
-        </div>
-
-        <p v-if="authStore.canAccessPetani || authStore.canAccessUsers" class="note">
-          <span v-if="authStore.canAccessPetani">Data petani ditampilkan untuk bulan <strong>{{ periodLabel }}</strong></span>
-          <span v-if="authStore.canAccessPetani && authStore.canAccessUsers"> &bull; </span>
-          <span v-if="authStore.canAccessUsers">Data pengguna menampilkan total keseluruhan</span>
-        </p>
-      </section>
-
-      <!-- Seksi Data Terdaftar -->
-      <section v-if="authStore.canAccessPetani || authStore.canAccessPenggilingan" class="section">
-        <div class="section-head">
-          <h2 class="section-title">Data Terdaftar</h2>
-          <p class="section-sub">Jumlah data yang telah terdaftar dalam sistem</p>
-        </div>
-        <div class="reg-grid">
-
-          <!-- Kartu Petani -->
-          <div v-if="authStore.canAccessPetani" class="reg-card">
-            <div class="reg-card__accent reg-card__accent--blue"></div>
-            <div class="reg-card__left">
-              <div class="reg-icon reg-icon--blue">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </div>
-              <div>
-                <div class="reg-num reg-num--blue">{{ petaniTotal }}</div>
-                <div class="reg-label">Petani Terdaftar</div>
-                <div class="reg-sub">Total petani yang terdaftar dalam sistem</div>
-              </div>
+              <div v-if="!gkpSegments.length" class="empty-legend">Belum ada data</div>
             </div>
           </div>
+        </div>
 
-          <!-- Kartu Penggilingan -->
-          <div v-if="authStore.canAccessPenggilingan" class="reg-card">
-            <div class="reg-card__accent reg-card__accent--green"></div>
-            <div class="reg-card__left">
-              <div class="reg-icon reg-icon--green">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        <!-- Distribusi Role Pengguna -->
+        <div v-if="authStore.canAccessUsers" class="chart-card">
+          <div class="cc-top">
+            <div class="cc-dot cc-dot-purple"></div>
+            <div>
+              <p class="cc-title">Distribusi Role</p>
+              <p class="cc-sub">{{ usersTotal }} pengguna aktif</p>
+            </div>
+            <span class="cc-live"><span class="rtdot"></span> Live</span>
+          </div>
+          <div class="cc-body">
+            <div class="donut-wrap">
+              <svg viewBox="0 0 120 120" class="donut-svg">
+                <circle cx="60" cy="60" r="42" fill="none" stroke="#f0f3f8" stroke-width="14"/>
+                <circle v-for="(seg, i) in roleSegments" :key="i" cx="60" cy="60" r="42" fill="none"
+                  :stroke="seg.color" stroke-width="14"
+                  :stroke-dasharray="`${seg.dash} ${seg.gap}`"
+                  :stroke-dashoffset="-seg.offset"
+                  stroke-linecap="round"
+                  style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dasharray .6s ease"/>
+                <text x="60" y="55" text-anchor="middle" class="donut-label">Total</text>
+                <text x="60" y="70" text-anchor="middle" class="donut-value">{{ usersTotal }}</text>
+              </svg>
+            </div>
+            <div class="legend">
+              <div v-for="(seg, i) in roleSegments" :key="i" class="legend-row">
+                <span class="ldot" :style="{background:seg.color}"></span>
+                <div class="ltext">
+                  <span class="lname">{{ seg.label }}</span>
+                  <div class="lbar-wrap"><div class="lbar" :style="{width:seg.pct+'%',background:seg.color}"></div></div>
+                </div>
+                <div class="lright">
+                  <span class="lval">{{ seg.value }}</span>
+                  <span class="lpct">{{ seg.pct }}%</span>
+                </div>
               </div>
-              <div>
-                <div class="reg-num reg-num--green">{{ penggilinganUnikTotal }}</div>
-                <div class="reg-label">Penggilingan Terdaftar</div>
-                <div class="reg-sub">Total penggilingan yang terdaftar dalam sistem</div>
-              </div>
+              <div v-if="!roleSegments.length" class="empty-legend">Belum ada data</div>
             </div>
           </div>
-
         </div>
-      </section>
 
-      <section class="section">
-        <div class="section-head">
-          <h2 class="section-title">Ringkasan Statistik</h2>
-          <p class="section-sub">Data terkini sistem pengadaan dan manajemen pengguna</p>
-        </div>
-        <div class="stat-grid">
-          <!-- Petani: total lahan & potensi panen -->
-          <div v-if="authStore.canAccessPetani" class="stat-card sindigo">
-            <div class="sbg-dots"></div>
-            <div class="sicon sicon-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-            <div class="snum">{{ totalLahan }} <span class="sunit">Ha</span></div>
-            <div class="slabel">Total Lahan</div>
-            <div class="ssub">Luas lahan terdaftar</div>
-          </div>
-          <div v-if="authStore.canAccessPetani" class="stat-card sorange">
-            <div class="sbg-dots"></div>
-            <div class="sicon sicon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l3 3"/><path d="M22 2L12 12"/></svg></div>
-            <div class="snum">{{ formatRibuan(totalPotensiPanen) }} <span class="sunit">KG</span></div>
-            <div class="slabel">Potensi Panen</div>
-            <div class="ssub">Total estimasi panen</div>
-          </div>
-          <!-- Penggilingan stats -->
-          <div v-if="authStore.canAccessPenggilingan" class="stat-card steal">
-            <div class="sbg-dots"></div>
-            <div class="sicon sicon-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
-            <div class="snum">{{ totalTonase }} <span class="sunit">KG</span></div>
-            <div class="slabel">Total Tonase GKP</div>
-            <div class="ssub">Akumulasi tonase makloon</div>
-          </div>
-          <div v-if="authStore.canAccessPenggilingan" class="stat-card sdark">
-            <div class="sbg-dots"></div>
-            <div class="sicon sicon-dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-            <div class="snum">{{ totalAngkutan }}</div>
-            <div class="slabel">Total Angkutan</div>
-            <div class="ssub">Jumlah kendaraan makloon</div>
-          </div>
-        </div>
-      </section>
+      </div>
 
-      <section class="section">
-        <div class="role-card">
-          <div class="role-avatars">
-            <span class="ravatar rav-blue"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></span>
-            <span class="ravatar rav-green"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></span>
-            <span class="ravatar rav-purple"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></span>
-          </div>
-          <h3 class="role-title">{{ roleLabel }}</h3>
-          <p class="role-desc">{{ roleDesc }}</p>
-        </div>
-      </section>
+      <!-- ══════════════════ FOOTER ══════════════════ -->
+      <footer class="page-footer">
+        <span class="rtdot"></span>
+        Data real-time &bull; Periode <strong>{{ periodLabel }}</strong> &bull;
+        &copy; 2025 Pengadaan Komoditas KC Surakarta
+      </footer>
 
-      <footer class="page-footer">Copyright &copy; 2025 Pengadaan Komoditas Kantor Cabang Surakarta MasbeID</footer>
     </template>
   </div>
 </template>
 
 <style scoped>
+/* ─── Base ─────────────────────────────────────────── */
 .home-view { width: 100%; }
 
+/* ─── Hero ──────────────────────────────────────────── */
 .hero {
   position: relative; overflow: hidden;
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 55%, #6366f1 100%);
-  border-radius: 16px; text-align: center;
-  padding: 3rem 2rem 2.5rem; margin-bottom: 2rem; color: #fff;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 45%, #2563eb 80%, #6366f1 100%);
+  border-radius: 20px; margin-bottom: 1.75rem; color: #fff;
 }
-.hero-blob { position: absolute; border-radius: 50%; opacity: 0.12; background: #fff; }
-.hero-blob--1 { width: 200px; height: 200px; top: -60px; left: -60px; }
-.hero-blob--2 { width: 160px; height: 160px; bottom: -50px; right: -40px; }
+.hero-blur {
+  position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none;
+}
+.hero-blur--1 { width: 300px; height: 300px; top: -120px; left: -80px; background: rgba(99,102,241,.35); }
+.hero-blur--2 { width: 250px; height: 250px; bottom: -100px; right: -60px; background: rgba(16,185,129,.25); }
+.hero-blur--3 { width: 200px; height: 200px; top: 50%; right: 20%; transform: translateY(-50%); background: rgba(59,130,246,.2); }
+
+.hero-inner {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2.5rem 2.5rem;
+  gap: 2rem;
+}
+.hero-left { flex: 1; min-width: 0; }
+.hero-right { flex-shrink: 0; text-align: right; }
+
 .hero-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 99px; padding: 5px 14px; font-size: .82rem; font-weight: 600;
-  margin-bottom: 1.2rem; backdrop-filter: blur(4px);
+  background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.25);
+  border-radius: 99px; padding: 4px 14px; font-size: .78rem; font-weight: 600;
+  margin-bottom: 1rem; backdrop-filter: blur(6px);
 }
 .badge-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: #4ade80;
-  box-shadow: 0 0 0 3px rgba(74,222,128,.3);
+  width: 7px; height: 7px; border-radius: 50%; background: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74,222,128,.35); animation: pulse 2s infinite;
 }
-.hero-greeting { font-size: 2.4rem; font-weight: 800; margin-bottom: .6rem; text-shadow: 0 2px 8px rgba(0,0,0,.15); }
-.hero-time { font-size: 1.5rem; font-weight: 300; letter-spacing: 3px; opacity: .9; margin-bottom: 1.2rem; font-variant-numeric: tabular-nums; }
-.hero-meta { display: inline-flex; gap: 1.5rem; }
-.hero-meta-item { display: flex; align-items: center; gap: 5px; font-size: .85rem; opacity: .85; }
-.hero-meta-item svg { width: 15px; height: 15px; }
+.hero-greeting {
+  font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800;
+  margin-bottom: .4rem; line-height: 1.2;
+}
+.hero-name { color: #93c5fd; }
+.hero-role-tag { font-size: .85rem; opacity: .75; margin-bottom: 1rem; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 8px; font-size: .78rem; font-weight: 600;
+}
+.chip svg { width: 13px; height: 13px; }
+.chip-white  { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); }
+.chip-green  { background: rgba(16,185,129,.2);  border: 1px solid rgba(16,185,129,.35); }
+.chip-yellow { background: rgba(245,158,11,.2);  border: 1px solid rgba(245,158,11,.35); }
 
+.hero-clock {
+  font-size: clamp(2rem, 4vw, 3rem); font-weight: 200; letter-spacing: 4px;
+  font-variant-numeric: tabular-nums; opacity: .95;
+}
+.hero-date { font-size: .8rem; opacity: .6; margin-top: .25rem; }
+
+/* ─── Loading ────────────────────────────────────────── */
 .loading-wrap { display: flex; justify-content: center; padding: 4rem 0; }
-.spinner { width: 40px; height: 40px; border: 3px solid #e8ecf0; border-top-color: #3b82f6; border-radius: 50%; animation: spin .7s linear infinite; }
+.loading-card {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  background: #fff; border-radius: 16px; padding: 2.5rem 3rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,.07); color: #6b7280; font-size: .9rem;
+}
+.spinner {
+  width: 42px; height: 42px;
+  border: 3px solid #e8ecf0; border-top-color: #2563eb;
+  border-radius: 50%; animation: spin .75s linear infinite;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
 
-.section { margin-bottom: 2rem; }
-.section-head { text-align: center; margin-bottom: 1.5rem; }
-.section-title { font-size: 1.6rem; font-weight: 800; color: #1a2332; margin-bottom: .4rem; }
-.section-sub { color: #6b7280; font-size: .9rem; margin-bottom: .8rem; }
-.periode-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; color: #374151; }
-.periode-badge strong { background: #2563eb; color: #fff; padding: 3px 12px; border-radius: 99px; font-size: .82rem; margin-left: 4px; }
-.periode-badge svg { width: 14px; height: 14px; }
+/* ─── KPI Grid ───────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem; margin-bottom: 1.75rem;
+}
+.kpi-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: #fff; border-radius: 14px;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  transition: transform .2s ease, box-shadow .2s ease;
+  position: relative; overflow: hidden;
+}
+.kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 4px; height: 100%; border-radius: 4px 0 0 4px;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
 
-.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
-.chart-card { background: #fff; border-radius: 14px; border: 1px solid #e8ecf0; padding: 1.4rem; box-shadow: 0 2px 12px rgba(0,0,0,.05); }
-.chart-card__header { margin-bottom: 1rem; }
-.chart-card__label { font-size: 1rem; font-weight: 700; color: #1a2332; }
-.chart-card__sub { font-size: .8rem; color: #9ea9b8; margin-top: 2px; }
-.chart-body { display: flex; align-items: center; gap: 1.25rem; }
-.donut-wrap { flex-shrink: 0; width: 120px; }
-.donut-svg { width: 100%; height: auto; overflow: visible; }
-.donut-top { font-size: 9px; fill: #9ea9b8; font-weight: 500; }
-.donut-num { font-size: 16px; fill: #1a2332; font-weight: 800; }
-.legend { flex: 1; display: flex; flex-direction: column; gap: .55rem; }
+.kpi-icon {
+  flex-shrink: 0; width: 46px; height: 46px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.kpi-icon svg { width: 22px; height: 22px; }
+.kpi-body { flex: 1; min-width: 0; }
+.kpi-label { font-size: .75rem; color: #6b7280; font-weight: 500; margin-bottom: .2rem; line-height: 1.3; }
+.kpi-value { font-size: 1.55rem; font-weight: 800; color: #0f172a; line-height: 1; }
+.kpi-unit  { font-size: .85rem; font-weight: 500; color: #9ea9b8; }
+.kpi-trend { flex-shrink: 0; }
+.kpi-badge { font-size: .65rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+
+.kpi-blue::before   { background: #2563eb; }
+.kpi-green::before  { background: #16a34a; }
+.kpi-indigo::before { background: #4f46e5; }
+.kpi-orange::before { background: #ea580c; }
+.kpi-teal::before   { background: #0d9488; }
+.kpi-dark::before   { background: #374151; }
+.kpi-purple::before { background: #7c3aed; }
+
+.kpi-blue   .kpi-icon { background: #eff6ff; color: #2563eb; }
+.kpi-green  .kpi-icon { background: #f0fdf4; color: #16a34a; }
+.kpi-indigo .kpi-icon { background: #eef2ff; color: #4f46e5; }
+.kpi-orange .kpi-icon { background: #fff7ed; color: #ea580c; }
+.kpi-teal   .kpi-icon { background: #f0fdfa; color: #0d9488; }
+.kpi-dark   .kpi-icon { background: #f1f5f9; color: #374151; }
+.kpi-purple .kpi-icon { background: #f5f3ff; color: #7c3aed; }
+
+.kpi-badge-blue   { background: #dbeafe; color: #1d4ed8; }
+.kpi-badge-green  { background: #dcfce7; color: #15803d; }
+.kpi-badge-indigo { background: #e0e7ff; color: #3730a3; }
+.kpi-badge-orange { background: #ffedd5; color: #c2410c; }
+.kpi-badge-teal   { background: #ccfbf1; color: #0f766e; }
+.kpi-badge-dark   { background: #e5e7eb; color: #374151; }
+.kpi-badge-purple { background: #ede9fe; color: #6d28d9; }
+
+/* ─── Section Header ─────────────────────────────────── */
+.section-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.sh-title { font-size: 1rem; font-weight: 700; color: #6b7280; white-space: nowrap; }
+.sh-line { flex: 1; height: 1px; background: #e8ecf0; }
+
+/* ─── Chart Grid ─────────────────────────────────────── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem; margin-bottom: 1.75rem;
+}
+.chart-card {
+  background: #fff; border-radius: 16px;
+  border: 1px solid #e8ecf0; padding: 1.4rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  transition: box-shadow .2s;
+}
+.chart-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.09); }
+
+.cc-top {
+  display: flex; align-items: center; gap: .75rem;
+  margin-bottom: 1.2rem; padding-bottom: .9rem;
+  border-bottom: 1px solid #f0f3f7;
+}
+.cc-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cc-dot-blue   { background: #2563eb; box-shadow: 0 0 0 3px #dbeafe; }
+.cc-dot-green  { background: #16a34a; box-shadow: 0 0 0 3px #dcfce7; }
+.cc-dot-orange { background: #ea580c; box-shadow: 0 0 0 3px #ffedd5; }
+.cc-dot-purple { background: #7c3aed; box-shadow: 0 0 0 3px #ede9fe; }
+.cc-title { font-size: .95rem; font-weight: 700; color: #0f172a; }
+.cc-sub   { font-size: .75rem; color: #9ea9b8; margin-top: 1px; }
+.cc-live  {
+  margin-left: auto; display: flex; align-items: center; gap: 5px;
+  font-size: .72rem; color: #6b7280; background: #f9fafb;
+  padding: 3px 9px; border-radius: 99px; border: 1px solid #e8ecf0;
+}
+
+.cc-body { display: flex; align-items: center; gap: 1.25rem; }
+.donut-wrap { flex-shrink: 0; width: 110px; }
+.donut-svg  { width: 100%; height: auto; overflow: visible; }
+.donut-label { font-size: 8px; fill: #9ea9b8; font-weight: 500; }
+.donut-value { font-size: 15px; fill: #0f172a; font-weight: 800; }
+
+.legend { flex: 1; display: flex; flex-direction: column; gap: .65rem; min-width: 0; }
 .legend-row { display: flex; align-items: center; gap: 8px; }
-.ldot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.ltext { flex: 1; }
-.lname { display: block; font-size: .82rem; font-weight: 600; color: #1a2332; }
-.lpct  { display: block; font-size: .72rem; color: #9ea9b8; margin-top: 1px; }
-.lval  { font-size: .95rem; font-weight: 700; color: #1a2332; text-align: right; line-height: 1.2; white-space: nowrap; }
-.lval small { font-size: .65rem; color: #9ea9b8; font-weight: 400; }
-.chart-foot { display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 1rem; padding-top: .75rem; border-top: 1px solid #f0f3f7; font-size: .75rem; color: #9ea9b8; }
-.rtdot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
-.note { text-align: center; font-size: .8rem; color: #9ea9b8; margin-top: 1rem; }
+.ldot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.ltext { flex: 1; min-width: 0; }
+.lname { display: block; font-size: .78rem; font-weight: 600; color: #1a2332; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lbar-wrap { margin-top: 3px; height: 4px; background: #f0f3f7; border-radius: 99px; overflow: hidden; }
+.lbar { height: 100%; border-radius: 99px; transition: width .6s ease; }
+.lright { flex-shrink: 0; text-align: right; }
+.lval { display: block; font-size: .88rem; font-weight: 800; color: #0f172a; line-height: 1; }
+.lpct { display: block; font-size: .68rem; color: #9ea9b8; margin-top: 1px; }
+.empty-legend { font-size: .8rem; color: #9ea9b8; text-align: center; padding: .5rem 0; }
 
-.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }
-.stat-card { position: relative; overflow: hidden; background: #fff; border-radius: 14px; padding: 1.4rem 1.4rem 1.2rem; border: 1px solid #e8ecf0; box-shadow: 0 2px 12px rgba(0,0,0,.05); }
-.sbg-dots { position:absolute;top:0;right:0;bottom:0;left:0; background-image: radial-gradient(circle,rgba(0,0,0,.04) 1px,transparent 1px); background-size:18px 18px; pointer-events:none; }
-.slive { position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:50%; }
-.slive-green { background:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.2); }
-.slive-red   { background:#ef4444; box-shadow:0 0 0 3px rgba(239,68,68,.2); }
-.sicon { width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem; }
-.sicon svg { width:22px;height:22px; }
-.sicon-blue  { background:#eff6ff;color:#2563eb; }
-.sicon-dark  { background:#1f2937;color:#fff; }
-.sicon-green { background:#ecfdf5;color:#10b981; }
-.sicon-red   { background:#fef2f2;color:#ef4444; }
-.sblue  { background:#eff6ff;border-color:#bfdbfe; }
-.sdark  { background:#f9fafb;border-color:#e5e7eb; }
-.sgreen { background:#ecfdf5;border-color:#a7f3d0; }
-.sred    { background:#fef2f2;border-color:#fecaca; }
-.sindigo { background:#eef2ff;border-color:#c7d2fe; }
-.sorange { background:#fff7ed;border-color:#fed7aa; }
-.steal   { background:#f0fdfa;border-color:#99f6e4; }
-.sicon-indigo { background:#e0e7ff;color:#4f46e5; }
-.sicon-orange { background:#ffedd5;color:#ea580c; }
-.sicon-teal   { background:#ccfbf1;color:#0d9488; }
-.sreg-blue  { background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#93c5fd; }
-.sreg-green { background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac; }
-.sicon-reg-blue  { background:#2563eb;color:#fff; }
-.sicon-reg-green { background:#16a34a;color:#fff; }
+.rtdot {
+  width: 7px; height: 7px; border-radius: 50%; background: #10b981;
+  display: inline-block; animation: pulse 2s infinite;
+  box-shadow: 0 0 0 2px rgba(16,185,129,.25);
+}
 
-/* Registration Cards */
-.reg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:1.5rem; }
-.reg-card {
-  position:relative; background:#fff; border-radius:16px;
-  border:1px solid #e8ecf0; box-shadow:0 2px 16px rgba(0,0,0,.06);
-  display:flex; align-items:stretch; overflow:hidden;
-  transition:box-shadow .2s, transform .2s;
+/* ─── Footer ─────────────────────────────────────────── */
+.page-footer {
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: 1.25rem 0 .25rem;
+  font-size: .78rem; color: #9ea9b8;
 }
-.reg-card:hover { box-shadow:0 8px 32px rgba(0,0,0,.1); transform:translateY(-2px); }
-.reg-card__accent {
-  width:6px; flex-shrink:0; border-radius:0;
-}
-.reg-card__accent--blue  { background:linear-gradient(180deg,#2563eb,#60a5fa); }
-.reg-card__accent--green { background:linear-gradient(180deg,#16a34a,#4ade80); }
-.reg-card__left {
-  flex:1; display:flex; align-items:center; gap:1.25rem;
-  padding:1.6rem 1.4rem;
-}
-.reg-icon {
-  flex-shrink:0; width:60px; height:60px; border-radius:16px;
-  display:flex; align-items:center; justify-content:center;
-}
-.reg-icon--blue  { background:#eff6ff; }
-.reg-icon--green { background:#f0fdf4; }
-.reg-icon--blue svg  { width:28px; height:28px; stroke:#2563eb; }
-.reg-icon--green svg { width:28px; height:28px; stroke:#16a34a; }
-.reg-num { font-size:3rem; font-weight:900; line-height:1; margin-bottom:.2rem; }
-.reg-num--blue  { color:#2563eb; }
-.reg-num--green { color:#16a34a; }
-.reg-label { font-size:.95rem; font-weight:700; color:#1a2332; margin-bottom:.25rem; }
-.reg-sub   { font-size:.75rem; color:#9ea9b8; line-height:1.4; }
-.reg-divider { width:1px; background:#f0f3f7; margin:1.2rem 0; flex-shrink:0; }
-.reg-card__right {
-  flex-shrink:0; display:flex; flex-direction:column; justify-content:center;
-  gap:.55rem; padding:1.4rem 1.4rem 1.4rem 1.2rem; min-width:140px;
-}
-.reg-stat-row { display:flex; align-items:center; gap:.55rem; }
-.reg-stat-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.reg-stat-name { flex:1; font-size:.8rem; color:#6b7280; }
-.reg-stat-val  { font-size:.9rem; font-weight:700; color:#1a2332; }
-.reg-badge {
-  display:inline-flex; align-items:center; gap:5px; margin-top:.4rem;
-  background:#f0f7ff; border:1px solid #bfdbfe; border-radius:99px;
-  padding:3px 10px; font-size:.7rem; font-weight:600; color:#2563eb; align-self:flex-start;
-}
-.reg-dot { width:6px; height:6px; border-radius:50%; background:#10b981; box-shadow:0 0 0 2px rgba(16,185,129,.3); display:inline-block; animation:pulse 2s infinite; }
-@media (max-width:600px) {
-  .reg-grid { grid-template-columns:1fr; }
-  .reg-card__right { min-width:110px; }
-}
-.snum   { font-size:2rem;font-weight:800;color:#1a2332;line-height:1;margin-bottom:.3rem; }
-.sunit  { font-size:1rem;font-weight:600;color:#6b7280; }
-.slabel { font-size:.9rem;font-weight:600;color:#374151;margin-bottom:.2rem; }
-.ssub   { font-size:.75rem;color:#9ea9b8; }
+.page-footer strong { color: #6b7280; }
 
-.role-card { background:#fff;border:1px solid #e8ecf0;border-radius:14px;padding:2rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.05); }
-.role-avatars { display:flex;justify-content:center;margin-bottom:1rem; }
-.ravatar { width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;margin:0 -4px; }
-.ravatar svg { width:22px;height:22px; }
-.rav-blue   { background:#3b82f6;color:#fff; }
-.rav-green  { background:#10b981;color:#fff; }
-.rav-purple { background:#8b5cf6;color:#fff; }
-.role-title { font-size:1.15rem;font-weight:700;color:#1a2332;margin-bottom:.4rem; }
-.role-desc  { font-size:.875rem;color:#6b7280; }
-
-.page-footer { text-align:center;padding:1.5rem 0 .5rem;font-size:.78rem;color:#9ea9b8; }
-
+/* ─── Responsive ─────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-right { display: none; }
+}
 @media (max-width: 768px) {
-  .hero { padding:2rem 1rem 1.8rem; }
-  .hero-greeting { font-size:1.6rem; }
-  .hero-time { font-size:1.1rem; }
-  .chart-grid { grid-template-columns:1fr; }
-  .stat-grid  { grid-template-columns:1fr 1fr; }
+  .hero-inner { padding: 1.75rem 1.5rem; }
+  .hero-greeting { font-size: 1.4rem; }
+  .kpi-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .chart-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
-  .stat-grid { grid-template-columns:1fr; }
-  .hero-greeting { font-size:1.3rem; }
-  .hero-meta { flex-direction:column;gap:.5rem; }
+  .hero-inner { padding: 1.4rem 1.1rem; }
+  .hero-greeting { font-size: 1.2rem; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-value { font-size: 1.3rem; }
+  .chip-yellow { display: none; }
 }
 </style>

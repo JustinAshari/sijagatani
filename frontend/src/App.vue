@@ -28,6 +28,16 @@ const handleLogout = async () => {
     window.location.href = '/login'
   }
 }
+
+const userInitials = computed(() => {
+  const name = authStore.user?.name || authStore.user?.username || '?'
+  return name.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase()).join('')
+})
+
+const roleLabel = computed(() => {
+  const roles = { superadmin: 'Super Admin', admin: 'Admin', lapangan: 'Petugas Lapangan', penggilingan: 'Penggilingan' }
+  return roles[authStore.user?.role] || authStore.user?.role || ''
+})
 </script>
 
 <template>
@@ -66,6 +76,15 @@ const handleLogout = async () => {
           </div>
 
           <div class="navbar-right">
+            <!-- User Info -->
+            <div class="user-info" v-if="authStore.user">
+              <div class="user-avatar">{{ userInitials }}</div>
+              <div class="user-details">
+                <span class="user-name">{{ authStore.user?.name || authStore.user?.username }}</span>
+                <span class="user-role">{{ roleLabel }}</span>
+              </div>
+            </div>
+
             <!-- Logout -->
             <button @click="handleLogout" class="btn-logout">
               <svg class="logout-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -123,16 +142,16 @@ body {
 .top-navbar {
   position: sticky;
   top: 0;
-  height: 64px;
+  height: 80px;
   background: #ffffff;
   border-bottom: 1px solid #e8ecf0;
   z-index: 900;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .navbar-content {
   height: 100%;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -165,13 +184,13 @@ body {
 }
 
 .sijagatani-logo {
-  height: 46px;
+  height: 56px;
   width: auto;
   object-fit: contain;
 }
 
 .app-title {
-  font-size: 1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: #1a2332;
   margin: 0;
@@ -181,28 +200,75 @@ body {
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
+}
+
+/* User info */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.85rem;
+  background: #f3f6fb;
+  border-radius: 10px;
+  border: 1px solid #e8ecf0;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a2332;
+  white-space: nowrap;
+}
+
+.user-role {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #6b7280;
+  white-space: nowrap;
 }
 
 /* Logout button */
 .btn-logout {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: 7px;
+  padding: 10px 18px;
   background: #ef4444;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .logout-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
@@ -237,12 +303,20 @@ body {
     display: none;
   }
 
+  .user-details {
+    display: none;
+  }
+
+  .user-info {
+    padding: 0.45rem;
+  }
+
   .logout-text {
     display: none;
   }
 
   .btn-logout {
-    padding: 8px 10px;
+    padding: 9px 11px;
   }
 
   .app-right.sidebar-open {
@@ -254,7 +328,7 @@ body {
   }
 
   .sijagatani-logo {
-    height: 36px;
+    height: 42px;
   }
 
   .app-main {

@@ -283,7 +283,5 @@ class PetaniSeeder extends Seeder
                     : null,
             ]));
         }
-
-        $this->command->info('✅ PetaniSeeder: 15 data petani berhasil dibuat.');
     }
 }
