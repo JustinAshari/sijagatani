@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PenggilinganController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SubAdminController;
 use App\Http\Controllers\Api\WilayahController;
+use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\WilayahController as WilayahExportImportController;
 
 // Auth Routes (Public)
@@ -92,5 +93,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/wilayah/export', [WilayahExportImportController::class, 'exportWilayah']);
         Route::post('/wilayah/import', [WilayahExportImportController::class, 'importWilayah']);
         Route::get('/wilayah/template', [WilayahExportImportController::class, 'templateWilayah']);
+
+        // Activity Log
+        Route::get('/activity-logs', [ActivityLogController::class, 'index']);
     });
 });

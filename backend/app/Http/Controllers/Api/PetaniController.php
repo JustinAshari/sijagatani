@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Petani;
 use App\Http\Requests\PetaniRequest;
+use App\Services\ActivityLogService;
 use App\Services\ImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -161,6 +162,8 @@ class PetaniController extends Controller
 
             $petani = Petani::create($data);
 
+            ActivityLogService::log($request, 'create', 'petani', "Menambahkan data petani: {$petani->nama} (NIK: {$petani->nik})");
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data petani berhasil ditambahkan',
@@ -275,6 +278,8 @@ class PetaniController extends Controller
 
             $petani->update($data);
 
+            ActivityLogService::log($request, 'update', 'petani', "Mengupdate data petani: {$petani->nama} (NIK: {$petani->nik})");
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data petani berhasil diupdate',
@@ -320,6 +325,8 @@ class PetaniController extends Controller
             if ($petani->surat_pernyataan) {
                 $this->imageService->delete($petani->surat_pernyataan);
             }
+
+            ActivityLogService::log($request, 'delete', 'petani', "Menghapus data petani: {$petani->nama} (NIK: {$petani->nik})");
 
             $petani->delete();
 
@@ -380,6 +387,8 @@ class PetaniController extends Controller
             'verified_at' => $request->status_verifikasi !== 'pending' ? now() : null,
             'verified_by' => $request->status_verifikasi !== 'pending' ? $request->user()->id : null,
         ]);
+
+        ActivityLogService::log($request, 'verify', 'petani', "Verifikasi petani {$petani->nama} → {$request->status_verifikasi}");
 
         return response()->json([
             'success' => true,

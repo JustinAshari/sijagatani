@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -72,6 +73,8 @@ class SubAdminController extends Controller
             'parent_id'         => $parent->id,
         ]);
 
+        ActivityLogService::log($request, 'create', 'sub-admin', "Menambahkan sub-admin: {$subAdmin['name']} ({$subAdmin['username']}) untuk {$parent->nama_penggilingan}");
+
         return response()->json([
             'success' => true,
             'message' => 'Sub-admin berhasil ditambahkan',
@@ -106,6 +109,8 @@ class SubAdminController extends Controller
 
         $subAdmin->save();
 
+        ActivityLogService::log($request, 'update', 'sub-admin', "Mengupdate sub-admin: {$subAdmin->name} ({$subAdmin->username})");
+
         return response()->json([
             'success' => true,
             'message' => 'Sub-admin berhasil diupdate',
@@ -124,6 +129,8 @@ class SubAdminController extends Controller
         $subAdmin = User::where('id', $id)
             ->where('parent_id', $parent->id)
             ->firstOrFail();
+
+        ActivityLogService::log($request, 'delete', 'sub-admin', "Menghapus sub-admin: {$subAdmin->name} ({$subAdmin->username})");
 
         $subAdmin->delete();
 

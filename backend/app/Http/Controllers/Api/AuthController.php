@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,6 +43,8 @@ class AuthController extends Controller
         // Create token
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        ActivityLogService::logUser($request, $user, 'login', 'auth', "Login berhasil sebagai {$user->role}");
+
         return response()->json([
             'success' => true,
             'message' => 'Login berhasil',
@@ -64,6 +67,8 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
+        ActivityLogService::log($request, 'logout', 'auth', 'Logout dari sistem');
+
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([

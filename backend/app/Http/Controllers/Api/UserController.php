@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -58,6 +59,8 @@ class UserController extends Controller
         }
 
         $user = User::create($userData);
+
+        ActivityLogService::log($request, 'create', 'user', "Menambahkan akun: {$user->name} ({$user->username}), role: {$user->role}");
 
         return response()->json([
             'success' => true,
@@ -114,6 +117,8 @@ class UserController extends Controller
         
         $user->save();
 
+        ActivityLogService::log($request, 'update', 'user', "Mengupdate akun: {$user->name} ({$user->username}), role: {$user->role}");
+
         return response()->json([
             'success' => true,
             'message' => 'User berhasil diupdate',
@@ -136,6 +141,8 @@ class UserController extends Controller
             ], 403);
         }
         
+        ActivityLogService::log($request, 'delete', 'user', "Menghapus akun: {$user->name} ({$user->username}), role: {$user->role}");
+
         $user->delete();
 
         return response()->json([

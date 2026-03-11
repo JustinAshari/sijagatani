@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Penggilingan;
 use App\Models\PenggilinganTransport;
 use App\Models\Petani;
+use App\Services\ActivityLogService;
 use App\Services\ImageService;
 use App\Exports\PenggilinganExport;
 use App\Exports\MakloonGKPExport;
@@ -190,6 +191,8 @@ class PenggilinganController extends Controller
             $penggilingan->refresh();
             $penggilingan->calculateTotals();
             $penggilingan->load(['transports']);
+
+            ActivityLogService::log($request, 'create', 'penggilingan', "Menambahkan data penggilingan: {$penggilingan->nama_penggilingan} (ID: {$penggilingan->id})");
 
             DB::commit();
 
@@ -390,6 +393,8 @@ class PenggilinganController extends Controller
             $penggilingan->calculateTotals();
             $penggilingan->load(['transports']);
 
+            ActivityLogService::log($request, 'update', 'penggilingan', "Mengupdate data penggilingan: {$penggilingan->nama_penggilingan} (ID: {$penggilingan->id})");
+
             DB::commit();
 
             return response()->json([
@@ -444,6 +449,8 @@ class PenggilinganController extends Controller
                     $this->imageService->delete($transport->nota_timbang);
                 }
             }
+
+            ActivityLogService::log($request, 'delete', 'penggilingan', "Menghapus data penggilingan: {$penggilingan->nama_penggilingan} (ID: {$penggilingan->id})");
 
             $penggilingan->delete(); // Cascade will delete transports
 
@@ -571,6 +578,8 @@ class PenggilinganController extends Controller
             'verified_at' => $request->status_verifikasi !== 'pending' ? now() : null,
             'verified_by' => $request->status_verifikasi !== 'pending' ? $request->user()->id : null,
         ]);
+
+        ActivityLogService::log($request, 'verify', 'penggilingan', "Verifikasi makloon {$penggilingan->nama_penggilingan} (ID: {$penggilingan->id}) \u2192 {$request->status_verifikasi}");
 
         return response()->json([
             'success' => true,

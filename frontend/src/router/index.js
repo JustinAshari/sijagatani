@@ -54,6 +54,12 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['superadmin'] }
     },
     {
+      path: '/activity-log',
+      name: 'activity-log',
+      component: () => import('../views/ActivityLogView.vue'),
+      meta: { requiresAuth: true, roles: ['superadmin'] }
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue'),
