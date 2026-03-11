@@ -25,8 +25,7 @@
       </button>
     </div>
 
-    <div v-if="loading" class="loading">Loading...</div>
-    <div v-else class="table-container">
+    <div class="table-container">
       <table class="data-table">
         <thead>
           <tr>
@@ -40,7 +39,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(user, index) in users" :key="user.id">
+          <tr v-if="loading">
+            <td colspan="7" class="loading-cell">Loading...</td>
+          </tr>
+          <tr v-else v-for="(user, index) in users" :key="user.id">
             <td>{{ index + 1 }}</td>
             <td>{{ user.name }}</td>
             <td>{{ user.username }}</td>
@@ -283,10 +285,11 @@ onMounted(() => {
   font-size: 24px;
 }
 
-.loading {
+.loading-cell,
+.empty-cell {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: #7f8c8d;
 }
 
 .table-container {

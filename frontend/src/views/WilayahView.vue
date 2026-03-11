@@ -655,10 +655,11 @@ onMounted(() => {
   background: #dceeff;
 }
 
-.loading-cell, .empty-cell {
+.loading-cell,
+.empty-cell {
   text-align: center;
-  padding: 40px !important;
-  color: #666;
+  padding: 40px;
+  color: #7f8c8d;
 }
 
 .actions {

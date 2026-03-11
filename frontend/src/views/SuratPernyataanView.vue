@@ -153,9 +153,7 @@
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td :colspan="colSpan" class="text-center">
-              <div class="loading">Memuat data...</div>
-            </td>
+            <td :colspan="colSpan" class="loading-cell">Memuat data...</td>
           </tr>
           <tr v-else-if="filteredPetani.length === 0">
             <td :colspan="colSpan" class="text-center">Tidak ada data</td>
@@ -891,9 +889,10 @@ tbody tr:hover {
   background: #bdc3c7;
 }
 
-.loading {
-  padding: 2rem;
+.loading-cell,
+.empty-cell {
   text-align: center;
+  padding: 40px;
   color: #7f8c8d;
 }
 

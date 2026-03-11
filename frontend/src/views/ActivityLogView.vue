@@ -147,8 +147,7 @@ const roleLabel = (role) => {
       </div>
 
       <!-- Table -->
-      <div v-if="loading" class="loading-state">Loading...</div>
-      <div v-else class="table-container">
+      <div class="table-container">
         <table class="data-table">
           <thead>
             <tr>
@@ -163,10 +162,13 @@ const roleLabel = (role) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-if="logs.length === 0">
+            <tr v-if="loading">
+              <td colspan="8" class="loading-cell">Loading...</td>
+            </tr>
+            <tr v-else-if="logs.length === 0">
               <td colspan="8" class="empty-cell">Tidak ada data log</td>
             </tr>
-            <tr v-for="(log, index) in logs" :key="log.id">
+            <tr v-else v-for="(log, index) in logs" :key="log.id">
               <td>{{ (currentPage - 1) * perPage + index + 1 }}</td>
               <td class="cell-datetime">{{ formatDateTime(log.created_at) }}</td>
               <td>
@@ -257,7 +259,12 @@ const roleLabel = (role) => {
 }
 .data-table td { padding: 0.65rem 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
 .data-table tr:hover td { background: #f8fafc; }
-.empty-cell, .loading-state { text-align: center; padding: 2rem; color: #94a3b8; }
+.loading-cell,
+.empty-cell {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+}
 
 /* Cell types */
 .cell-datetime { white-space: nowrap; font-size: 0.8rem; color: #475569; }
