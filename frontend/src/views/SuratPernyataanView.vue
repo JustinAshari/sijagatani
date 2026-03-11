@@ -456,9 +456,7 @@ onMounted(() => {
 
 <style scoped>
 .surat-pernyataan-view {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 20px;
 }
 
 .page-header {

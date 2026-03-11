@@ -207,7 +207,7 @@ const roleLabel = (role) => {
 </template>
 
 <style scoped>
-.activity-log { padding: 1.5rem; }
+.activity-log { padding: 20px; }
 .page-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; }
 
 /* Hero Banner */

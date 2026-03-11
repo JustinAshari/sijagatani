@@ -239,7 +239,7 @@ onMounted(fetchSubAdmins)
 </script>
 
 <style scoped>
-.sub-admin-page { width: 100%; }
+.sub-admin-page { padding: 20px; }
 
 /* Hero */
 .hero-banner {
