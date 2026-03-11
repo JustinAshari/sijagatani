@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
+import FilterDropdown from '@/components/FilterDropdown.vue'
 
 const logs = ref([])
 const loading = ref(true)
@@ -19,6 +20,15 @@ const filters = ref({
 
 const modules = ['auth', 'petani', 'penggilingan', 'user', 'sub-admin']
 const actions = ['login', 'logout', 'create', 'update', 'delete', 'verify']
+
+const logActiveFilterCount = computed(() => {
+  let count = 0
+  if (filters.value.module) count++
+  if (filters.value.action) count++
+  if (filters.value.tanggal_dari) count++
+  if (filters.value.tanggal_sampai) count++
+  return count
+})
 
 const fetchLogs = async (page = 1) => {
   loading.value = true
@@ -120,7 +130,7 @@ const roleLabel = (role) => {
 
       <!-- Filters -->
       <div class="filters-bar">
-        <div class="filter-row">
+        <div class="filter-toolbar">
           <input
             v-model="filters.search"
             @keyup.enter="applyFilters"
@@ -128,18 +138,34 @@ const roleLabel = (role) => {
             placeholder="Cari nama, username, deskripsi..."
             class="filter-input search-input"
           />
-          <select v-model="filters.module" class="filter-select">
-            <option value="">Semua Modul</option>
-            <option v-for="m in modules" :key="m" :value="m">{{ moduleLabel(m) }}</option>
-          </select>
-          <select v-model="filters.action" class="filter-select">
-            <option value="">Semua Aksi</option>
-            <option v-for="a in actions" :key="a" :value="a">{{ actionLabel(a) }}</option>
-          </select>
-          <input v-model="filters.tanggal_dari" type="date" class="filter-input" title="Dari tanggal" />
-          <input v-model="filters.tanggal_sampai" type="date" class="filter-input" title="Sampai tanggal" />
-          <button @click="applyFilters" class="btn-filter">Cari</button>
-          <button @click="resetFilters" class="btn-reset">Reset</button>
+          <FilterDropdown
+            :active-count="logActiveFilterCount"
+            @apply="applyFilters"
+            @reset="resetFilters"
+          >
+            <div class="fd-field">
+              <label class="fd-label">Modul</label>
+              <select v-model="filters.module" class="fd-select">
+                <option value="">Semua Modul</option>
+                <option v-for="m in modules" :key="m" :value="m">{{ moduleLabel(m) }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Aksi</label>
+              <select v-model="filters.action" class="fd-select">
+                <option value="">Semua Aksi</option>
+                <option v-for="a in actions" :key="a" :value="a">{{ actionLabel(a) }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Tanggal Dari</label>
+              <input v-model="filters.tanggal_dari" type="date" class="fd-input" />
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Tanggal Sampai</label>
+              <input v-model="filters.tanggal_sampai" type="date" class="fd-input" />
+            </div>
+          </FilterDropdown>
         </div>
         <div class="result-info" v-if="!loading">
           Menampilkan <strong>{{ logs.length }}</strong> dari <strong>{{ total }}</strong> entri
@@ -231,23 +257,25 @@ const roleLabel = (role) => {
 
 /* Filters */
 .filters-bar { padding: 1.2rem 1.5rem; border-bottom: 1px solid #e8ecf0; background: #f8fafc; }
-.filter-row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
-.filter-input, .filter-select {
-  height: 36px; border: 1px solid #d1d5db; border-radius: 6px;
+.filter-toolbar { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+.filter-input {
+  height: 36px; border: 1.5px solid #d1d5db; border-radius: 8px;
   padding: 0 0.75rem; font-size: 0.875rem; background: #fff; outline: none;
+  transition: border-color 0.15s;
 }
-.filter-input:focus, .filter-select:focus { border-color: #475569; }
+.filter-input:focus { border-color: #475569; }
 .search-input { min-width: 220px; flex: 1; }
-.btn-filter {
-  height: 36px; padding: 0 1rem; background: #475569; color: #fff;
-  border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-weight: 500;
+
+/* Filter panel field styles */
+.fd-field { display: flex; flex-direction: column; gap: 4px; }
+.fd-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+.fd-select, .fd-input {
+  height: 34px; padding: 0 10px; border: 1px solid #d1d5db;
+  border-radius: 6px; font-size: 0.875rem; background: #fff; outline: none;
+  width: 100%; box-sizing: border-box;
 }
-.btn-filter:hover { background: #334155; }
-.btn-reset {
-  height: 36px; padding: 0 1rem; background: #e2e8f0; color: #475569;
-  border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem;
-}
-.btn-reset:hover { background: #cbd5e1; }
+.fd-select:focus, .fd-input:focus { border-color: #475569; }
+
 .result-info { margin-top: 0.5rem; font-size: 0.8rem; color: #64748b; }
 
 /* Table */

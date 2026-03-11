@@ -46,43 +46,44 @@
     <!-- end page-header -->
 
     <div class="filter-section">
-      <div class="filter-row">
-        <input 
-          v-model="searchQuery" 
-          type="text" 
+      <div class="filter-toolbar">
+        <input
+          v-model="searchQuery"
+          @keyup.enter="applyFilter"
+          type="text"
           placeholder="Cari nama atau NIK petani..."
           class="search-input"
         />
-        <select v-model="filterKabupaten" class="filter-select">
-          <option value="">Semua Kabupaten</option>
-          <option v-for="kab in kabupatenList" :key="kab" :value="kab">
-            {{ kab }}
-          </option>
-        </select>
-      </div>
-      <div class="filter-row">
-        <div class="date-filter">
-          <label>Dari:</label>
-          <input v-model="filterTanggalDari" type="date" class="date-input" />
-        </div>
-        <div class="date-filter">
-          <label>Sampai:</label>
-          <input v-model="filterTanggalSampai" type="date" class="date-input" />
-        </div>
-        <button @click="applyFilter" class="btn-filter">
-          <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-          </svg>
-          Filter
-        </button>
-        <button @click="resetFilter" class="btn-reset">
-          <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 4 23 10 17 10"/>
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-          </svg>
-          Reset
-        </button>
+        <FilterDropdown
+          :active-count="petaniActiveFilterCount"
+          @apply="applyFilter"
+          @reset="resetFilter"
+        >
+          <div class="fd-field">
+            <label class="fd-label">Kabupaten</label>
+            <select v-model="filterKabupaten" class="fd-select">
+              <option value="">Semua Kabupaten</option>
+              <option v-for="kab in kabupatenList" :key="kab" :value="kab">{{ kab }}</option>
+            </select>
+          </div>
+          <div class="fd-field">
+            <label class="fd-label">Status Verifikasi</label>
+            <select v-model="filterStatus" class="fd-select">
+              <option value="">Semua Status</option>
+              <option value="pending">Pending</option>
+              <option value="disetujui">Disetujui</option>
+              <option value="ditolak">Ditolak</option>
+            </select>
+          </div>
+          <div class="fd-field">
+            <label class="fd-label">Tanggal Dari</label>
+            <input v-model="filterTanggalDari" type="date" class="fd-input" />
+          </div>
+          <div class="fd-field">
+            <label class="fd-label">Tanggal Sampai</label>
+            <input v-model="filterTanggalSampai" type="date" class="fd-input" />
+          </div>
+        </FilterDropdown>
       </div>
     </div>
 
@@ -637,6 +638,7 @@
 import { ref, computed, onMounted } from 'vue'
 import api, { getStorageUrl } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+import FilterDropdown from '@/components/FilterDropdown.vue'
 
 const authStore = useAuthStore()
 const petaniList = ref([])
@@ -644,6 +646,16 @@ const searchQuery = ref('')
 const filterKabupaten = ref('')
 const filterTanggalDari = ref('')
 const filterTanggalSampai = ref('')
+const filterStatus = ref('')
+
+const petaniActiveFilterCount = computed(() => {
+  let count = 0
+  if (filterKabupaten.value) count++
+  if (filterStatus.value) count++
+  if (filterTanggalDari.value) count++
+  if (filterTanggalSampai.value) count++
+  return count
+})
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDetailModal = ref(false)
@@ -767,7 +779,8 @@ const applyFilter = async () => {
     if (filterKabupaten.value) params.kabupaten = filterKabupaten.value
     if (filterTanggalDari.value) params.tanggal_dari = filterTanggalDari.value
     if (filterTanggalSampai.value) params.tanggal_sampai = filterTanggalSampai.value
-    
+    if (filterStatus.value) params.status_verifikasi = filterStatus.value
+
     const response = await api.get('/petani', { params })
     petaniList.value = response.data.data
   } catch (error) {
@@ -779,6 +792,7 @@ const resetFilter = () => {
   filterKabupaten.value = ''
   filterTanggalDari.value = ''
   filterTanggalSampai.value = ''
+  filterStatus.value = ''
   searchQuery.value = ''
   fetchPetani()
 }
@@ -1149,76 +1163,66 @@ onMounted(() => {
 
 .filter-section {
   background: white;
-  padding: 20px;
+  padding: 14px 20px;
   border-radius: 8px;
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.filter-row {
+.filter-toolbar {
   display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
-}
-
-.filter-row:last-child {
-  margin-bottom: 0;
 }
 
 .search-input {
   flex: 1;
-  min-width: 300px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
+  min-width: 240px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
 }
 
-.filter-select {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-  min-width: 200px;
+.search-input:focus {
+  border-color: #475569;
 }
 
-.date-filter {
+/* Filter panel field styles (used inside FilterDropdown slot) */
+.fd-field {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.date-filter label {
-  font-weight: 500;
-  color: #495057;
+.fd-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.date-input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
+.fd-select,
+.fd-input {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: #fff;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.btn-filter {
-  background: #1565c0;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-reset {
-  background: #6c757d;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
+.fd-select:focus,
+.fd-input:focus {
+  border-color: #475569;
 }
 
 .btn-success {

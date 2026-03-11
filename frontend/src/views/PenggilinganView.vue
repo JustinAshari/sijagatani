@@ -44,27 +44,38 @@
 
     <!-- Filter Section -->
     <div class="filter-section">
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>Tanggal Dari:</label>
-          <input type="date" v-model="filters.tanggalDari" @change="applyFilters" />
-        </div>
-        <div class="filter-item">
-          <label>Tanggal Sampai:</label>
-          <input type="date" v-model="filters.tanggalSampai" @change="applyFilters" />
-        </div>
-        <div v-if="!authStore.isPenggilingan" class="filter-item">
-          <label>Nama Makloon/MPP:</label>
-          <input
-            type="text"
-            v-model="filters.namaPenggilingan"
-            @input="applyFilters"
-            placeholder="Cari nama makloon/MPP..."
-          />
-        </div>
-        <div class="filter-item">
-          <button @click="resetFilters" class="btn-reset">Reset Filter</button>
-        </div>
+      <div class="filter-toolbar">
+        <input
+          v-if="!authStore.isPenggilingan"
+          v-model="filters.namaPenggilingan"
+          @keyup.enter="applyFilters"
+          type="text"
+          placeholder="Cari nama makloon/MPP..."
+          class="search-input"
+        />
+        <FilterDropdown
+          :active-count="penggilinganActiveFilterCount"
+          @apply="applyFilters"
+          @reset="resetFilters"
+        >
+          <div class="fd-field">
+            <label class="fd-label">Status Verifikasi</label>
+            <select v-model="filters.statusVerifikasi" class="fd-select">
+              <option value="">Semua Status</option>
+              <option value="pending">Pending</option>
+              <option value="disetujui">Disetujui</option>
+              <option value="ditolak">Ditolak</option>
+            </select>
+          </div>
+          <div class="fd-field">
+            <label class="fd-label">Tanggal Dari</label>
+            <input v-model="filters.tanggalDari" type="date" class="fd-input" />
+          </div>
+          <div class="fd-field">
+            <label class="fd-label">Tanggal Sampai</label>
+            <input v-model="filters.tanggalSampai" type="date" class="fd-input" />
+          </div>
+        </FilterDropdown>
       </div>
     </div>
 
@@ -517,6 +528,7 @@
 import { ref, onMounted, computed } from 'vue'
 import api, { getStorageUrl } from '../services/api'
 import { useAuthStore } from '../stores/auth'
+import FilterDropdown from '@/components/FilterDropdown.vue'
 
 const authStore = useAuthStore()
 
@@ -565,6 +577,15 @@ const filters = ref({
   tanggalDari: '',
   tanggalSampai: '',
   namaPenggilingan: '',
+  statusVerifikasi: '',
+})
+
+const penggilinganActiveFilterCount = computed(() => {
+  let count = 0
+  if (filters.value.tanggalDari) count++
+  if (filters.value.tanggalSampai) count++
+  if (filters.value.statusVerifikasi) count++
+  return count
 })
 
 const form = ref({
@@ -659,6 +680,10 @@ const applyFilters = () => {
     )
   }
 
+  if (filters.value.statusVerifikasi) {
+    filtered = filtered.filter((item) => item.status_verifikasi === filters.value.statusVerifikasi)
+  }
+
   filteredData.value = filtered
 }
 
@@ -667,6 +692,7 @@ const resetFilters = () => {
     tanggalDari: '',
     tanggalSampai: '',
     namaPenggilingan: '',
+    statusVerifikasi: '',
   }
   filteredData.value = [...data.value]
 }
@@ -1081,39 +1107,66 @@ const downloadMakloonGKP = async (penggilinganId) => {
 
 .filter-section {
   background: white;
-  padding: 20px;
+  padding: 14px 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
 
-.filter-row {
+.filter-toolbar {
   display: flex;
-  gap: 15px;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
-  align-items: flex-end;
 }
 
-.filter-item {
+.search-input {
+  flex: 1;
+  min-width: 240px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-input:focus {
+  border-color: #475569;
+}
+
+/* Filter panel field styles */
+.fd-field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  flex: 1;
-  min-width: 200px;
+  gap: 4px;
 }
 
-.filter-item label {
-  font-size: 14px;
-  color: #555;
-  font-weight: 500;
+.fd-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.filter-item input,
-.filter-item select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+.fd-select,
+.fd-input {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: #fff;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fd-select:focus,
+.fd-input:focus {
+  border-color: #475569;
 }
 
 .btn-reset,
