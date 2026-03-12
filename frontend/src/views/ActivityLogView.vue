@@ -189,7 +189,9 @@ const roleLabel = (role) => {
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="8" class="loading-cell">Loading...</td>
+              <td colspan="8" class="loading-cell">
+                <div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div>
+              </td>
             </tr>
             <tr v-else-if="logs.length === 0">
               <td colspan="8" class="empty-cell">Tidak ada data log</td>
@@ -291,8 +293,22 @@ const roleLabel = (role) => {
 .empty-cell {
   text-align: center;
   padding: 40px;
-  color: #7f8c8d;
+  color: #6b7280;
 }
+.loading-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.tbl-spinner {
+  width: 22px; height: 22px;
+  border: 2.5px solid #e8ecf0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Cell types */
 .cell-datetime { white-space: nowrap; font-size: 0.8rem; color: #475569; }
