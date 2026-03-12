@@ -26,9 +26,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/petani/{id}', [PetaniController::class, 'show']);
         Route::get('/petani/export/excel', [PetaniController::class, 'export']);
         Route::post('/petani', [PetaniController::class, 'store']);
-        Route::put('/petani/{id}', [PetaniController::class, 'update']);
-        Route::delete('/petani/{id}', [PetaniController::class, 'destroy']);
         Route::post('/petani/check-nik', [PetaniController::class, 'checkNik']);
+        Route::put('/petani/{id}', [PetaniController::class, 'update']);
+        Route::post('/petani/{id}', [PetaniController::class, 'update']); // For FormData (file upload)
+        Route::delete('/petani/{id}', [PetaniController::class, 'destroy']);
     });
     
     // Penggilingan Routes - Admin and Penggilingan role can access
