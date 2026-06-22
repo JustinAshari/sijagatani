@@ -18,7 +18,7 @@ const filters = ref({
   tanggal_sampai: '',
 })
 
-const modules = ['auth', 'petani', 'penggilingan', 'user', 'sub-admin']
+const modules = ['auth', 'petani', 'transaksi-petani', 'penggilingan', 'user', 'sub-admin']
 const actions = ['login', 'logout', 'create', 'update', 'delete', 'verify']
 
 const logActiveFilterCount = computed(() => {
@@ -95,8 +95,12 @@ const actionClass = (action) => {
 
 const moduleLabel = (mod) => {
   const map = {
-    auth: 'Auth', petani: 'Petani', penggilingan: 'Makloon',
-    user: 'Akun', 'sub-admin': 'Sub-Admin'
+    auth: 'Auth',
+    petani: 'Petani',
+    'transaksi-petani': 'Transaksi Petani',
+    penggilingan: 'Makloon',
+    user: 'Akun',
+    'sub-admin': 'Sub-Admin'
   }
   return map[mod] || mod
 }
