@@ -1,199 +1,110 @@
-# SiJagaTani - Sistem Informasi Arsip Data Petani
+# SiJagaTani
 
-Aplikasi web fullstack untuk mengelola data petani dan penggilingan padi dengan fitur CRUD lengkap dan auto-compress image.
+SiJagaTani adalah aplikasi web internal untuk pendataan petani, penggilingan padi, wilayah, akun pengguna, dan audit aktivitas. Project ini memakai backend Laravel dan frontend Vue 3 dengan akses berbasis role.
 
-## 🌟 Fitur Utama
+Dokumentasi breakdown lengkap ada di [PROJECT_BREAKDOWN.md](PROJECT_BREAKDOWN.md).
 
-### Backend (Laravel)
-- ✅ RESTful API dengan Laravel 12
-- ✅ CRUD lengkap untuk Data Petani dan Penggilingan
-- ✅ Auto compress image menggunakan Intervention Image
-- ✅ Validasi data dengan Form Request
-- ✅ Relasi database (One to Many: Petani - Penggilingan)
-- ✅ Image Service untuk handle upload & compression
-- ✅ Laravel Sanctum untuk API authentication (ready)
-- ✅ Export data ke Excel menggunakan Laravel Excel
-
-### Frontend (Vue 3)
-- ✅ Vue 3 + TypeScript dengan Composition API
-- ✅ Interface modern dan responsive
-- ✅ CRUD dengan modal dialog
-- ✅ Upload image dengan preview
-- ✅ Filter dan pencarian data
-- ✅ Vue Router untuk navigasi
-- ✅ Axios untuk HTTP requests
-- ✅ Pinia untuk state management
-
-## 📁 Struktur Database
-
-### Tabel Petani
-- `id` - Primary Key
-- `nik` - NIK (16 digit, unique)
-- `nama` - Nama lengkap
-- `alamat` - Alamat lengkap
-- `no_telepon` - Nomor telepon
-- `jenis_kelamin` - L/P
-- `tanggal_lahir` - Tanggal lahir
-- `foto` - Foto petani (auto-compressed)
-
-## 🚀 Instalasi dan Menjalankan
-
-### Persiapan Database
-
-1. Buat database MySQL:
-```bash
-mysql -u root -e "CREATE DATABASE sijagatani_db"
-```
-
-### Backend Setup
-
-1. Masuk ke folder backend:
-```bash
-cd d:\laragon\www\sijagatani\backend
-```
-
-2. Install dependencies:
-```bash
-composer install
-```
-
-3. Setup environment (sudah dikonfigurasi):
-- Database: MySQL (sijagatani_db)
-- APP_URL: http://localhost:8000
-- CORS: localhost:5173
-
-4. Jalankan migrasi:
-```bash
-php artisan migrate
-```
-
-5. Jalankan server:
-```bash
-php artisan serve
-```
-
-Server backend akan berjalan di: **http://localhost:8000**
-
-### Frontend Setup
-
-1. Masuk ke folder frontend:
-```bash
-cd d:\laragon\www\sijagatani\frontend
-```
-
-2. Install dependencies (sudah terinstall):
-```bash
-npm install
-```
-
-3. Jalankan development server:
-```bash
-npm run dev
-```
-
-Server frontend akan berjalan di: **http://localhost:5173**
-
-## 📡 API Endpoints
-
-### Petani
-- `GET /api/petani` - List semua petani
-- `POST /api/petani` - Tambah petani baru
-- `GET /api/petani/{id}` - Detail petani
-- `PUT /api/petani/{id}` - Update petani
-- `DELETE /api/petani/{id}` - Hapus petani
-- `GET /api/petani/export/excel` - Export data ke Excel
-
-### Penggilingan
-- `GET /api/penggilingan` - List semua data penggilingan
-- `POST /api/penggilingan` - Tambah data penggilingan baru
-- `GET /api/penggilingan/{id}` - Detail data penggilingan
-- `PUT /api/penggilingan/{id}` - Update data penggilingan
-- `DELETE /api/penggilingan/{id}` - Hapus data penggilingan
-- `GET /api/penggilingan/summary` - Ringkasan data penggilingan
-- `GET /api/penggilingan/export/excel` - Export data ke Excel
-
-## 🖼️ Image Compression
-
-Image yang diupload akan otomatis dikompres dengan konfigurasi:
-- **Foto Petani**: Max width 800px, quality 85%
-- **Foto KTP**: Max width 1200px, quality 85%
-- **Foto Komoditi**: Max width 1200px, quality 85%
-- **Kwitansi Pembayaran**: Max width 1200px, quality 85%
-- Format output: JPEG
-- Max upload size: 5MB
-
-Image disimpan di `storage/app/public/` dan dapat diakses via:
-```
-http://localhost:8000/storage/{path}
-```
-
-## 💻 Penggunaan Aplikasi
-
-### Mengelola Data Petani
-
-1. Akses menu **Data Petani**
-2. Klik tombol **+ Tambah Petani**
-3. Isi form dengan data yang diperlukan
-4. Upload foto jika diperlukan (akan otomatis dikompres)
-5. Klik **Simpan**
-
-**Fitur lain:**
-- 👁️ **Detail**: Melihat informasi lengkap petani
-- ✏️ **Edit**: Mengubah data petani
-- 🗑️ **Hapus**: Menghapus data petani
-- 🔍 **Cari**: Cari berdasarkan nama atau NIK
-- 📊 **Export**: Export data ke Excel
-
-### Mengelola Data Penggilingan
-
-1. Akses menu **Data Penggilingan**
-2. Klik tombol **+ Tambah Data**
-3. Pilih petani dan isi data penggilingan
-4. Upload foto-foto yang diperlukan
-5. Klik **Simpan**
-
-**Fitur lain:**
-- 👁️ **Detail**: Melihat informasi lengkap
-- ✏️ **Edit**: Mengubah data
-- 🗑️ **Hapus**: Menghapus data
-- 🔍 **Filter**: Filter berdasarkan berbagai kriteria
-- 📊 **Summary**: Melihat ringkasan data
-- 📊 **Export**: Export data ke Excel
-
-## 🛠️ Teknologi yang Digunakan
+## Ringkasan Stack
 
 ### Backend
-- Laravel 12
 - PHP 8.2+
+- Laravel 12
 - MySQL
-- Intervention Image (Image Processing)
-- Laravel Sanctum (API Auth)
+- Laravel Sanctum
+- Maatwebsite Excel
+- Intervention Image
 
 ### Frontend
+- JavaScript
 - Vue 3
-- TypeScript
-- Vite
 - Vue Router
 - Pinia
 - Axios
+- Vite
 
-## 📝 Catatan Development
+## Fitur Utama
 
-- Image compression menggunakan GD Driver (built-in PHP)
-- Storage menggunakan symbolic link (`php artisan storage:link`)
-- CORS sudah dikonfigurasi untuk development
-- API menggunakan prefix `/api`
-- Frontend menggunakan composition API style
+- Login dan logout berbasis token
+- Role-based access control untuk superadmin, admin, lapangan, dan penggilingan
+- Dashboard ringkasan data
+- CRUD data petani
+- CRUD data penggilingan / makloon
+- Upload dan kompresi gambar otomatis
+- Export data ke Excel
+- Verifikasi data
+- Manajemen wilayah
+- Manajemen user dan sub-admin
+- Audit log aktivitas
 
-## 🔐 Security
+## Struktur Project
 
-- Input validation di backend dengan Form Request
-- CSRF protection enabled
-- File upload validation (type & size)
-- Image compression untuk menghemat storage
-- SQL injection protection via Eloquent ORM
+```text
+.
+├── backend/
+└── frontend/
+```
 
-## 📄 License
+### Backend
+- `app/Http/Controllers/Api`: endpoint API utama
+- `app/Http/Requests`: validasi input
+- `app/Services`: helper logika bisnis seperti image processing dan logging
+- `app/Exports`: export Excel
+- `app/Imports`: import data wilayah
+- `app/Models`: model dan relasi database
+- `database/migrations`: skema database
+- `routes/api.php`: seluruh route API
 
-Open-source project untuk pembelajaran dan pengembangan sistem informasi pertanian.
+### Frontend
+- `src/views`: halaman utama aplikasi
+- `src/components`: komponen UI reusable
+- `src/router`: navigasi dan guard role
+- `src/stores`: state management autentikasi
+- `src/services`: komunikasi ke API
+
+## Halaman Utama
+
+- Login
+- Beranda / Dashboard
+- Data Petani
+- Surat Pernyataan
+- Data Penggilingan
+- Kelola Sub-Admin
+- Kelola Akun
+- Data Wilayah
+- Log Aktivitas
+- About
+
+## Cara Menjalankan
+
+### Backend
+
+```bash
+cd backend
+composer install
+php artisan migrate
+php artisan serve
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Endpoint Inti
+
+- `POST /api/login`
+- `GET /api/me`
+- `GET /api/petani`
+- `GET /api/penggilingan`
+- `GET /api/users`
+- `GET /api/activity-logs`
+
+## Catatan
+
+- Frontend saat ini menggunakan JavaScript, bukan TypeScript.
+- Layout dashboard memakai sidebar dan navbar responsif.
+- Upload file memakai storage public Laravel.
 

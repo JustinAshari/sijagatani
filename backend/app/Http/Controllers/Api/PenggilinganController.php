@@ -94,7 +94,6 @@ class PenggilinganController extends Controller
 
         $validator = Validator::make($data, [
             'tanggal_pengajuan' => 'required|date',
-            'petani_id' => 'required|string|max:255',  // Changed to string (nama petani)
             'nama_penggilingan' => $namaPenggilinganRule,
             'lokasi_makloon' => 'required|string|max:255',
             'foto_gkp_1' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',

@@ -23,7 +23,6 @@ class PenggilinganRequest extends FormRequest
     {
         return [
             'tanggal' => ['required', 'date'],
-            'petani_id' => ['required', 'exists:petani,id'],
             'jumlah_gabah' => ['required', 'numeric', 'min:0'],
             'hasil_beras' => ['nullable', 'numeric', 'min:0'],
             'biaya_giling' => ['nullable', 'numeric', 'min:0'],
