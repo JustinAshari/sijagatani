@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SubAdminController;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Api\ActivityLogController;
+use App\Http\Controllers\Api\TransaksiPetaniController;
 use App\Http\Controllers\WilayahController as WilayahExportImportController;
 
 // Auth Routes (Public)
@@ -30,6 +31,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/petani/{id}', [PetaniController::class, 'update']);
         Route::post('/petani/{id}', [PetaniController::class, 'update']); // For FormData (file upload)
         Route::delete('/petani/{id}', [PetaniController::class, 'destroy']);
+        
+        // Transaksi Petani Routes
+        Route::apiResource('/transaksi-petani', TransaksiPetaniController::class);
     });
     
     // Penggilingan Routes - Admin and Penggilingan role can access

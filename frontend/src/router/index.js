@@ -24,6 +24,12 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin', 'lapangan', 'superadmin'] }
     },
     {
+      path: '/transaksi-petani',
+      name: 'transaksi-petani',
+      component: () => import('../views/TransaksiPetaniView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'lapangan', 'superadmin'] }
+    },
+    {
       path: '/surat-pernyataan',
       name: 'surat-pernyataan',
       component: () => import('../views/SuratPernyataanView.vue'),
