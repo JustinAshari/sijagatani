@@ -33,12 +33,16 @@
         <span class="stat-value">{{ filteredData.length }}</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Total Tonase (dalam KG):</span>
-        <span class="stat-value">{{ totalTonase}} KG</span>
+        <span class="stat-label">Tonase Diterima:</span>
+        <span class="stat-value text-green">{{ totalTonaseDiterima }} KG</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Total Angkutan:</span>
-        <span class="stat-value">{{ totalAngkutan }}</span>
+        <span class="stat-label">Tonase Pending:</span>
+        <span class="stat-value text-yellow">{{ totalTonasePending }} KG</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Tonase Ditolak:</span>
+        <span class="stat-value text-red">{{ totalTonaseDitolak }} KG</span>
       </div>
     </div>
 
@@ -616,14 +620,27 @@ const form = ref({
   ],
 })
 
-const totalTonase = computed(() => {
-  const sum = filteredData.value.reduce((sum, item) => sum + parseFloat(String(item.total_tonase)), 0)
+const totalTonaseDiterima = computed(() => {
+  const sum = filteredData.value
+    .filter(item => item.status_verifikasi === 'disetujui')
+    .reduce((sum, item) => sum + parseFloat(String(item.total_tonase)), 0)
   return sum.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 })
 
-const totalAngkutan = computed(() => {
-  return filteredData.value.reduce((sum, item) => sum + item.jumlah_angkutan, 0)
+const totalTonasePending = computed(() => {
+  const sum = filteredData.value
+    .filter(item => !item.status_verifikasi || item.status_verifikasi === 'pending')
+    .reduce((sum, item) => sum + parseFloat(String(item.total_tonase)), 0)
+  return sum.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 })
+
+const totalTonaseDitolak = computed(() => {
+  const sum = filteredData.value
+    .filter(item => item.status_verifikasi === 'ditolak')
+    .reduce((sum, item) => sum + parseFloat(String(item.total_tonase)), 0)
+  return sum.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+})
+
 
 const getImageUrl = (path) => getStorageUrl(path)
 
@@ -1105,6 +1122,15 @@ const downloadMakloonGKP = async (penggilinganId) => {
   color: #2c3e50;
   font-size: 24px;
   font-weight: bold;
+}
+.text-green {
+  color: #27ae60 !important;
+}
+.text-yellow {
+  color: #f39c12 !important;
+}
+.text-red {
+  color: #e74c3c !important;
 }
 
 .filter-section {

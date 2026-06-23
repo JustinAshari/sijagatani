@@ -12,6 +12,14 @@ class PetaniSeeder extends Seeder
         // Provinsi ID: 2 = Jawa Tengah
         // Kabupaten: 6=Kota Surakarta, 7=Kab.Boyolali, 8=Kab.Sukoharjo,
         //            9=Kab.Karanganyar, 10=Kab.Wonogiri, 11=Kab.Sragen, 12=Kab.Klaten
+        \App\Models\Provinsi::firstOrCreate(['id' => 2], ['nama' => 'Jawa Tengah']);
+        \App\Models\Kabupaten::firstOrCreate(['id' => 6], ['provinsi_id' => 2, 'nama' => 'Kota Surakarta']);
+        \App\Models\Kabupaten::firstOrCreate(['id' => 7], ['provinsi_id' => 2, 'nama' => 'Kab. Boyolali']);
+        \App\Models\Kabupaten::firstOrCreate(['id' => 8], ['provinsi_id' => 2, 'nama' => 'Kab. Sukoharjo']);
+        \App\Models\Kabupaten::firstOrCreate(['id' => 9], ['provinsi_id' => 2, 'nama' => 'Kab. Karanganyar']);
+        \App\Models\Kabupaten::firstOrCreate(['id' => 10], ['provinsi_id' => 2, 'nama' => 'Kab. Wonogiri']);
+        \App\Models\Kabupaten::firstOrCreate(['id' => 11], ['provinsi_id' => 2, 'nama' => 'Kab. Sragen']);
+        \App\Models\Kabupaten::firstOrCreate(['id' => 12], ['provinsi_id' => 2, 'nama' => 'Kab. Klaten']);
 
         $petaniData = [
             // ── Kota Surakarta ─────────────────────────────────────────────
@@ -276,12 +284,8 @@ class PetaniSeeder extends Seeder
                 continue;
             }
 
-            Petani::create(array_merge($data, [
-                'catatan_verifikasi' => $data['catatan_verifikasi'] ?? null,
-                'verified_at'        => $data['status_verifikasi'] !== 'pending'
-                    ? now()->subDays(rand(1, 15))
-                    : null,
-            ]));
+            $cleanData = collect($data)->except(['status_verifikasi', 'catatan_verifikasi'])->toArray();
+            Petani::create($cleanData);
         }
     }
 }

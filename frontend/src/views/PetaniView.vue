@@ -66,15 +66,7 @@
               <option v-for="kab in kabupatenList" :key="kab" :value="kab">{{ kab }}</option>
             </select>
           </div>
-          <div class="fd-field">
-            <label class="fd-label">Status Verifikasi</label>
-            <select v-model="filterStatus" class="fd-select">
-              <option value="">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="disetujui">Disetujui</option>
-              <option value="ditolak">Ditolak</option>
-            </select>
-          </div>
+
           <div class="fd-field">
             <label class="fd-label">Tanggal Dari</label>
             <input v-model="filterTanggalDari" type="date" class="fd-input" />
@@ -149,10 +141,7 @@
             <th v-if="visibleCols.no_telepon">No Telepon</th>
             <th v-if="visibleCols.bank">Bank</th>
             <th v-if="visibleCols.no_rekening">No Rekening</th>
-            <th v-if="visibleCols.status_verifikasi">Status Verifikasi</th>
-            <th v-if="visibleCols.catatan_verifikasi">Catatan Verifikasi</th>
             <th>Aksi</th>
-            <th v-if="authStore.canVerify">Verifikasi</th>
           </tr>
         </thead>
         <tbody>
@@ -185,12 +174,7 @@
             <td v-if="visibleCols.no_telepon">{{ petani.no_telepon || '-' }}</td>
             <td v-if="visibleCols.bank">{{ petani.bank || '-' }}</td>
             <td v-if="visibleCols.no_rekening">{{ petani.no_rekening || '-' }}</td>
-            <td v-if="visibleCols.status_verifikasi" class="text-center">
-              <span :class="['badge-status', 'badge-' + petani.status_verifikasi]">
-                {{ petani.status_verifikasi === 'disetujui' ? 'Disetujui' : petani.status_verifikasi === 'ditolak' ? 'Ditolak' : 'Pending' }}
-              </span>
-            </td>
-            <td v-if="visibleCols.catatan_verifikasi">{{ petani.catatan_verifikasi || '-' }}</td>
+
             <td class="action-buttons">
               <button @click="viewDetail(petani)" class="btn-view" title="Detail">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -211,14 +195,7 @@
                 </svg>
               </button>
             </td>
-            <td v-if="authStore.canVerify" class="verifikasi-cell">
-              <button @click="openVerifikasiModal(petani)" class="btn-verify" title="Verifikasi">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-              </button>
-            </td>
+
           </tr>
         </tbody>
       </table>
@@ -594,44 +571,7 @@
       </div>
     </div>
 
-    <!-- Modal Verifikasi -->
-    <div v-if="showVerifikasiModal" class="modal" @click.self="showVerifikasiModal = false">
-      <div class="modal-content modal-verifikasi">
-        <div class="modal-header">
-          <h3>Verifikasi Data Petani</h3>
-          <button @click="showVerifikasiModal = false" class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p class="verifikasi-info">
-            <strong>{{ verifikasiItem?.nama }}</strong><br>
-            <span>NIK: {{ verifikasiItem?.nik }}</span>
-          </p>
-          <div class="form-group">
-            <label>Status Verifikasi <span class="required">*</span></label>
-            <select v-model="verifikasiForm.status_verifikasi" class="select-status">
-              <option value="pending">Pending</option>
-              <option value="disetujui">Disetujui</option>
-              <option value="ditolak">Ditolak</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Catatan</label>
-            <textarea
-              v-model="verifikasiForm.catatan_verifikasi"
-              rows="3"
-              placeholder="Catatan verifikasi (opsional)..."
-              class="textarea-catatan"
-            ></textarea>
-          </div>
-          <div class="modal-footer-buttons">
-            <button @click="showVerifikasiModal = false" class="btn-cancel">Batal</button>
-            <button @click="submitVerifikasi" class="btn-submit-verifikasi" :disabled="verifikasiLoading">
-              {{ verifikasiLoading ? 'Menyimpan...' : 'Simpan Verifikasi' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+
     </div>
   </div>
 </template>
@@ -648,12 +588,9 @@ const searchQuery = ref('')
 const filterKabupaten = ref('')
 const filterTanggalDari = ref('')
 const filterTanggalSampai = ref('')
-const filterStatus = ref('')
-
 const petaniActiveFilterCount = computed(() => {
   let count = 0
   if (filterKabupaten.value) count++
-  if (filterStatus.value) count++
   if (filterTanggalDari.value) count++
   if (filterTanggalSampai.value) count++
   return count
@@ -681,8 +618,6 @@ const allColDefs = [
   { key: 'no_telepon', label: 'No Telepon' },
   { key: 'bank', label: 'Bank' },
   { key: 'no_rekening', label: 'No Rekening', adminOnly: false },
-  { key: 'status_verifikasi', label: 'Status Verifikasi', adminOnly: false },
-  { key: 'catatan_verifikasi', label: 'Catatan Verifikasi', adminOnly: false },
 ]
 const colDefs = computed(() =>
   allColDefs.filter(c => !c.adminOnly || authStore.canVerify)
@@ -692,17 +627,8 @@ const visibleCols = ref({
   potensi_panen: false, komoditi: true, alamat: false, provinsi_id: false,
   kabupaten_id: true, kecamatan_id: false, kalurahan_id: false,
   no_telepon: false, bank: false, no_rekening: false,
-  status_verifikasi: true, catatan_verifikasi: false
 })
-const colSpan = computed(() => 2 + Object.values(visibleCols.value).filter(Boolean).length + (authStore.canVerify ? 1 : 0))
-
-const showVerifikasiModal = ref(false)
-const verifikasiItem = ref(null)
-const verifikasiLoading = ref(false)
-const verifikasiForm = ref({
-  status_verifikasi: 'pending',
-  catatan_verifikasi: ''
-})
+const colSpan = computed(() => 2 + Object.values(visibleCols.value).filter(Boolean).length)
 const kabupatenList = computed(() => allKabupaten.value.map(k => k.nama))
 const nikCheckTimeout = ref(null)
 const nikStatus = ref({ message: '', class: '', isDuplicate: false })
@@ -782,7 +708,6 @@ const applyFilter = async () => {
     if (filterKabupaten.value) params.kabupaten = filterKabupaten.value
     if (filterTanggalDari.value) params.tanggal_dari = filterTanggalDari.value
     if (filterTanggalSampai.value) params.tanggal_sampai = filterTanggalSampai.value
-    if (filterStatus.value) params.status_verifikasi = filterStatus.value
 
     const response = await api.get('/petani', { params })
     petaniList.value = response.data.data
@@ -795,7 +720,6 @@ const resetFilter = () => {
   filterKabupaten.value = ''
   filterTanggalDari.value = ''
   filterTanggalSampai.value = ''
-  filterStatus.value = ''
   searchQuery.value = ''
   fetchPetani()
 }
@@ -1019,30 +943,7 @@ const openImage = (url) => {
   window.open(url, '_blank')
 }
 
-const openVerifikasiModal = (petani) => {
-  verifikasiItem.value = petani
-  verifikasiForm.value = {
-    status_verifikasi: petani.status_verifikasi || 'pending',
-    catatan_verifikasi: petani.catatan_verifikasi || ''
-  }
-  showVerifikasiModal.value = true
-}
 
-const submitVerifikasi = async () => {
-  if (!verifikasiItem.value) return
-  verifikasiLoading.value = true
-  try {
-    await api.post(`/petani/${verifikasiItem.value.id}/verifikasi`, verifikasiForm.value)
-    alert('Status verifikasi berhasil disimpan')
-    showVerifikasiModal.value = false
-    fetchPetani()
-  } catch (error) {
-    console.error('Error verifikasi:', error)
-    alert(error.response?.data?.message || 'Gagal menyimpan verifikasi')
-  } finally {
-    verifikasiLoading.value = false
-  }
-}
 
 const formatDate = (date) => {
   if (!date) return '-'

@@ -20,7 +20,7 @@ class TransaksiPetaniSeeder extends Seeder
             return;
         }
 
-        $statuses = ['pending', 'sukses', 'gagal'];
+        $statuses = ['belum', 'sudah'];
 
         foreach ($petani as $p) {
             // Generate 1-3 transactions per farmer
@@ -41,12 +41,37 @@ class TransaksiPetaniSeeder extends Seeder
                 // Random date in the last 6 months
                 $date = Carbon::now()->subDays(rand(1, 180))->format('Y-m-d');
 
+                $statusTransaksi = $statuses[array_rand($statuses)];
+                $statusVerifikasi = match ($statusTransaksi) {
+                    'sudah' => 'disetujui',
+                    default => rand(0, 1) ? 'pending' : 'ditolak',
+                };
+                $catatanVerifikasi = match ($statusVerifikasi) {
+                    'disetujui' => 'Transaksi valid dan sesuai dokumen.',
+                    'ditolak' => 'Dokumen pendukung tidak lengkap.',
+                    default => null,
+                };
+                $verifiedAt = $statusVerifikasi !== 'pending' ? Carbon::parse($date)->addHours(rand(1, 24)) : null;
+                $verifiedBy = null;
+                if ($statusVerifikasi !== 'pending') {
+                    $verifiedBy = \App\Models\User::where('role', 'admin')->first()?->id 
+                        ?? \App\Models\User::first()?->id;
+                }
+
                 TransaksiPetani::create([
                     'petani_id' => $p->id,
+                    'komoditas' => $p->komoditi ?? 'Gabah',
                     'tanggal_transaksi' => $date,
                     'volume_kg' => $volume,
+                    'harga_per_kg' => $pricePerKg,
                     'nominal' => $nominal,
-                    'status_transaksi' => $statuses[array_rand($statuses)],
+                    'status_transaksi' => $statusTransaksi,
+                    'status_verifikasi' => $statusVerifikasi,
+                    'catatan_verifikasi' => $catatanVerifikasi,
+                    'verified_at' => $verifiedAt,
+                    'verified_by' => $verifiedBy,
+                    'bank' => $p->bank,
+                    'no_rekening' => $p->no_rekening,
                 ]);
             }
         }

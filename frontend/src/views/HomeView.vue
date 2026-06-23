@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import api from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
@@ -29,6 +29,7 @@ const greetingEmoji = computed(() => {
 })
 
 const petaniData = ref([])
+const transaksiData = ref([])
 const penggilinganData = ref([])
 const usersData = ref([])
 const subAdminData = ref([])
@@ -37,7 +38,10 @@ const loading = ref(true)
 const fetchAll = async () => {
   loading.value = true
   const tasks = []
-  if (authStore.canAccessPetani)       tasks.push(api.get('/petani').then(r => { petaniData.value = r.data.data || [] }))
+  if (authStore.canAccessPetani) {
+    tasks.push(api.get('/petani').then(r => { petaniData.value = r.data.data || [] }))
+    tasks.push(api.get('/transaksi-petani').then(r => { transaksiData.value = r.data.data || [] }))
+  }
   if (authStore.canAccessPenggilingan) tasks.push(api.get('/penggilingan').then(r => { penggilinganData.value = r.data.data || [] }))
   if (authStore.canAccessUsers)        tasks.push(api.get('/users').then(r => { usersData.value = r.data.data || [] }))
   if (authStore.canManageSubAdmins)    tasks.push(api.get('/my-sub-admins').then(r => { subAdminData.value = r.data.data || [] }))
@@ -52,10 +56,11 @@ const petaniByKomoditi = computed(() => {
   for (const p of petaniData.value) { const k = p.komoditi || 'Lainnya'; map[k] = (map[k] || 0) + 1 }
   return map
 })
-const petaniByStatus = computed(() => ({
-  Disetujui: petaniData.value.filter(p => p.status_verifikasi === 'disetujui').length,
-  Pending:   petaniData.value.filter(p => !p.status_verifikasi || p.status_verifikasi === 'pending').length,
-  Ditolak:   petaniData.value.filter(p => p.status_verifikasi === 'ditolak').length,
+const transaksiTotal = computed(() => transaksiData.value.length)
+const transaksiByStatus = computed(() => ({
+  Disetujui: transaksiData.value.filter(t => t.status_verifikasi === 'disetujui').length,
+  Pending:   transaksiData.value.filter(t => !t.status_verifikasi || t.status_verifikasi === 'pending').length,
+  Ditolak:   transaksiData.value.filter(t => t.status_verifikasi === 'ditolak').length,
 }))
 const penggilinganTotal = computed(() => penggilinganData.value.length)
 const penggilinganUnikTotal = computed(() => new Set(penggilinganData.value.map(p => p.nama_penggilingan).filter(Boolean)).size)
@@ -118,7 +123,7 @@ const roleColors     = ['#8b5cf6', '#10b981', '#f59e0b', '#3b82f6']
 const gkpColors      = ['#10b981', '#f59e0b', '#ef4444']
 
 const komoditiSegments = computed(() => donutSegments(petaniByKomoditi.value,       komoditiColors))
-const statusSegments   = computed(() => donutSegments(petaniByStatus.value,         statusColors))
+const statusSegments   = computed(() => donutSegments(transaksiByStatus.value,         statusColors))
 const roleSegments     = computed(() => donutSegments(usersByRole.value,            roleColors))
 const gkpSegments      = computed(() => donutSegments(penggilinganByStatus.value,   gkpColors))
 
@@ -334,8 +339,8 @@ const roleDesc = computed(() => {
           <div class="cc-top">
             <div class="cc-dot cc-dot-green"></div>
             <div>
-              <p class="cc-title">Verifikasi Petani</p>
-              <p class="cc-sub">{{ petaniTotal }} petani terdaftar</p>
+              <p class="cc-title">Verifikasi Transaksi Petani</p>
+              <p class="cc-sub">{{ transaksiTotal }} transaksi terdaftar</p>
             </div>
             <span class="cc-live"><span class="rtdot"></span> Live</span>
           </div>
@@ -350,7 +355,7 @@ const roleDesc = computed(() => {
                   stroke-linecap="round"
                   style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dasharray .6s ease"/>
                 <text x="60" y="55" text-anchor="middle" class="donut-label">Total</text>
-                <text x="60" y="70" text-anchor="middle" class="donut-value">{{ petaniTotal }}</text>
+                <text x="60" y="70" text-anchor="middle" class="donut-value">{{ transaksiTotal }}</text>
               </svg>
             </div>
             <div class="legend">

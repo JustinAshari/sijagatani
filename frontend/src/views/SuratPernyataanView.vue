@@ -146,8 +146,6 @@
             <th v-if="visibleCols.bank">Bank</th>
             <th v-if="visibleCols.no_rekening">No Rekening</th>
             <th v-if="visibleCols.surat_pernyataan">Surat Pernyataan</th>
-            <th v-if="visibleCols.status_verifikasi">Status Verifikasi</th>
-            <th v-if="visibleCols.catatan_verifikasi">Catatan Verifikasi</th>
             <th>Aksi</th>
           </tr>
         </thead>
@@ -192,8 +190,7 @@
                 Belum Upload
               </span>
             </td>
-            <td v-if="visibleCols.status_verifikasi" class="text-center">{{ petani.status_verifikasi || 'pending' }}</td>
-            <td v-if="visibleCols.catatan_verifikasi">{{ petani.catatan_verifikasi || '-' }}</td>
+
             <td>
               <div class="action-buttons">
                 <button v-if="petani.surat_pernyataan" @click="viewSurat(petani)" class="btn-view" title="Lihat Surat">
@@ -295,15 +292,13 @@ const colDefs = [
   { key: 'bank', label: 'Bank' },
   { key: 'no_rekening', label: 'No Rekening' },
   { key: 'surat_pernyataan', label: 'Surat Pernyataan' },
-  { key: 'status_verifikasi', label: 'Status Verifikasi' },
-  { key: 'catatan_verifikasi', label: 'Catatan Verifikasi' },
 ]
 const visibleCols = ref({
   tanggal: true, nik: true, nama: true, luas_lahan: false, alamat_lahan: false,
   potensi_panen: false, komoditi: false, alamat: false, provinsi_id: false,
   kabupaten_id: false, kecamatan_id: true, kalurahan_id: true,
   no_telepon: true, bank: false, no_rekening: false,
-  surat_pernyataan: true, status_verifikasi: false, catatan_verifikasi: false
+  surat_pernyataan: true
 })
 const colSpan = computed(() => 2 + Object.values(visibleCols.value).filter(Boolean).length)
 

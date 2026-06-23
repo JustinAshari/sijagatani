@@ -51,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Verifikasi Routes - Admin & SuperAdmin only
     Route::middleware('role:admin,superadmin')->group(function () {
-        Route::post('/petani/{id}/verifikasi', [PetaniController::class, 'verifikasi']);
+        Route::post('/transaksi-petani/{id}/verifikasi', [TransaksiPetaniController::class, 'verifikasi']);
         Route::post('/penggilingan/{id}/verifikasi', [PenggilinganController::class, 'verifikasi']);
     });
 

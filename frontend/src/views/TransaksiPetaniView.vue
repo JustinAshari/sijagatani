@@ -33,7 +33,7 @@
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon icon-green">
+        <div class="stat-icon icon-blue">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
@@ -41,7 +41,46 @@
         <div class="stat-info">
           <h3>Total Nominal</h3>
           <p class="stat-val">{{ formatRupiah(statistics.totalNominal) }}</p>
-          <span class="stat-sub">Transaksi berstatus sukses</span>
+          <span class="stat-sub">Semua transaksi</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <h3>Nominal Sudah Transfer</h3>
+          <p class="stat-val text-green-val">{{ formatRupiah(statistics.nominalSudah) }}</p>
+          <span class="stat-sub">Transaksi berhasil ditransfer</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-red">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <h3>Nominal Belum Transfer</h3>
+          <p class="stat-val text-red-val">{{ formatRupiah(statistics.nominalBelum) }}</p>
+          <span class="stat-sub">Belum ditransfer</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <h3>Tonase Diterima</h3>
+          <p class="stat-val text-green-val">{{ formatVolume(statistics.volumeDiterima) }} KG</p>
+          <span class="stat-sub">Transaksi disetujui</span>
         </div>
       </div>
 
@@ -52,9 +91,22 @@
           </svg>
         </div>
         <div class="stat-info">
-          <h3>Total Volume</h3>
-          <p class="stat-val">{{ formatVolume(statistics.totalVolume) }} KG</p>
-          <span class="stat-sub">Transaksi berstatus sukses</span>
+          <h3>Tonase Pending</h3>
+          <p class="stat-val text-orange-val">{{ formatVolume(statistics.volumePending) }} KG</p>
+          <span class="stat-sub">Menunggu verifikasi</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-red">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <h3>Tonase Ditolak</h3>
+          <p class="stat-val text-red-val">{{ formatVolume(statistics.volumeDitolak) }} KG</p>
+          <span class="stat-sub">Transaksi ditolak</span>
         </div>
       </div>
     </div>
@@ -75,12 +127,21 @@
             @reset="resetFilters"
           >
             <div class="fd-field">
-              <label class="fd-label">Status Transaksi</label>
+              <label class="fd-label">Status Transfer</label>
               <select v-model="filterStatus" class="fd-select">
                 <option value="">Semua Status</option>
+                <option value="belum">Belum Transfer</option>
+                <option value="sudah">Sudah Transfer</option>
+                <option value="ditolak">Ditolak</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Status Verifikasi</label>
+              <select v-model="filterStatusVerifikasi" class="fd-select">
+                <option value="">Semua Status</option>
                 <option value="pending">Pending</option>
-                <option value="sukses">Sukses</option>
-                <option value="gagal">Gagal</option>
+                <option value="disetujui">Disetujui</option>
+                <option value="ditolak">Ditolak</option>
               </select>
             </div>
             <div class="fd-field">
@@ -126,11 +187,16 @@
               <th>No</th>
               <th>Nama Petani</th>
               <th>NIK</th>
+              <th>Komoditas</th>
               <th>Tanggal Transaksi</th>
               <th>Volume (KG)</th>
+              <th>Harga/KG (Rp)</th>
               <th>Nominal (Rp)</th>
-              <th>Status</th>
+              <th>Status Transfer</th>
+              <th>Status Verifikasi</th>
+              <th>Catatan Verifikasi</th>
               <th>Aksi</th>
+              <th v-if="authStore.canVerify">Verifikasi</th>
             </tr>
           </thead>
           <tbody>
@@ -138,14 +204,26 @@
               <td class="td-num">{{ idx + 1 }}</td>
               <td class="td-name">{{ tx.petani?.nama || '-' }}</td>
               <td><code class="nik-code">{{ tx.petani?.nik || '-' }}</code></td>
-              <td class="td-date">{{ formatDate(tx.tanggal_transaksi) }}</td>
-              <td class="text-right font-medium">{{ formatVolume(tx.volume_kg) }} KG</td>
-              <td class="text-right font-semibold">{{ formatRupiah(tx.nominal) }}</td>
-              <td class="text-center">
-                <span class="badge-status" :class="'badge-' + tx.status_transaksi">
-                  {{ tx.status_transaksi === 'sukses' ? 'Sukses' : tx.status_transaksi === 'gagal' ? 'Gagal' : 'Pending' }}
+              <td>
+                <span class="badge" :class="tx.komoditas ? `badge-${tx.komoditas.toLowerCase()}` : ''">
+                  {{ tx.komoditas || '-' }}
                 </span>
               </td>
+              <td class="td-date">{{ formatDate(tx.tanggal_transaksi) }}</td>
+              <td class="text-right font-medium">{{ formatVolume(tx.volume_kg) }} KG</td>
+              <td class="text-right font-medium">{{ formatRupiah(tx.harga_per_kg) }}</td>
+              <td class="text-right font-semibold text-blue">{{ formatRupiah(tx.nominal) }}</td>
+              <td class="text-center">
+                <span class="badge-status" :class="'badge-' + tx.status_transaksi">
+                  {{ tx.status_transaksi === 'sudah' ? 'Sudah Transfer' : tx.status_transaksi === 'ditolak' ? 'Ditolak' : 'Belum Transfer' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="badge-status" :class="'badge-' + (tx.status_verifikasi || 'pending')">
+                  {{ tx.status_verifikasi === 'disetujui' ? 'Disetujui' : tx.status_verifikasi === 'ditolak' ? 'Ditolak' : 'Pending' }}
+                </span>
+              </td>
+              <td>{{ tx.catatan_verifikasi || '-' }}</td>
               <td class="td-actions">
                 <button @click="viewDetail(tx)" class="btn-icon btn-view" title="Detail">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -155,6 +233,14 @@
                 </button>
                 <button v-if="authStore.canManagePetani" @click="confirmDelete(tx)" class="btn-icon btn-del" title="Hapus">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </td>
+              <td v-if="authStore.canVerify" class="text-center verifikasi-cell">
+                <button @click="openVerifikasiModal(tx)" class="btn-icon btn-view btn-verify" title="Verifikasi" style="background: #e0f2fe; border-color: #bae6fd; color: #0284c7;">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
                 </button>
               </td>
             </tr>
@@ -174,12 +260,29 @@
         <form @submit.prevent="submitForm" class="modal-form">
           <div class="form-group">
             <label>Petani <span class="req">*</span></label>
-            <select v-model="form.petani_id" required :disabled="isEdit" class="select-petani">
-              <option value="">Pilih Petani</option>
-              <option v-for="p in petaniList" :key="p.id" :value="p.id">
-                {{ p.nama }} (NIK: {{ p.nik }})
-              </option>
-            </select>
+            <div ref="selectPetaniContainer" class="searchable-select">
+              <input
+                type="text"
+                v-model="searchPetaniQuery"
+                @focus="showPetaniDropdown = true"
+                placeholder="Cari nama atau NIK petani..."
+                class="searchable-select-input"
+                :disabled="isEdit"
+              />
+              <div v-if="showPetaniDropdown && !isEdit" class="searchable-select-dropdown">
+                <div
+                  v-for="p in filteredPetaniOptions"
+                  :key="p.id"
+                  @click="selectPetaniOption(p)"
+                  class="searchable-select-option"
+                >
+                  {{ p.nama }} (NIK: {{ p.nik }})
+                </div>
+                <div v-if="filteredPetaniOptions.length === 0" class="searchable-select-no-results">
+                  Tidak ada hasil
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="form-group">
@@ -189,22 +292,50 @@
 
           <div class="form-row-2">
             <div class="form-group">
-              <label>Volume (KG) <span class="req">*</span></label>
-              <input v-model="form.volume_kg" type="number" step="0.01" min="0.01" placeholder="Contoh: 1500" required />
+              <label>Komoditas <span class="req">*</span></label>
+              <select v-model="form.komoditas" required>
+                <option value="Gabah">Gabah</option>
+                <option value="Beras">Beras</option>
+                <option value="Jagung">Jagung</option>
+              </select>
             </div>
 
             <div class="form-group">
-              <label>Nominal (Rp) <span class="req">*</span></label>
-              <input v-model="form.nominal" type="number" min="0" placeholder="Contoh: 10500000" required />
+              <label>Volume (KG) <span class="req">*</span></label>
+              <input v-model="form.volume_kg" type="number" step="0.01" min="0.01" placeholder="Contoh: 1500" required />
             </div>
           </div>
 
-          <div class="form-group">
-            <label>Status Transaksi <span class="req">*</span></label>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Harga per KG (Rp) <span class="req">*</span></label>
+              <input v-model="form.harga_per_kg" type="number" step="0.01" min="0.01" placeholder="Contoh: 7000" required />
+            </div>
+
+            <div class="form-group">
+              <label>Total Nominal (Rp) <span class="req">*</span></label>
+              <input v-model="form.nominal" type="number" min="0" placeholder="Otomatis dihitung..." readonly class="input-readonly" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Bank</label>
+              <input v-model="form.bank" type="text" placeholder="Contoh: BRI, Mandiri" />
+            </div>
+
+            <div class="form-group">
+              <label>Nomor Rekening</label>
+              <input v-model="form.no_rekening" type="text" placeholder="Contoh: 1234567890" />
+            </div>
+          </div>
+
+          <div class="form-group" v-if="authStore.canVerify">
+            <label>Status Transfer <span class="req">*</span></label>
             <select v-model="form.status_transaksi" required>
-              <option value="pending">Pending</option>
-              <option value="sukses">Sukses</option>
-              <option value="gagal">Gagal</option>
+              <option value="belum">Belum Transfer</option>
+              <option value="sudah">Sudah Transfer</option>
+              <option value="ditolak">Ditolak</option>
             </select>
           </div>
 
@@ -236,9 +367,23 @@
                 <span class="det-val">{{ formatDate(selectedTx.tanggal_transaksi) }}</span>
               </div>
               <div class="detail-item">
-                <span class="det-label">Status</span>
+                <span class="det-label">Status Transfer</span>
                 <span class="badge-status" :class="'badge-' + selectedTx.status_transaksi">
-                  {{ selectedTx.status_transaksi === 'sukses' ? 'Sukses' : selectedTx.status_transaksi === 'gagal' ? 'Gagal' : 'Pending' }}
+                  {{ selectedTx.status_transaksi === 'sudah' ? 'Sudah Transfer' : selectedTx.status_transaksi === 'ditolak' ? 'Ditolak' : 'Belum Transfer' }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <span class="det-label">Bank</span>
+                <span class="det-val">{{ selectedTx.bank || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="det-label">Nomor Rekening</span>
+                <span class="det-val">{{ selectedTx.no_rekening || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="det-label">Komoditas</span>
+                <span class="badge" :class="selectedTx.komoditas ? `badge-${selectedTx.komoditas.toLowerCase()}` : ''">
+                  {{ selectedTx.komoditas || '-' }}
                 </span>
               </div>
               <div class="detail-item">
@@ -246,8 +391,30 @@
                 <span class="det-val font-medium">{{ formatVolume(selectedTx.volume_kg) }} KG</span>
               </div>
               <div class="detail-item">
-                <span class="det-label">Nominal</span>
+                <span class="det-label">Harga per KG</span>
+                <span class="det-val font-medium">{{ formatRupiah(selectedTx.harga_per_kg) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="det-label">Total Nominal</span>
                 <span class="det-val font-semibold text-blue">{{ formatRupiah(selectedTx.nominal) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="det-label">Status Verifikasi</span>
+                <span class="badge-status" :class="'badge-' + (selectedTx.status_verifikasi || 'pending')">
+                  {{ selectedTx.status_verifikasi === 'disetujui' ? 'Disetujui' : selectedTx.status_verifikasi === 'ditolak' ? 'Ditolak' : 'Pending' }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <span class="det-label">Catatan Verifikasi</span>
+                <span class="det-val">{{ selectedTx.catatan_verifikasi || '-' }}</span>
+              </div>
+              <div class="detail-item" v-if="selectedTx.verifier">
+                <span class="det-label">Diverifikasi Oleh</span>
+                <span class="det-val">{{ selectedTx.verifier?.name || '-' }}</span>
+              </div>
+              <div class="detail-item" v-if="selectedTx.verified_at">
+                <span class="det-label">Waktu Verifikasi</span>
+                <span class="det-val">{{ formatDate(selectedTx.verified_at) }}</span>
               </div>
             </div>
           </div>
@@ -282,12 +449,50 @@
         </div>
       </div>
     </div>
-
+    <!-- Modal Verifikasi -->
+    <div v-if="showVerifikasiModal" class="modal-overlay" @click.self="showVerifikasiModal = false">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Verifikasi Transaksi Petani</h3>
+          <button class="btn-close" @click="showVerifikasiModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="verifikasi-info" style="margin-bottom: 1.2rem; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.88rem;">
+            <strong>Nama Petani:</strong> {{ verifikasiItem?.petani?.nama }}<br>
+            <strong>Nominal:</strong> {{ formatRupiah(verifikasiItem?.nominal) }}<br>
+            <strong>Volume:</strong> {{ formatVolume(verifikasiItem?.volume_kg) }} KG
+          </p>
+          <div class="form-group">
+            <label>Status Verifikasi <span class="req">*</span></label>
+            <select v-model="verifikasiForm.status_verifikasi" class="select-status" style="width: 100%; padding: 0.6rem 0.85rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem;">
+              <option value="pending">Pending</option>
+              <option value="disetujui">Disetujui</option>
+              <option value="ditolak">Ditolak</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Catatan</label>
+            <textarea
+              v-model="verifikasiForm.catatan_verifikasi"
+              rows="3"
+              placeholder="Catatan verifikasi (opsional)..."
+              style="width: 100%; padding: 0.6rem 0.85rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem; resize: vertical;"
+            ></textarea>
+          </div>
+          <div class="modal-actions" style="margin-top: 1.5rem;">
+            <button @click="showVerifikasiModal = false" class="btn-secondary">Batal</button>
+            <button @click="submitVerifikasi" class="btn-primary" :disabled="verifikasiLoading" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+              {{ verifikasiLoading ? 'Menyimpan...' : 'Simpan Verifikasi' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import api from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import FilterDropdown from '../components/FilterDropdown.vue'
@@ -303,49 +508,121 @@ const showDetailModal = ref(false)
 const isEdit = ref(false)
 const selectedTx = ref(null)
 
+const emptyForm = () => ({
+  id: null,
+  petani_id: '',
+  komoditas: 'Gabah',
+  tanggal_transaksi: new Date().toISOString().split('T')[0],
+  volume_kg: '',
+  harga_per_kg: '',
+  nominal: '',
+  status_transaksi: 'belum',
+  bank: '',
+  no_rekening: ''
+})
+
+const form = ref(emptyForm())
+
+const searchPetaniQuery = ref('')
+const showPetaniDropdown = ref(false)
+const selectPetaniContainer = ref(null)
+
+const filteredPetaniOptions = computed(() => {
+  const query = searchPetaniQuery.value.toLowerCase().trim()
+  if (!query) return petaniList.value
+  return petaniList.value.filter(p => 
+    p.nama.toLowerCase().includes(query) || 
+    p.nik.includes(query)
+  )
+})
+
+const selectPetaniOption = (p) => {
+  form.value.petani_id = p.id
+  searchPetaniQuery.value = `${p.nama} (NIK: ${p.nik})`
+  showPetaniDropdown.value = false
+  
+  // Auto-populate bank and account number from selected farmer profile
+  form.value.bank = p.bank || ''
+  form.value.no_rekening = p.no_rekening || ''
+
+  // Auto-populate komoditas from selected farmer profile
+  form.value.komoditas = p.komoditi || 'Gabah'
+}
+
+const handleDocumentClick = (e) => {
+  if (selectPetaniContainer.value && !selectPetaniContainer.value.contains(e.target)) {
+    showPetaniDropdown.value = false
+  }
+}
+
+watch(searchPetaniQuery, (newVal) => {
+  if (!newVal) {
+    form.value.petani_id = ''
+  }
+})
+
+// Auto-calculate nominal based on volume_kg and harga_per_kg
+watch(() => [form.value.volume_kg, form.value.harga_per_kg], ([vol, price]) => {
+  const v = parseFloat(vol) || 0
+  const p = parseFloat(price) || 0
+  form.value.nominal = (v * p).toFixed(2)
+})
+
 // Filters
 const searchQuery = ref('')
 const filterStatus = ref('')
+const filterStatusVerifikasi = ref('')
 const filterTanggalDari = ref('')
 const filterTanggalSampai = ref('')
 
 const activeFilterCount = computed(() => {
   let count = 0
   if (filterStatus.value) count++
+  if (filterStatusVerifikasi.value) count++
   if (filterTanggalDari.value) count++
   if (filterTanggalSampai.value) count++
   return count
 })
 
-const emptyForm = () => ({
-  id: null,
-  petani_id: '',
-  tanggal_transaksi: new Date().toISOString().split('T')[0],
-  volume_kg: '',
-  nominal: '',
-  status_transaksi: 'pending'
-})
-
-const form = ref(emptyForm())
-
 // Statistics computed
 const statistics = computed(() => {
   let count = 0
-  let nominal = 0
-  let volume = 0
+  let totalNominal = 0
+  let nominalSudah = 0
+  let nominalBelum = 0
+  let volumeDiterima = 0
+  let volumePending = 0
+  let volumeDitolak = 0
 
   transaksiList.value.forEach(tx => {
     count++
-    if (tx.status_transaksi === 'sukses') {
-      nominal += parseFloat(tx.nominal)
-      volume += parseFloat(tx.volume_kg)
+    const nom = parseFloat(tx.nominal) || 0
+    totalNominal += nom
+    
+    if (tx.status_transaksi === 'sudah') {
+      nominalSudah += nom
+    } else if (tx.status_transaksi === 'belum') {
+      nominalBelum += nom
+    }
+    
+    const vol = parseFloat(tx.volume_kg) || 0
+    if (tx.status_verifikasi === 'disetujui') {
+      volumeDiterima += vol
+    } else if (!tx.status_verifikasi || tx.status_verifikasi === 'pending') {
+      volumePending += vol
+    } else if (tx.status_verifikasi === 'ditolak') {
+      volumeDitolak += vol
     }
   })
 
   return {
     totalCount: count,
-    totalNominal: nominal,
-    totalVolume: volume
+    totalNominal,
+    nominalSudah,
+    nominalBelum,
+    volumeDiterima,
+    volumePending,
+    volumeDitolak
   }
 })
 
@@ -355,6 +632,7 @@ const fetchTransaksi = async () => {
   try {
     const params = {}
     if (filterStatus.value) params.status_transaksi = filterStatus.value
+    if (filterStatusVerifikasi.value) params.status_verifikasi = filterStatusVerifikasi.value
     if (filterTanggalDari.value) params.tanggal_dari = filterTanggalDari.value
     if (filterTanggalSampai.value) params.tanggal_sampai = filterTanggalSampai.value
 
@@ -383,6 +661,7 @@ const applyFilters = async () => {
 
 const resetFilters = async () => {
   filterStatus.value = ''
+  filterStatusVerifikasi.value = ''
   filterTanggalDari.value = ''
   filterTanggalSampai.value = ''
   searchQuery.value = ''
@@ -407,6 +686,8 @@ const filteredTransaksi = computed(() => {
 const openAdd = () => {
   isEdit.value = false
   form.value = emptyForm()
+  searchPetaniQuery.value = ''
+  showPetaniDropdown.value = false
   showModal.value = true
 }
 
@@ -415,11 +696,18 @@ const openEdit = (tx) => {
   form.value = {
     id: tx.id,
     petani_id: tx.petani_id,
+    komoditas: tx.komoditas || 'Gabah',
     tanggal_transaksi: tx.tanggal_transaksi ? tx.tanggal_transaksi.split('T')[0] : '',
     volume_kg: tx.volume_kg,
+    harga_per_kg: tx.harga_per_kg,
     nominal: tx.nominal,
-    status_transaksi: tx.status_transaksi
+    status_transaksi: tx.status_transaksi,
+    bank: tx.bank || '',
+    no_rekening: tx.no_rekening || ''
   }
+  const p = petaniList.value.find(item => item.id === tx.petani_id) || tx.petani
+  searchPetaniQuery.value = p ? `${p.nama} (NIK: ${p.nik})` : ''
+  showPetaniDropdown.value = false
   showModal.value = true
 }
 
@@ -494,11 +782,49 @@ const formatRupiah = (val) => {
   return 'Rp ' + formatNumber(val)
 }
 
+const showVerifikasiModal = ref(false)
+const verifikasiItem = ref(null)
+const verifikasiLoading = ref(false)
+const verifikasiForm = ref({
+  status_verifikasi: 'pending',
+  catatan_verifikasi: ''
+})
+
+const openVerifikasiModal = (tx) => {
+  verifikasiItem.value = tx
+  verifikasiForm.value = {
+    status_verifikasi: tx.status_verifikasi || 'pending',
+    catatan_verifikasi: tx.catatan_verifikasi || ''
+  }
+  showVerifikasiModal.value = true
+}
+
+const submitVerifikasi = async () => {
+  if (!verifikasiItem.value) return
+  verifikasiLoading.value = true
+  try {
+    await api.post(`/transaksi-petani/${verifikasiItem.value.id}/verifikasi`, verifikasiForm.value)
+    alert('Status verifikasi berhasil disimpan')
+    showVerifikasiModal.value = false
+    await fetchTransaksi()
+  } catch (error) {
+    console.error('Error verifikasi:', error)
+    alert(error.response?.data?.message || 'Gagal menyimpan verifikasi')
+  } finally {
+    verifikasiLoading.value = false
+  }
+}
+
 onMounted(async () => {
+  document.addEventListener('click', handleDocumentClick)
   await Promise.all([
     fetchTransaksi(),
     fetchPetaniList()
   ])
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleDocumentClick)
 })
 </script>
 
@@ -581,6 +907,10 @@ onMounted(async () => {
 .icon-blue { background: #eff6ff; color: #3b82f6; }
 .icon-green { background: #ecfdf5; color: #10b981; }
 .icon-orange { background: #fff7ed; color: #f97316; }
+.icon-red { background: #fef2f2; color: #ef4444; }
+.text-green-val { color: #10b981; }
+.text-orange-val { color: #f97316; }
+.text-red-val { color: #ef4444; }
 
 .stat-info h3 {
   font-size: 0.82rem;
@@ -742,6 +1072,26 @@ onMounted(async () => {
   color: #065f46;
 }
 .badge-gagal {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+.badge-belum {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+.badge-sudah {
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+.badge-disetujui {
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+.badge-ditolak {
   background: #fee2e2;
   border: 1px solid #fecaca;
   color: #991b1b;
@@ -994,5 +1344,65 @@ onMounted(async () => {
   .data-table td:nth-child(4) {
     display: none;
   }
+}
+
+/* Searchable Select Dropdown */
+.searchable-select {
+  position: relative;
+  width: 100%;
+}
+.searchable-select-input {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.searchable-select-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+.searchable-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 2010;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.searchable-select-option {
+  padding: 0.6rem 0.85rem;
+  font-size: 0.875rem;
+  color: #1f2937;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s;
+}
+.searchable-select-option:hover {
+  background-color: #f3f4f6;
+  color: #1e3a8a;
+}
+.searchable-select-no-results {
+  padding: 0.6rem 0.85rem;
+  font-size: 0.875rem;
+  color: #9ca3af;
+  text-align: center;
+}
+.input-readonly {
+  background-color: #f3f4f6 !important;
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
 }
 </style>

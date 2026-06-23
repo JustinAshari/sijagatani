@@ -95,21 +95,6 @@ class ApiWorkflowTest extends TestCase
             'nama' => 'Petani Diupdate',
         ]);
 
-        $verifyResponse = $this->postJson('/api/petani/' . $petaniId . '/verifikasi', [
-            'status_verifikasi' => 'disetujui',
-            'catatan_verifikasi' => 'Data lengkap',
-        ]);
-
-        $verifyResponse->assertOk()
-            ->assertJsonPath('success', true)
-            ->assertJsonPath('data.status_verifikasi', 'disetujui');
-
-        $this->assertDatabaseHas('petani', [
-            'id' => $petaniId,
-            'status_verifikasi' => 'disetujui',
-            'verified_by' => $admin->id,
-        ]);
-
         $deleteResponse = $this->deleteJson('/api/petani/' . $petaniId);
 
         $deleteResponse->assertOk()
@@ -117,6 +102,113 @@ class ApiWorkflowTest extends TestCase
 
         $this->assertDatabaseMissing('petani', [
             'id' => $petaniId,
+        ]);
+    }
+
+    public function test_admin_can_crud_and_verify_transaksi_petani(): void
+    {
+        $admin = $this->makeUser('admin');
+        Sanctum::actingAs($admin);
+
+        $petani = Petani::create([
+            'tanggal' => now()->toDateString(),
+            'nik' => '9999888877776666',
+            'nama' => 'Petani Transaksi',
+            'alamat' => 'Alamat Transaksi',
+            'luas_lahan' => 2.00,
+            'alamat_lahan' => 'Lahan Transaksi',
+            'potensi_panen' => 600,
+            'komoditi' => 'Gabah',
+            'bank' => 'BRI',
+            'no_rekening' => '1234567890',
+        ]);
+
+        // Create Transaksi
+        $createResponse = $this->postJson('/api/transaksi-petani', [
+            'petani_id' => $petani->id,
+            'komoditas' => 'Gabah',
+            'tanggal_transaksi' => now()->toDateString(),
+            'volume_kg' => 1200,
+            'harga_per_kg' => 7000,
+            'nominal' => 8400000,
+            'status_transaksi' => 'belum',
+        ]);
+
+        $createResponse->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.volume_kg', '1200.00');
+
+        $transaksiId = $createResponse->json('data.id');
+
+        $this->assertDatabaseHas('transaksi_petani', [
+            'id' => $transaksiId,
+            'petani_id' => $petani->id,
+            'komoditas' => 'Gabah',
+            'volume_kg' => 1200,
+            'harga_per_kg' => 7000,
+            'nominal' => 8400000,
+            'status_transaksi' => 'belum',
+            'bank' => 'BRI',
+            'no_rekening' => '1234567890',
+        ]);
+
+        // Verify Transaksi as disetujui
+        $verifyResponse = $this->postJson('/api/transaksi-petani/' . $transaksiId . '/verifikasi', [
+            'status_verifikasi' => 'disetujui',
+            'catatan_verifikasi' => 'Transaksi disetujui',
+        ]);
+
+        $verifyResponse->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.status_verifikasi', 'disetujui');
+
+        $this->assertDatabaseHas('transaksi_petani', [
+            'id' => $transaksiId,
+            'status_verifikasi' => 'disetujui',
+            'verified_by' => $admin->id,
+        ]);
+
+        // Verify Transaksi as ditolak (should set status_transaksi to ditolak)
+        $verifyResponse2 = $this->postJson('/api/transaksi-petani/' . $transaksiId . '/verifikasi', [
+            'status_verifikasi' => 'ditolak',
+            'catatan_verifikasi' => 'Transaksi ditolak',
+        ]);
+
+        $verifyResponse2->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.status_transaksi', 'ditolak')
+            ->assertJsonPath('data.status_verifikasi', 'ditolak');
+
+        $this->assertDatabaseHas('transaksi_petani', [
+            'id' => $transaksiId,
+            'status_verifikasi' => 'ditolak',
+            'status_transaksi' => 'ditolak',
+        ]);
+
+        // Revert back to disetujui (should change status_transaksi to belum)
+        $verifyResponse3 = $this->postJson('/api/transaksi-petani/' . $transaksiId . '/verifikasi', [
+            'status_verifikasi' => 'disetujui',
+            'catatan_verifikasi' => 'Transaksi disetujui setelah ditolak',
+        ]);
+
+        $verifyResponse3->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.status_transaksi', 'belum')
+            ->assertJsonPath('data.status_verifikasi', 'disetujui');
+
+        $this->assertDatabaseHas('transaksi_petani', [
+            'id' => $transaksiId,
+            'status_verifikasi' => 'disetujui',
+            'status_transaksi' => 'belum',
+        ]);
+
+        // Delete Transaksi
+        $this->deleteJson('/api/transaksi-petani/' . $transaksiId)
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertDatabaseMissing('transaksi_petani', [
+            'id' => $transaksiId,
         ]);
     }
 

@@ -358,42 +358,4 @@ class PetaniController extends Controller
         );
     }
 
-    /**
-     * Verifikasi data petani (SuperAdmin & Admin only)
-     */
-    public function verifikasi(Request $request, string $id): JsonResponse
-    {
-        $validator = Validator::make($request->all(), [
-            'status_verifikasi' => 'required|in:pending,disetujui,ditolak',
-            'catatan_verifikasi' => 'nullable|string|max:1000',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $petani = Petani::find($id);
-        if (!$petani) {
-            return response()->json(['success' => false, 'message' => 'Data petani tidak ditemukan'], 404);
-        }
-
-        $petani->update([
-            'status_verifikasi' => $request->status_verifikasi,
-            'catatan_verifikasi' => $request->catatan_verifikasi,
-            'verified_at' => $request->status_verifikasi !== 'pending' ? now() : null,
-            'verified_by' => $request->status_verifikasi !== 'pending' ? $request->user()->id : null,
-        ]);
-
-        ActivityLogService::log($request, 'verify', 'petani', "Verifikasi petani {$petani->nama} → {$request->status_verifikasi}");
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Status verifikasi berhasil diperbarui',
-            'data' => $petani
-        ]);
-    }
 }
