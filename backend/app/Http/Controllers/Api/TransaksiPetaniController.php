@@ -46,11 +46,42 @@ class TransaksiPetaniController extends Controller
             });
         }
 
-        $transaksi = $query->latest('tanggal_transaksi')->latest('id')->get();
+        $query->latest('tanggal_transaksi')->latest('id');
+
+        $perPageInput = $request->input('per_page', 'all');
+        $allowedPerPage = [10, 20, 50, 100];
+
+        if ($perPageInput === 'all') {
+            $transaksi = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $transaksi,
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => $transaksi->count(),
+                    'per_page' => $transaksi->count(),
+                ],
+            ]);
+        }
+
+        $perPage = (int) $perPageInput;
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+
+        $transaksi = $query->paginate($perPage);
 
         return response()->json([
             'success' => true,
-            'data' => $transaksi
+            'data' => $transaksi->items(),
+            'meta' => [
+                'current_page' => $transaksi->currentPage(),
+                'last_page' => $transaksi->lastPage(),
+                'total' => $transaksi->total(),
+                'per_page' => $transaksi->perPage(),
+            ],
         ]);
     }
 

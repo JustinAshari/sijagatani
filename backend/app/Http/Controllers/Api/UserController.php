@@ -14,13 +14,43 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('created_at', 'desc')->get();
+        $query = User::orderBy('created_at', 'desc');
+        $perPageInput = $request->input('per_page', 'all');
+        $allowedPerPage = [10, 20, 50, 100];
+
+        if ($perPageInput === 'all') {
+            $users = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $users,
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => $users->count(),
+                    'per_page' => $users->count(),
+                ],
+            ]);
+        }
+
+        $perPage = (int) $perPageInput;
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+
+        $users = $query->paginate($perPage);
         
         return response()->json([
             'success' => true,
-            'data' => $users
+            'data' => $users->items(),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'total' => $users->total(),
+                'per_page' => $users->perPage(),
+            ],
         ]);
     }
 
@@ -129,7 +159,7 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $user = User::findOrFail($id);
         

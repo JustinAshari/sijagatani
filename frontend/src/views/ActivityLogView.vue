@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import api from '@/services/api'
 import FilterDropdown from '@/components/FilterDropdown.vue'
 
@@ -8,7 +8,8 @@ const loading = ref(true)
 const currentPage = ref(1)
 const lastPage = ref(1)
 const total = ref(0)
-const perPage = ref(50)
+const perPage = ref('10')
+const responsePerPage = ref(10)
 
 const filters = ref({
   search: '',
@@ -46,6 +47,7 @@ const fetchLogs = async (page = 1) => {
       currentPage.value = res.data.meta.current_page
       lastPage.value = res.data.meta.last_page
       total.value = res.data.meta.total
+      responsePerPage.value = res.data.meta.per_page
     }
   } catch (err) {
     console.error(err)
@@ -66,6 +68,13 @@ const resetFilters = () => {
 
 const prevPage = () => { if (currentPage.value > 1) fetchLogs(currentPage.value - 1) }
 const nextPage = () => { if (currentPage.value < lastPage.value) fetchLogs(currentPage.value + 1) }
+
+const rowNumber = (index) => ((currentPage.value - 1) * (Number(responsePerPage.value) || 0)) + index + 1
+
+watch(perPage, () => {
+  currentPage.value = 1
+  fetchLogs(1)
+})
 
 onMounted(() => fetchLogs(1))
 
@@ -201,7 +210,7 @@ const roleLabel = (role) => {
               <td colspan="8" class="empty-cell">Tidak ada data log</td>
             </tr>
             <tr v-else v-for="(log, index) in logs" :key="log.id">
-              <td>{{ (currentPage - 1) * perPage + index + 1 }}</td>
+              <td>{{ rowNumber(index) }}</td>
               <td class="cell-datetime">{{ formatDateTime(log.created_at) }}</td>
               <td>
                 <div class="user-cell">
@@ -230,10 +239,20 @@ const roleLabel = (role) => {
       </div>
 
       <!-- Pagination -->
-      <div v-if="lastPage > 1" class="pagination">
-        <button @click="prevPage" :disabled="currentPage === 1" class="btn-page">&laquo; Prev</button>
-        <span class="page-info">Halaman {{ currentPage }} dari {{ lastPage }}</span>
-        <button @click="nextPage" :disabled="currentPage === lastPage" class="btn-page">Next &raquo;</button>
+      <div v-if="lastPage > 1 || logs.length" class="pagination-bar">
+        <div class="pagination-info">Halaman {{ currentPage }} dari {{ lastPage }}</div>
+        <div class="pagination-controls">
+          <label for="log-per-page">Baris:</label>
+          <select id="log-per-page" v-model="perPage" class="per-page-select">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button @click="prevPage" :disabled="currentPage === 1" class="btn-page">&laquo;</button>
+          <span class="page-label">{{ currentPage }} / {{ lastPage }}</span>
+          <button @click="nextPage" :disabled="currentPage === lastPage" class="btn-page">&raquo;</button>
+        </div>
       </div>
 
     </div>
@@ -283,6 +302,35 @@ const roleLabel = (role) => {
 .fd-select:focus, .fd-input:focus { border-color: #475569; }
 
 .result-info { margin-top: 0.5rem; font-size: 0.8rem; color: #64748b; }
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-top: 1px solid #e8ecf0;
+  flex-wrap: wrap;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-info,
+.page-label {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.per-page-select {
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0 8px;
+}
 
 /* Table */
 .table-container { overflow-x: auto; }
@@ -345,16 +393,14 @@ const roleLabel = (role) => {
 .badge-role-lapangan  { background: #dcfce7; color: #15803d; }
 .badge-role-penggilingan { background: #ede9fe; color: #6d28d9; }
 
-/* Pagination */
-.pagination {
-  display: flex; align-items: center; justify-content: center;
-  gap: 1rem; padding: 1.2rem; border-top: 1px solid #e8ecf0;
-}
 .btn-page {
-  padding: 6px 14px; border: 1px solid #d1d5db; border-radius: 6px;
-  background: #fff; cursor: pointer; font-size: 0.875rem;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
 }
 .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-page:not(:disabled):hover { background: #f1f5f9; }
-.page-info { font-size: 0.875rem; color: #64748b; }
 </style>

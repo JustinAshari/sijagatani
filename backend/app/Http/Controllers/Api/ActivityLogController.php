@@ -43,7 +43,29 @@ class ActivityLogController extends Controller
             $query->whereDate('created_at', '<=', $request->tanggal_sampai);
         }
 
-        $perPage = min((int) ($request->per_page ?? 50), 200);
+        $perPageInput = $request->input('per_page', 'all');
+        $allowedPerPage = [10, 20, 50, 100];
+
+        if ($perPageInput === 'all') {
+            $logs = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $logs,
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => $logs->count(),
+                    'per_page' => $logs->count(),
+                ],
+            ]);
+        }
+
+        $perPage = (int) $perPageInput;
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+
         $logs = $query->paginate($perPage);
 
         return response()->json([

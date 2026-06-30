@@ -139,8 +139,8 @@
           <tr v-else-if="filteredData.length === 0">
             <td :colspan="colSpan" class="empty-cell">Tidak ada data</td>
           </tr>
-          <tr v-else v-for="(item, index) in filteredData" :key="item.id">
-            <td>{{ index + 1 }}</td>
+          <tr v-else v-for="(item, index) in paginatedData" :key="item.id">
+            <td>{{ rowNumber(index) }}</td>
             <td v-if="visibleCols.tanggal_pengajuan">{{ formatDate(item.tanggal_pengajuan) }}</td>
             <td v-if="visibleCols.nama_penggilingan">{{ item.nama_penggilingan }}</td>
             <td v-if="visibleCols.lokasi_makloon">{{ item.lokasi_makloon }}</td>
@@ -190,6 +190,24 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="pagination-bar" v-if="filteredData.length">
+      <div class="pagination-info">
+        Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ filteredData.length }} data
+      </div>
+      <div class="pagination-controls">
+        <label for="makloon-per-page">Baris:</label>
+        <select id="makloon-per-page" v-model="perPage" class="per-page-select">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
+        <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
+        <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+      </div>
     </div>
 
     <!-- Modal Form -->
@@ -531,7 +549,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import api, { getStorageUrl } from '../services/api'
 import { useAuthStore } from '../stores/auth'
 import FilterDropdown from '@/components/FilterDropdown.vue'
@@ -544,6 +562,8 @@ const data = ref([])
 const filteredData = ref([])
 const kabupatenList = ref([])
 const loading = ref(false)
+const currentPage = ref(1)
+const perPage = ref('10')
 
 const showColPicker = ref(false)
 const allColDefs = [
@@ -641,6 +661,53 @@ const totalTonaseDitolak = computed(() => {
   return sum.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 })
 
+const totalPages = computed(() => {
+  if (perPage.value === 'all') return 1
+  const size = Number(perPage.value) || 10
+  return Math.max(1, Math.ceil(filteredData.value.length / size))
+})
+
+const paginatedData = computed(() => {
+  if (perPage.value === 'all') return filteredData.value
+  const size = Number(perPage.value) || 10
+  const start = (currentPage.value - 1) * size
+  return filteredData.value.slice(start, start + size)
+})
+
+const pageStart = computed(() => {
+  if (!filteredData.value.length) return 0
+  if (perPage.value === 'all') return 1
+  return (currentPage.value - 1) * (Number(perPage.value) || 10) + 1
+})
+
+const pageEnd = computed(() => {
+  if (!filteredData.value.length) return 0
+  if (perPage.value === 'all') return filteredData.value.length
+  return Math.min(currentPage.value * (Number(perPage.value) || 10), filteredData.value.length)
+})
+
+const rowNumber = (index) => {
+  if (perPage.value === 'all') return index + 1
+  return (currentPage.value - 1) * (Number(perPage.value) || 10) + index + 1
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+watch([filteredData, perPage], () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value
+  }
+  if (currentPage.value < 1) {
+    currentPage.value = 1
+  }
+})
+
 
 const getImageUrl = (path) => getStorageUrl(path)
 
@@ -668,6 +735,7 @@ const fetchData = async () => {
     const response = await api.get('/penggilingan')
     data.value = response.data.data
     filteredData.value = response.data.data
+    currentPage.value = 1
   } catch (error) {
     console.error('Error fetching data:', error)
     alert('Gagal memuat data')
@@ -704,6 +772,7 @@ const applyFilters = () => {
   }
 
   filteredData.value = filtered
+  currentPage.value = 1
 }
 
 const resetFilters = () => {
@@ -714,6 +783,7 @@ const resetFilters = () => {
     statusVerifikasi: '',
   }
   filteredData.value = [...data.value]
+  currentPage.value = 1
 }
 
 const handleFileUpload = (event, field) => {
@@ -1146,6 +1216,48 @@ const downloadMakloonGKP = async (penggilinganId) => {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-info,
+.page-label {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.per-page-select {
+  height: 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0 8px;
+}
+
+.btn-page {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-page:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .search-input {

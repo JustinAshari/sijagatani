@@ -12,11 +12,52 @@ use Illuminate\Support\Facades\Validator;
 
 class WilayahController extends Controller
 {
-    // ==================== PROVINSI ====================
-    public function getProvinsi()
+    private function paginateOrGet($query, Request $request)
     {
-        $provinsi = Provinsi::withCount('kabupaten')->orderBy('nama')->get();
-        return response()->json(['success' => true, 'data' => $provinsi]);
+        $perPageInput = $request->input('per_page', 'all');
+        $allowedPerPage = [10, 20, 50, 100];
+
+        if ($perPageInput === 'all') {
+            $items = $query->get();
+
+            return [
+                'data' => $items,
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => $items->count(),
+                    'per_page' => $items->count(),
+                ],
+            ];
+        }
+
+        $perPage = (int) $perPageInput;
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+
+        $items = $query->paginate($perPage);
+
+        return [
+            'data' => $items->items(),
+            'meta' => [
+                'current_page' => $items->currentPage(),
+                'last_page' => $items->lastPage(),
+                'total' => $items->total(),
+                'per_page' => $items->perPage(),
+            ],
+        ];
+    }
+
+    // ==================== PROVINSI ====================
+    public function getProvinsi(Request $request)
+    {
+        $result = $this->paginateOrGet(
+            Provinsi::withCount('kabupaten')->orderBy('nama'),
+            $request
+        );
+
+        return response()->json(['success' => true, 'data' => $result['data'], 'meta' => $result['meta']]);
     }
 
     public function storeProvinsi(Request $request)
@@ -94,8 +135,8 @@ class WilayahController extends Controller
             $query->where('provinsi_id', $request->provinsi_id);
         }
         
-        $kabupaten = $query->orderBy('nama')->get();
-        return response()->json(['success' => true, 'data' => $kabupaten]);
+        $result = $this->paginateOrGet($query->orderBy('nama'), $request);
+        return response()->json(['success' => true, 'data' => $result['data'], 'meta' => $result['meta']]);
     }
 
     public function storeKabupaten(Request $request)
@@ -177,8 +218,8 @@ class WilayahController extends Controller
             $query->where('kabupaten_id', $request->kabupaten_id);
         }
         
-        $kecamatan = $query->orderBy('nama')->get();
-        return response()->json(['success' => true, 'data' => $kecamatan]);
+        $result = $this->paginateOrGet($query->orderBy('nama'), $request);
+        return response()->json(['success' => true, 'data' => $result['data'], 'meta' => $result['meta']]);
     }
 
     public function storeKecamatan(Request $request)
@@ -260,8 +301,8 @@ class WilayahController extends Controller
             $query->where('kecamatan_id', $request->kecamatan_id);
         }
         
-        $kalurahan = $query->orderBy('nama')->get();
-        return response()->json(['success' => true, 'data' => $kalurahan]);
+        $result = $this->paginateOrGet($query->orderBy('nama'), $request);
+        return response()->json(['success' => true, 'data' => $result['data'], 'meta' => $result['meta']]);
     }
 
     public function storeKalurahan(Request $request)

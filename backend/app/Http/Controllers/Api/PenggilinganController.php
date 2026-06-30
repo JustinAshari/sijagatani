@@ -65,11 +65,42 @@ class PenggilinganController extends Controller
 
         // Removed kabupaten filter since we no longer have petani relationship
 
-        $penggilingan = $query->latest('tanggal_pengajuan')->get();
+        $query->latest('tanggal_pengajuan');
+
+        $perPageInput = $request->input('per_page', 'all');
+        $allowedPerPage = [10, 20, 50, 100];
+
+        if ($perPageInput === 'all') {
+            $penggilingan = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $penggilingan,
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => $penggilingan->count(),
+                    'per_page' => $penggilingan->count(),
+                ],
+            ]);
+        }
+
+        $perPage = (int) $perPageInput;
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+
+        $penggilingan = $query->paginate($perPage);
 
         return response()->json([
             'success' => true,
-            'data' => $penggilingan
+            'data' => $penggilingan->items(),
+            'meta' => [
+                'current_page' => $penggilingan->currentPage(),
+                'last_page' => $penggilingan->lastPage(),
+                'total' => $penggilingan->total(),
+                'per_page' => $penggilingan->perPage(),
+            ],
         ]);
     }
 

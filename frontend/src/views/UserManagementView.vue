@@ -44,8 +44,8 @@
               <div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div>
             </td>
           </tr>
-          <tr v-else v-for="(user, index) in users" :key="user.id">
-            <td>{{ index + 1 }}</td>
+          <tr v-else v-for="(user, index) in paginatedUsers" :key="user.id">
+            <td>{{ rowNumber(index) }}</td>
             <td>{{ user.name }}</td>
             <td>{{ user.username }}</td>
             <td>
@@ -85,6 +85,24 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="pagination-bar" v-if="users.length">
+      <div class="pagination-info">
+        Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ users.length }} data
+      </div>
+      <div class="pagination-controls">
+        <label for="user-per-page">Baris:</label>
+        <select id="user-per-page" v-model="perPage" class="per-page-select">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
+        <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
+        <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+      </div>
     </div>
 
     <!-- Modal Add/Edit User -->
@@ -144,13 +162,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import api from '../services/api'
 
 const users = ref([])
 const loading = ref(false)
 const showModal = ref(false)
 const isEdit = ref(false)
+const currentPage = ref(1)
+const perPage = ref('10')
 const form = ref({
   id: null,
   name: '',
@@ -160,12 +180,60 @@ const form = ref({
   nama_penggilingan: ''
 })
 
+const totalPages = computed(() => {
+  if (perPage.value === 'all') return 1
+  const size = Number(perPage.value) || 10
+  return Math.max(1, Math.ceil(users.value.length / size))
+})
+
+const paginatedUsers = computed(() => {
+  if (perPage.value === 'all') return users.value
+  const size = Number(perPage.value) || 10
+  const start = (currentPage.value - 1) * size
+  return users.value.slice(start, start + size)
+})
+
+const pageStart = computed(() => {
+  if (!users.value.length) return 0
+  if (perPage.value === 'all') return 1
+  return (currentPage.value - 1) * (Number(perPage.value) || 10) + 1
+})
+
+const pageEnd = computed(() => {
+  if (!users.value.length) return 0
+  if (perPage.value === 'all') return users.value.length
+  return Math.min(currentPage.value * (Number(perPage.value) || 10), users.value.length)
+})
+
+const rowNumber = (index) => {
+  if (perPage.value === 'all') return index + 1
+  return (currentPage.value - 1) * (Number(perPage.value) || 10) + index + 1
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+watch([users, perPage], () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value
+  }
+  if (currentPage.value < 1) {
+    currentPage.value = 1
+  }
+})
+
 const fetchUsers = async () => {
   loading.value = true
   try {
     const response = await api.get('/users')
     if (response.data.success) {
       users.value = response.data.data
+      currentPage.value = 1
     }
   } catch (error) {
     console.error('Error fetching users:', error)
@@ -280,6 +348,48 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-info,
+.page-label {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.per-page-select {
+  height: 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0 8px;
+}
+
+.btn-page {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-page:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .header h2 {

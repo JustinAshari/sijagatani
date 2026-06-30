@@ -200,8 +200,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(tx, idx) in filteredTransaksi" :key="tx.id">
-              <td class="td-num">{{ idx + 1 }}</td>
+            <tr v-for="(tx, idx) in paginatedTransaksi" :key="tx.id">
+              <td class="td-num">{{ rowNumber(idx) }}</td>
               <td class="td-name">{{ tx.petani?.nama || '-' }}</td>
               <td><code class="nik-code">{{ tx.petani?.nik || '-' }}</code></td>
               <td>
@@ -246,6 +246,24 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="pagination-bar" v-if="filteredTransaksi.length">
+        <div class="pagination-info">
+          Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ filteredTransaksi.length }} data
+        </div>
+        <div class="pagination-controls">
+          <label for="tx-per-page">Baris:</label>
+          <select id="tx-per-page" v-model="perPage" class="per-page-select">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
+          <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
+          <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+        </div>
       </div>
     </div>
 
@@ -526,6 +544,8 @@ const form = ref(emptyForm())
 const searchPetaniQuery = ref('')
 const showPetaniDropdown = ref(false)
 const selectPetaniContainer = ref(null)
+const currentPage = ref(1)
+const perPage = ref('10')
 
 const filteredPetaniOptions = computed(() => {
   const query = searchPetaniQuery.value.toLowerCase().trim()
@@ -656,6 +676,7 @@ const fetchPetaniList = async () => {
 }
 
 const applyFilters = async () => {
+  currentPage.value = 1
   await fetchTransaksi()
 }
 
@@ -665,6 +686,7 @@ const resetFilters = async () => {
   filterTanggalDari.value = ''
   filterTanggalSampai.value = ''
   searchQuery.value = ''
+  currentPage.value = 1
   await fetchTransaksi()
 }
 
@@ -681,6 +703,53 @@ const filteredTransaksi = computed(() => {
   }
 
   return result
+})
+
+const totalPages = computed(() => {
+  if (perPage.value === 'all') return 1
+  const size = Number(perPage.value) || 10
+  return Math.max(1, Math.ceil(filteredTransaksi.value.length / size))
+})
+
+const paginatedTransaksi = computed(() => {
+  if (perPage.value === 'all') return filteredTransaksi.value
+  const size = Number(perPage.value) || 10
+  const start = (currentPage.value - 1) * size
+  return filteredTransaksi.value.slice(start, start + size)
+})
+
+const pageStart = computed(() => {
+  if (!filteredTransaksi.value.length) return 0
+  if (perPage.value === 'all') return 1
+  return (currentPage.value - 1) * (Number(perPage.value) || 10) + 1
+})
+
+const pageEnd = computed(() => {
+  if (!filteredTransaksi.value.length) return 0
+  if (perPage.value === 'all') return filteredTransaksi.value.length
+  return Math.min(currentPage.value * (Number(perPage.value) || 10), filteredTransaksi.value.length)
+})
+
+const rowNumber = (index) => {
+  if (perPage.value === 'all') return index + 1
+  return (currentPage.value - 1) * (Number(perPage.value) || 10) + index + 1
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+watch([filteredTransaksi, perPage], () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value
+  }
+  if (currentPage.value < 1) {
+    currentPage.value = 1
+  }
 })
 
 const openAdd = () => {
@@ -1009,6 +1078,48 @@ onUnmounted(() => {
 /* Table Style */
 .table-wrap {
   overflow-x: auto;
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-info,
+.page-label {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.per-page-select {
+  height: 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 8px;
+}
+
+.btn-page {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-page:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 .data-table {
   width: 100%;

@@ -64,11 +64,42 @@ class PetaniController extends Controller
             });
         }
 
-        $petani = $query->latest()->get();
+        $query->latest();
+
+        $perPageInput = $request->input('per_page', 'all');
+        $allowedPerPage = [10, 20, 50, 100];
+
+        if ($perPageInput === 'all') {
+            $petani = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $petani,
+                'meta' => [
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => $petani->count(),
+                    'per_page' => $petani->count(),
+                ],
+            ]);
+        }
+
+        $perPage = (int) $perPageInput;
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+
+        $petani = $query->paginate($perPage);
 
         return response()->json([
             'success' => true,
-            'data' => $petani
+            'data' => $petani->items(),
+            'meta' => [
+                'current_page' => $petani->currentPage(),
+                'last_page' => $petani->lastPage(),
+                'total' => $petani->total(),
+                'per_page' => $petani->perPage(),
+            ],
         ]);
     }
 
