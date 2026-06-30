@@ -398,8 +398,8 @@
               <div class="form-group">
                 <label>Kwitansi Pembayaran</label>
                 <input type="file" @change="handleFileUpload($event, 'kwitansi_pembayaran')" accept="image/*,application/pdf" />
-                <img v-if="previews.kwitansi_pembayaran && !previews.kwitansi_pembayaran.includes('.pdf')" :src="previews.kwitansi_pembayaran" class="preview-image" />
-                <p v-if="previews.kwitansi_pembayaran && previews.kwitansi_pembayaran.includes('.pdf')" class="pdf-indicator">
+                <img v-if="previews.kwitansi_pembayaran && !isPdfPreview('kwitansi_pembayaran')" :src="previews.kwitansi_pembayaran" class="preview-image" />
+                <p v-if="previews.kwitansi_pembayaran && isPdfPreview('kwitansi_pembayaran')" class="pdf-indicator">
                   <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
@@ -411,8 +411,15 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Surat Pernyataan (Opsional)</label>
-                <input type="file" @change="handleFileUpload($event, 'surat_pernyataan')" accept="image/*" />
-                <img v-if="previews.surat_pernyataan" :src="previews.surat_pernyataan" class="preview-image" />
+                <input type="file" @change="handleFileUpload($event, 'surat_pernyataan')" accept="image/*,application/pdf" />
+                <img v-if="previews.surat_pernyataan && !isPdfPreview('surat_pernyataan')" :src="previews.surat_pernyataan" class="preview-image" />
+                <p v-if="previews.surat_pernyataan && isPdfPreview('surat_pernyataan')" class="pdf-indicator">
+                  <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  PDF telah dipilih
+                </p>
                 <small class="help-text">Surat pernyataan yang telah ditandatangani petugas</small>
               </div>
             </div>
@@ -577,11 +584,13 @@
               </div>
               <div class="photo-item" v-if="selectedPetani.kwitansi_pembayaran">
                 <label>Kwitansi Pembayaran</label>
-                <img :src="getImageUrl(selectedPetani.kwitansi_pembayaran)" alt="Kwitansi" @click="openImage(getImageUrl(selectedPetani.kwitansi_pembayaran))" />
+                <img v-if="!isPdfPath(selectedPetani.kwitansi_pembayaran)" :src="getImageUrl(selectedPetani.kwitansi_pembayaran)" alt="Kwitansi" @click="openImage(getImageUrl(selectedPetani.kwitansi_pembayaran))" />
+                <button v-else type="button" class="btn-doc-open" @click="openImage(getImageUrl(selectedPetani.kwitansi_pembayaran))">Buka Dokumen PDF</button>
               </div>
               <div class="photo-item" v-if="selectedPetani.surat_pernyataan">
                 <label>Surat Pernyataan</label>
-                <img :src="getImageUrl(selectedPetani.surat_pernyataan)" alt="Surat Pernyataan" @click="openImage(getImageUrl(selectedPetani.surat_pernyataan))" />
+                <img v-if="!isPdfPath(selectedPetani.surat_pernyataan)" :src="getImageUrl(selectedPetani.surat_pernyataan)" alt="Surat Pernyataan" @click="openImage(getImageUrl(selectedPetani.surat_pernyataan))" />
+                <button v-else type="button" class="btn-doc-open" @click="openImage(getImageUrl(selectedPetani.surat_pernyataan))">Buka Dokumen PDF</button>
               </div>
             </div>
           </div>
@@ -693,6 +702,10 @@ const previews = ref({
   foto_komoditi: null,
   kwitansi_pembayaran: null,
   surat_pernyataan: null
+})
+const docPreviewIsPdf = ref({
+  kwitansi_pembayaran: false,
+  surat_pernyataan: false,
 })
 
 const filteredPetani = computed(() => {
@@ -831,6 +844,9 @@ const handleFileUpload = (event, fieldName) => {
   const file = event.target.files[0]
   if (file) {
     form.value[fieldName] = file
+    if (fieldName === 'kwitansi_pembayaran' || fieldName === 'surat_pernyataan') {
+      docPreviewIsPdf.value[fieldName] = file.type === 'application/pdf'
+    }
     const reader = new FileReader()
     reader.onload = (e) => {
       previews.value[fieldName] = e.target.result
@@ -918,6 +934,8 @@ const editPetani = (petani) => {
   if (petani.foto_komoditi) previews.value.foto_komoditi = getImageUrl(petani.foto_komoditi)
   if (petani.kwitansi_pembayaran) previews.value.kwitansi_pembayaran = getImageUrl(petani.kwitansi_pembayaran)
   if (petani.surat_pernyataan) previews.value.surat_pernyataan = getImageUrl(petani.surat_pernyataan)
+  docPreviewIsPdf.value.kwitansi_pembayaran = isPdfPath(petani.kwitansi_pembayaran)
+  docPreviewIsPdf.value.surat_pernyataan = isPdfPath(petani.surat_pernyataan)
   
   showEditModal.value = true
 }
@@ -950,6 +968,10 @@ const closeModal = () => {
     foto_komoditi: null,
     kwitansi_pembayaran: null,
     surat_pernyataan: null
+  }
+  docPreviewIsPdf.value = {
+    kwitansi_pembayaran: false,
+    surat_pernyataan: false,
   }
   form.value = {
     tanggal: new Date().toISOString().split('T')[0],
@@ -1011,6 +1033,14 @@ const getImageUrl = (path) => getStorageUrl(path)
 
 const openImage = (url) => {
   window.open(url, '_blank')
+}
+
+const isPdfPath = (path) => typeof path === 'string' && path.toLowerCase().endsWith('.pdf')
+
+const isPdfPreview = (fieldName) => {
+  if (docPreviewIsPdf.value[fieldName]) return true
+  const preview = previews.value[fieldName]
+  return typeof preview === 'string' && preview.startsWith('data:application/pdf')
 }
 
 
@@ -1613,6 +1643,20 @@ tbody tr:last-child td {
   color: #28a745;
   font-weight: 600;
   margin-top: 10px;
+}
+
+.btn-doc-open {
+  background: #f8fafc;
+  color: #1d4ed8;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-doc-open:hover {
+  background: #eef2ff;
 }
 
 .modal-footer {

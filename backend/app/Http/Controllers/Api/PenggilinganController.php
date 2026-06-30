@@ -135,7 +135,8 @@ class PenggilinganController extends Controller
             'transports.*.nama_pengemudi' => 'required|string|max:255',
             'transports.*.nopol' => 'required|string|max:20',
             'transports.*.kuantum' => 'required|numeric|min:0',
-            // nota_timbang is handled separately during file upload
+            'transports.*.nota_timbang' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'transports.*.surat_jalan' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -195,7 +196,7 @@ class PenggilinganController extends Controller
                 // Handle nota timbang upload - check from request directly
                 $notaTimbangKey = "transports.{$index}.nota_timbang";
                 if ($request->hasFile($notaTimbangKey)) {
-                    $transportRecord['nota_timbang'] = $this->imageService->uploadAndCompress(
+                    $transportRecord['nota_timbang'] = $this->imageService->uploadImageOrFile(
                         $request->file($notaTimbangKey),
                         'penggilingan/nota',
                         800,
@@ -206,7 +207,7 @@ class PenggilinganController extends Controller
                 // Handle surat jalan upload - check from request directly
                 $suratJalanKey = "transports.{$index}.surat_jalan";
                 if ($request->hasFile($suratJalanKey)) {
-                    $transportRecord['surat_jalan'] = $this->imageService->uploadAndCompress(
+                    $transportRecord['surat_jalan'] = $this->imageService->uploadImageOrFile(
                         $request->file($suratJalanKey),
                         'penggilingan/surat',
                         800,
@@ -295,7 +296,8 @@ class PenggilinganController extends Controller
             'transports.*.nama_pengemudi' => 'required|string|max:255',
             'transports.*.nopol' => 'required|string|max:20',
             'transports.*.kuantum' => 'required|numeric|min:0',
-            // nota_timbang is handled separately during file upload
+            'transports.*.nota_timbang' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'transports.*.surat_jalan' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -392,7 +394,7 @@ class PenggilinganController extends Controller
                 // Handle nota timbang upload - check from request directly
                 $notaTimbangKey = "transports.{$index}.nota_timbang";
                 if ($request->hasFile($notaTimbangKey)) {
-                    $transportRecord['nota_timbang'] = $this->imageService->uploadAndCompress(
+                    $transportRecord['nota_timbang'] = $this->imageService->uploadImageOrFile(
                         $request->file($notaTimbangKey),
                         'penggilingan/nota',
                         800,
@@ -405,7 +407,7 @@ class PenggilinganController extends Controller
                 // Handle surat jalan upload - check from request directly
                 $suratJalanKey = "transports.{$index}.surat_jalan";
                 if ($request->hasFile($suratJalanKey)) {
-                    $transportRecord['surat_jalan'] = $this->imageService->uploadAndCompress(
+                    $transportRecord['surat_jalan'] = $this->imageService->uploadImageOrFile(
                         $request->file($suratJalanKey),
                         'penggilingan/surat',
                         800,

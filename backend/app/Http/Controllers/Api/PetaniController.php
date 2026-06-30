@@ -174,7 +174,7 @@ class PetaniController extends Controller
             }
 
             if ($request->hasFile('kwitansi_pembayaran')) {
-                $data['kwitansi_pembayaran'] = $this->imageService->uploadAndCompress(
+                $data['kwitansi_pembayaran'] = $this->imageService->uploadImageOrFile(
                     $request->file('kwitansi_pembayaran'),
                     'petani/kwitansi',
                     800,
@@ -183,7 +183,7 @@ class PetaniController extends Controller
             }
 
             if ($request->hasFile('surat_pernyataan')) {
-                $data['surat_pernyataan'] = $this->imageService->uploadAndCompress(
+                $data['surat_pernyataan'] = $this->imageService->uploadImageOrFile(
                     $request->file('surat_pernyataan'),
                     'petani/surat-pernyataan',
                     800,
@@ -287,7 +287,7 @@ class PetaniController extends Controller
                 if ($petani->kwitansi_pembayaran) {
                     $this->imageService->delete($petani->kwitansi_pembayaran);
                 }
-                $data['kwitansi_pembayaran'] = $this->imageService->uploadAndCompress(
+                $data['kwitansi_pembayaran'] = $this->imageService->uploadImageOrFile(
                     $request->file('kwitansi_pembayaran'),
                     'petani/kwitansi',
                     800,
@@ -299,7 +299,7 @@ class PetaniController extends Controller
                 if ($petani->surat_pernyataan) {
                     $this->imageService->delete($petani->surat_pernyataan);
                 }
-                $data['surat_pernyataan'] = $this->imageService->uploadAndCompress(
+                $data['surat_pernyataan'] = $this->imageService->uploadImageOrFile(
                     $request->file('surat_pernyataan'),
                     'petani/surat-pernyataan',
                     800,

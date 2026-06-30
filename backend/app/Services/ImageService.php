@@ -52,6 +52,25 @@ class ImageService
     }
 
     /**
+     * Upload file with auto handling for image/pdf.
+     * Images are compressed, PDF is stored as-is.
+     */
+    public function uploadImageOrFile(UploadedFile $file, string $folder = 'files', int $maxWidth = 800, int $quality = 75): string
+    {
+        $mimeType = strtolower((string) $file->getMimeType());
+        $extension = strtolower((string) $file->getClientOriginalExtension());
+
+        if ($mimeType === 'application/pdf' || $extension === 'pdf') {
+            $filename = time() . '_' . uniqid() . '.pdf';
+            $path = $folder . '/' . $filename;
+            Storage::disk('public')->putFileAs($folder, $file, $filename);
+            return $path;
+        }
+
+        return $this->uploadAndCompress($file, $folder, $maxWidth, $quality);
+    }
+
+    /**
      * Delete image from storage
      * 
      * @param string|null $path

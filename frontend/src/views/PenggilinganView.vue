@@ -278,7 +278,7 @@
                 <input type="file" @change="handleFileUpload($event, 'foto_gkp_2')" accept="image/*" />
               </div>
             </div>
-            <small class="help-text">* Format: JPG, PNG. Max: 5MB (akan dikompres otomatis)</small>
+            <small class="help-text">* Format: JPG, PNG, PDF. Max: 5MB (gambar akan dikompres otomatis)</small>
           </div>
 
           <!-- Transport Entries -->
@@ -344,22 +344,24 @@
                   </div>
                   <div class="form-group">
                     <label>Upload Nota Timbang</label>
-                    <img v-if="transport.nota_timbang_preview" :src="transport.nota_timbang_preview" class="preview-image-small" alt="Preview Nota Timbang" />
+                    <img v-if="transport.nota_timbang_preview && !transport.nota_timbang_is_pdf" :src="transport.nota_timbang_preview" class="preview-image-small" alt="Preview Nota Timbang" />
+                    <p v-if="transport.nota_timbang_preview && transport.nota_timbang_is_pdf" class="pdf-indicator">PDF telah dipilih</p>
                     <input
                       type="file"
                       @change="handleTransportFileUpload($event, index, 'nota_timbang')"
-                      accept="image/*"
+                      accept="image/*,application/pdf"
                     />
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group">
                     <label>Upload Surat Jalan</label>
-                    <img v-if="transport.surat_jalan_preview" :src="transport.surat_jalan_preview" class="preview-image-small" alt="Preview Surat Jalan" />
+                    <img v-if="transport.surat_jalan_preview && !transport.surat_jalan_is_pdf" :src="transport.surat_jalan_preview" class="preview-image-small" alt="Preview Surat Jalan" />
+                    <p v-if="transport.surat_jalan_preview && transport.surat_jalan_is_pdf" class="pdf-indicator">PDF telah dipilih</p>
                     <input
                       type="file"
                       @change="handleTransportFileUpload($event, index, 'surat_jalan')"
-                      accept="image/*"
+                      accept="image/*,application/pdf"
                     />
                   </div>
                 </div>
@@ -471,7 +473,8 @@
                 :key="`nota-${transport.id}`"
               >
                 <label>Nota Timbang - Angkutan #{{ transport.urutan }} ({{ transport.nama_pengemudi }})</label>
-                <img :src="getImageUrl(transport.nota_timbang)" :alt="`Nota Timbang ${transport.nama_pengemudi}`" @click="openImage(getImageUrl(transport.nota_timbang))" />
+                <img v-if="!isPdfPath(transport.nota_timbang)" :src="getImageUrl(transport.nota_timbang)" :alt="`Nota Timbang ${transport.nama_pengemudi}`" @click="openImage(getImageUrl(transport.nota_timbang))" />
+                <button v-else type="button" class="btn-doc-open" @click="openImage(getImageUrl(transport.nota_timbang))">Buka Dokumen PDF</button>
               </div>
               <div
                 class="photo-item"
@@ -479,7 +482,8 @@
                 :key="`surat-${transport.id}`"
               >
                 <label>Surat Jalan - Angkutan #{{ transport.urutan }} ({{ transport.nama_pengemudi }})</label>
-                <img :src="getImageUrl(transport.surat_jalan)" :alt="`Surat Jalan ${transport.nama_pengemudi}`" @click="openImage(getImageUrl(transport.surat_jalan))" />
+                <img v-if="!isPdfPath(transport.surat_jalan)" :src="getImageUrl(transport.surat_jalan)" :alt="`Surat Jalan ${transport.nama_pengemudi}`" @click="openImage(getImageUrl(transport.surat_jalan))" />
+                <button v-else type="button" class="btn-doc-open" @click="openImage(getImageUrl(transport.surat_jalan))">Buka Dokumen PDF</button>
               </div>
             </div>
             <p v-if="!selectedItem.foto_gkp_1 && !selectedItem.foto_gkp_2 && selectedItem.transports.filter(t => t.nota_timbang).length === 0 && selectedItem.transports.filter(t => t.surat_jalan).length === 0" class="no-data">
@@ -632,9 +636,11 @@ const form = ref({
       kuantum: '',
       nota_timbang: null,
       nota_timbang_preview: '',
+      nota_timbang_is_pdf: false,
       old_nota_timbang: '',
       surat_jalan: null,
       surat_jalan_preview: '',
+      surat_jalan_is_pdf: false,
       old_surat_jalan: '',
     },
   ],
@@ -714,6 +720,8 @@ const getImageUrl = (path) => getStorageUrl(path)
 const openImage = (url) => {
   window.open(url, '_blank')
 }
+
+const isPdfPath = (path) => typeof path === 'string' && path.toLowerCase().endsWith('.pdf')
 
 onMounted(() => {
   fetchData()
@@ -815,9 +823,11 @@ const handleTransportFileUpload = (event, index, fileType = 'nota_timbang') => {
     if (fileType === 'nota_timbang') {
       form.value.transports[index].nota_timbang = file
       form.value.transports[index].nota_timbang_preview = URL.createObjectURL(file)
+      form.value.transports[index].nota_timbang_is_pdf = file.type === 'application/pdf'
     } else if (fileType === 'surat_jalan') {
       form.value.transports[index].surat_jalan = file
       form.value.transports[index].surat_jalan_preview = URL.createObjectURL(file)
+      form.value.transports[index].surat_jalan_is_pdf = file.type === 'application/pdf'
     }
   }
 }
@@ -826,6 +836,7 @@ const removeTransportImage = (index) => {
   if (form.value.transports[index]) {
     form.value.transports[index].nota_timbang = null
     form.value.transports[index].nota_timbang_preview = ''
+    form.value.transports[index].nota_timbang_is_pdf = false
   }
 }
 
@@ -837,9 +848,11 @@ const addTransport = () => {
       kuantum: '',
       nota_timbang: null,
       nota_timbang_preview: '',
+      nota_timbang_is_pdf: false,
       old_nota_timbang: '',
       surat_jalan: null,
       surat_jalan_preview: '',
+      surat_jalan_is_pdf: false,
       old_surat_jalan: '',
     })
   }
@@ -998,11 +1011,13 @@ const editItem = (item) => {
       nota_timbang_preview: t.nota_timbang
         ? `http://localhost:8000/storage/${t.nota_timbang}`
         : '',
+      nota_timbang_is_pdf: isPdfPath(t.nota_timbang),
       old_nota_timbang: t.nota_timbang || '',
       surat_jalan: null,
       surat_jalan_preview: t.surat_jalan
         ? `http://localhost:8000/storage/${t.surat_jalan}`
         : '',
+      surat_jalan_is_pdf: isPdfPath(t.surat_jalan),
       old_surat_jalan: t.surat_jalan || '',
     })),
   }
@@ -1057,9 +1072,11 @@ const closeModal = () => {
         kuantum: '',
         nota_timbang: null,
         nota_timbang_preview: '',
+        nota_timbang_is_pdf: false,
         old_nota_timbang: '',
         surat_jalan: null,
         surat_jalan_preview: '',
+        surat_jalan_is_pdf: false,
         old_surat_jalan: '',
       },
     ],
@@ -1676,6 +1693,26 @@ tbody tr:last-child td {
   border: 1px solid #ddd;
   cursor: pointer;
   display: block;
+}
+
+.pdf-indicator {
+  color: #16a34a;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.btn-doc-open {
+  background: #f8fafc;
+  color: #1d4ed8;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-doc-open:hover {
+  background: #eef2ff;
 }
 
 .btn-remove-image {
