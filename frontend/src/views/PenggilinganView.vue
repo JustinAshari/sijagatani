@@ -101,6 +101,43 @@
               </select>
             </div>
             <div class="fd-field">
+              <label class="fd-label">Komoditas</label>
+              <select v-model="filters.komoditas" class="fd-select">
+                <option value="">Semua Komoditas</option>
+                <option value="Gabah">Gabah</option>
+                <option value="Jagung">Jagung</option>
+                <option value="Beras">Beras</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Provinsi</label>
+              <select v-model="filters.provinsiId" @change="onFilterProvinsiChange" class="fd-select">
+                <option value="">Semua Provinsi</option>
+                <option v-for="prov in provinsiList" :key="prov.id" :value="prov.id">{{ prov.nama }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Kabupaten</label>
+              <select v-model="filters.kabupatenId" @change="onFilterKabupatenChange" :disabled="!filters.provinsiId" class="fd-select">
+                <option value="">Semua Kabupaten</option>
+                <option v-for="kab in filterKabupatenOptions" :key="kab.id" :value="kab.id">{{ kab.nama }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Kecamatan</label>
+              <select v-model="filters.kecamatanId" @change="onFilterKecamatanChange" :disabled="!filters.kabupatenId" class="fd-select">
+                <option value="">Semua Kecamatan</option>
+                <option v-for="kec in filterKecamatanOptions" :key="kec.id" :value="kec.id">{{ kec.nama }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Kalurahan</label>
+              <select v-model="filters.kalurahanId" :disabled="!filters.kecamatanId" class="fd-select">
+                <option value="">Semua Kalurahan</option>
+                <option v-for="kal in filterKalurahanOptions" :key="kal.id" :value="kal.id">{{ kal.nama }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
               <label class="fd-label">Tanggal Dari</label>
               <input v-model="filters.tanggalDari" type="date" class="fd-input" />
             </div>
@@ -159,6 +196,7 @@
               <th>No</th>
               <th v-if="visibleCols.tanggal_pengajuan">Tanggal Pengajuan</th>
               <th v-if="visibleCols.nama_penggilingan">Nama Penggilingan</th>
+              <th v-if="visibleCols.komoditas">Komoditas</th>
               <th v-if="visibleCols.lokasi_makloon">Lokasi Makloon</th>
               <th v-if="visibleCols.total_tonase">Total Tonase</th>
               <th v-if="visibleCols.jumlah_angkutan">Jumlah Angkutan</th>
@@ -184,6 +222,11 @@
               <td class="td-num">{{ rowNumber(index) }}</td>
               <td v-if="visibleCols.tanggal_pengajuan" class="td-date">{{ formatDate(item.tanggal_pengajuan) }}</td>
               <td v-if="visibleCols.nama_penggilingan" class="td-name">{{ item.nama_penggilingan }}</td>
+              <td v-if="visibleCols.komoditas">
+                <span class="badge" :class="item.komoditas ? `badge-${item.komoditas.toLowerCase()}` : ''">
+                  {{ item.komoditas || '-' }}
+                </span>
+              </td>
               <td v-if="visibleCols.lokasi_makloon">{{ item.lokasi_makloon }}</td>
               <td v-if="visibleCols.total_tonase" class="text-right font-medium">{{ formatNumber(item.total_tonase) }} KG</td>
               <td v-if="visibleCols.jumlah_angkutan" class="text-center font-medium">{{ item.jumlah_angkutan }}</td>
@@ -290,10 +333,44 @@
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>Lokasi Makloon <span class="required">*</span></label>
-                <select v-model="form.lokasi_makloon" required>
+                <label>Komoditas <span class="required">*</span></label>
+                <select v-model="form.komoditas" required>
+                  <option value="">Pilih Komoditas</option>
+                  <option value="Gabah">Gabah</option>
+                  <option value="Jagung">Jagung</option>
+                  <option value="Beras">Beras</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Provinsi</label>
+                <select v-model="form.provinsi_id" @change="onFormProvinsiChange">
+                  <option value="">Pilih Provinsi</option>
+                  <option v-for="prov in provinsiList" :key="prov.id" :value="prov.id">{{ prov.nama }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Kabupaten <span class="required">*</span></label>
+                <select v-model="form.kabupaten_id" @change="onFormKabupatenChange" :disabled="!form.provinsi_id" required>
                   <option value="">Pilih Kabupaten</option>
-                  <option v-for="kab in kabupatenList" :key="kab.id" :value="kab.nama">{{ kab.nama }}</option>
+                  <option v-for="kab in formKabupatenOptions" :key="kab.id" :value="kab.id">{{ kab.nama }}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Kecamatan</label>
+                <select v-model="form.kecamatan_id" @change="onFormKecamatanChange" :disabled="!form.kabupaten_id">
+                  <option value="">Pilih Kecamatan</option>
+                  <option v-for="kec in formKecamatanOptions" :key="kec.id" :value="kec.id">{{ kec.nama }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Kalurahan</label>
+                <select v-model="form.kalurahan_id" :disabled="!form.kecamatan_id">
+                  <option value="">Pilih Kalurahan</option>
+                  <option v-for="kal in formKalurahanOptions" :key="kal.id" :value="kal.id">{{ kal.nama }}</option>
                 </select>
               </div>
             </div>
@@ -457,8 +534,25 @@
                 <span class="detail-value">{{ selectedItem.nama_penggilingan }}</span>
               </div>
               <div class="detail-item">
+                <span class="detail-label">Komoditas:</span>
+                <span class="detail-value">
+                  <span class="badge" :class="selectedItem.komoditas ? `badge-${selectedItem.komoditas.toLowerCase()}` : ''">
+                    {{ selectedItem.komoditas || '-' }}
+                  </span>
+                </span>
+              </div>
+              <div class="detail-item">
                 <span class="detail-label">Lokasi Makloon:</span>
                 <span class="detail-value">{{ selectedItem.lokasi_makloon }}</span>
+              </div>
+              <div class="detail-item" v-if="selectedItem.provinsi || selectedItem.kabupaten">
+                <span class="detail-label">Wilayah:</span>
+                <span class="detail-value">
+                  {{ selectedItem.kalurahan?.nama ? selectedItem.kalurahan.nama + ', ' : '' }}
+                  {{ selectedItem.kecamatan?.nama ? selectedItem.kecamatan.nama + ', ' : '' }}
+                  {{ selectedItem.kabupaten?.nama ? selectedItem.kabupaten.nama + ', ' : '' }}
+                  {{ selectedItem.provinsi?.nama ? selectedItem.provinsi.nama : '' }}
+                </span>
               </div>
             </div>
           </div>
@@ -615,6 +709,7 @@ const showColPicker = ref(false)
 const allColDefs = [
   { key: 'tanggal_pengajuan', label: 'Tanggal Pengajuan', adminOnly: false },
   { key: 'nama_penggilingan', label: 'Nama Penggilingan', adminOnly: false },
+  { key: 'komoditas', label: 'Komoditas', adminOnly: false },
   { key: 'lokasi_makloon', label: 'Lokasi Makloon', adminOnly: false },
   { key: 'total_tonase', label: 'Total Tonase', adminOnly: false },
   { key: 'jumlah_angkutan', label: 'Jumlah Angkutan', adminOnly: false },
@@ -626,7 +721,7 @@ const colDefs = computed(() =>
   allColDefs.filter(c => !c.adminOnly || authStore.canVerify)
 )
 const visibleCols = ref({
-  tanggal_pengajuan: true, nama_penggilingan: true,
+  tanggal_pengajuan: true, nama_penggilingan: true, komoditas: true,
   lokasi_makloon: true, total_tonase: true, jumlah_angkutan: true,
   status_verifikasi: true, catatan_verifikasi: false
 })
@@ -650,6 +745,11 @@ const filters = ref({
   tanggalSampai: '',
   namaPenggilingan: '',
   statusVerifikasi: '',
+  komoditas: '',
+  provinsiId: '',
+  kabupatenId: '',
+  kecamatanId: '',
+  kalurahanId: '',
 })
 
 const penggilinganActiveFilterCount = computed(() => {
@@ -657,6 +757,11 @@ const penggilinganActiveFilterCount = computed(() => {
   if (filters.value.tanggalDari) count++
   if (filters.value.tanggalSampai) count++
   if (filters.value.statusVerifikasi) count++
+  if (filters.value.komoditas) count++
+  if (filters.value.provinsiId) count++
+  if (filters.value.kabupatenId) count++
+  if (filters.value.kecamatanId) count++
+  if (filters.value.kalurahanId) count++
   return count
 })
 
@@ -665,6 +770,11 @@ const form = ref({
   tanggal_pengajuan: '',
   nama_penggilingan: '',
   lokasi_makloon: '',
+  komoditas: '',
+  provinsi_id: '',
+  kabupaten_id: '',
+  kecamatan_id: '',
+  kalurahan_id: '',
   foto_gkp_1: null,
   foto_gkp_2: null,
   foto_gkp_1_preview: '',
@@ -765,24 +875,131 @@ const openImage = (url) => {
 
 const isPdfPath = (path) => typeof path === 'string' && path.toLowerCase().endsWith('.pdf')
 
-onMounted(() => {
-  fetchData()
-  fetchKabupaten()
-})
+const provinsiList = ref([])
+const allKabupaten = ref([])
+const allKecamatan = ref([])
+const allKalurahan = ref([])
 
-const fetchKabupaten = async () => {
-  try {
-    const response = await api.get('/kabupaten')
-    kabupatenList.value = response.data.data
-  } catch (error) {
-    console.error('Error fetching kabupaten:', error)
+const filterKabupatenOptions = ref([])
+const filterKecamatanOptions = ref([])
+const filterKalurahanOptions = ref([])
+
+const formKabupatenOptions = ref([])
+const formKecamatanOptions = ref([])
+const formKalurahanOptions = ref([])
+
+const onFilterProvinsiChange = () => {
+  filters.value.kabupatenId = ''
+  filters.value.kecamatanId = ''
+  filters.value.kalurahanId = ''
+  if (filters.value.provinsiId) {
+    filterKabupatenOptions.value = allKabupaten.value.filter(k => k.provinsi_id == filters.value.provinsiId)
+  } else {
+    filterKabupatenOptions.value = []
+  }
+  filterKecamatanOptions.value = []
+  filterKalurahanOptions.value = []
+}
+
+const onFilterKabupatenChange = () => {
+  filters.value.kecamatanId = ''
+  filters.value.kalurahanId = ''
+  if (filters.value.kabupatenId) {
+    filterKecamatanOptions.value = allKecamatan.value.filter(k => k.kabupaten_id == filters.value.kabupatenId)
+  } else {
+    filterKecamatanOptions.value = []
+  }
+  filterKalurahanOptions.value = []
+}
+
+const onFilterKecamatanChange = () => {
+  filters.value.kalurahanId = ''
+  if (filters.value.kecamatanId) {
+    filterKalurahanOptions.value = allKalurahan.value.filter(k => k.kecamatan_id == filters.value.kecamatanId)
+  } else {
+    filterKalurahanOptions.value = []
   }
 }
+
+const onFormProvinsiChange = () => {
+  form.value.kabupaten_id = ''
+  form.value.kecamatan_id = ''
+  form.value.kalurahan_id = ''
+  if (form.value.provinsi_id) {
+    formKabupatenOptions.value = allKabupaten.value.filter(k => k.provinsi_id == form.value.provinsi_id)
+  } else {
+    formKabupatenOptions.value = []
+  }
+  formKecamatanOptions.value = []
+  formKalurahanOptions.value = []
+}
+
+const onFormKabupatenChange = () => {
+  form.value.kecamatan_id = ''
+  form.value.kalurahan_id = ''
+  const selectedKab = allKabupaten.value.find(k => k.id == form.value.kabupaten_id)
+  if (selectedKab) {
+    form.value.lokasi_makloon = selectedKab.nama
+  } else {
+    form.value.lokasi_makloon = ''
+  }
+
+  if (form.value.kabupaten_id) {
+    formKecamatanOptions.value = allKecamatan.value.filter(k => k.kabupaten_id == form.value.kabupaten_id)
+  } else {
+    formKecamatanOptions.value = []
+  }
+  formKalurahanOptions.value = []
+}
+
+const onFormKecamatanChange = () => {
+  form.value.kalurahan_id = ''
+  if (form.value.kecamatan_id) {
+    formKalurahanOptions.value = allKalurahan.value.filter(k => k.kecamatan_id == form.value.kecamatan_id)
+  } else {
+    formKalurahanOptions.value = []
+  }
+}
+
+const loadWilayahData = async () => {
+  try {
+    const [provRes, kabRes, kecRes, kalRes] = await Promise.all([
+      api.get('/provinsi'),
+      api.get('/kabupaten'),
+      api.get('/kecamatan'),
+      api.get('/kalurahan')
+    ])
+    
+    provinsiList.value = provRes.data.data
+    allKabupaten.value = kabRes.data.data
+    kabupatenList.value = kabRes.data.data
+    allKecamatan.value = kecRes.data.data
+    allKalurahan.value = kalRes.data.data
+  } catch (error) {
+    console.error('Error loading wilayah:', error)
+  }
+}
+
+onMounted(() => {
+  fetchData()
+  loadWilayahData()
+})
 
 const fetchData = async () => {
   loading.value = true
   try {
-    const response = await api.get('/penggilingan')
+    const params = {}
+    if (filters.value.tanggalDari) params.tanggal_dari = filters.value.tanggalDari
+    if (filters.value.tanggalSampai) params.tanggal_sampai = filters.value.tanggalSampai
+    if (filters.value.namaPenggilingan) params.nama_penggilingan = filters.value.namaPenggilingan
+    if (filters.value.statusVerifikasi) params.status_verifikasi = filters.value.statusVerifikasi
+    if (filters.value.komoditas) params.komoditas = filters.value.komoditas
+    if (filters.value.provinsiId) params.provinsi_id = filters.value.provinsiId
+    if (filters.value.kabupatenId) params.kabupaten_id = filters.value.kabupatenId
+    if (filters.value.kecamatanId) params.kecamatan_id = filters.value.kecamatanId
+    if (filters.value.kalurahanId) params.kalurahan_id = filters.value.kalurahanId
+
+    const response = await api.get('/penggilingan', { params })
     data.value = response.data.data
     filteredData.value = response.data.data
     currentPage.value = 1
@@ -795,34 +1012,7 @@ const fetchData = async () => {
 }
 
 const applyFilters = () => {
-  let filtered = [...data.value]
-
-  if (filters.value.tanggalDari) {
-    filtered = filtered.filter(
-      (item) => new Date(item.tanggal_pengajuan) >= new Date(filters.value.tanggalDari)
-    )
-  }
-
-  if (filters.value.tanggalSampai) {
-    filtered = filtered.filter(
-      (item) => new Date(item.tanggal_pengajuan) <= new Date(filters.value.tanggalSampai)
-    )
-  }
-
-  if (filters.value.namaPenggilingan) {
-    filtered = filtered.filter((item) =>
-      item.nama_penggilingan
-        .toLowerCase()
-        .includes(filters.value.namaPenggilingan.toLowerCase())
-    )
-  }
-
-  if (filters.value.statusVerifikasi) {
-    filtered = filtered.filter((item) => item.status_verifikasi === filters.value.statusVerifikasi)
-  }
-
-  filteredData.value = filtered
-  currentPage.value = 1
+  fetchData()
 }
 
 const resetFilters = () => {
@@ -831,9 +1021,16 @@ const resetFilters = () => {
     tanggalSampai: '',
     namaPenggilingan: '',
     statusVerifikasi: '',
+    komoditas: '',
+    provinsiId: '',
+    kabupatenId: '',
+    kecamatanId: '',
+    kalurahanId: '',
   }
-  filteredData.value = [...data.value]
-  currentPage.value = 1
+  filterKabupatenOptions.value = []
+  filterKecamatanOptions.value = []
+  filterKalurahanOptions.value = []
+  fetchData()
 }
 
 const handleFileUpload = (event, field) => {
@@ -924,8 +1121,12 @@ const submitForm = async () => {
       alert('Nama penggilingan harus diisi')
       return
     }
-    if (!form.value.lokasi_makloon) {
-      alert('Lokasi makloon harus diisi')
+    if (!form.value.komoditas) {
+      alert('Komoditas harus diisi')
+      return
+    }
+    if (!form.value.kabupaten_id) {
+      alert('Kabupaten harus diisi')
       return
     }
     if (form.value.transports.length === 0) {
@@ -956,6 +1157,19 @@ const submitForm = async () => {
     formData.append('tanggal_pengajuan', form.value.tanggal_pengajuan)
     formData.append('nama_penggilingan', form.value.nama_penggilingan)
     formData.append('lokasi_makloon', form.value.lokasi_makloon)
+    formData.append('komoditas', form.value.komoditas)
+    if (form.value.provinsi_id) {
+      formData.append('provinsi_id', form.value.provinsi_id)
+    }
+    if (form.value.kabupaten_id) {
+      formData.append('kabupaten_id', form.value.kabupaten_id)
+    }
+    if (form.value.kecamatan_id) {
+      formData.append('kecamatan_id', form.value.kecamatan_id)
+    }
+    if (form.value.kalurahan_id) {
+      formData.append('kalurahan_id', form.value.kalurahan_id)
+    }
 
     if (form.value.foto_gkp_1) {
       formData.append('foto_gkp_1', form.value.foto_gkp_1)
@@ -1035,6 +1249,11 @@ const editItem = (item) => {
     tanggal_pengajuan: tanggalFormatted,
     nama_penggilingan: item.nama_penggilingan,
     lokasi_makloon: item.lokasi_makloon,
+    komoditas: item.komoditas || '',
+    provinsi_id: item.provinsi_id || '',
+    kabupaten_id: item.kabupaten_id || '',
+    kecamatan_id: item.kecamatan_id || '',
+    kalurahan_id: item.kalurahan_id || '',
     foto_gkp_1: null,
     foto_gkp_2: null,
     foto_gkp_1_preview: item.foto_gkp_1
@@ -1063,6 +1282,27 @@ const editItem = (item) => {
       old_surat_jalan: t.surat_jalan || '',
     })),
   }
+
+  // Load chained dropdown options
+  if (item.provinsi_id) {
+    formKabupatenOptions.value = allKabupaten.value.filter(k => k.provinsi_id == item.provinsi_id)
+  } else if (item.lokasi_makloon) {
+    // Look up by lokasi_makloon (kabupaten name) for backward compatibility
+    const matchedKab = allKabupaten.value.find(k => k.nama.toLowerCase() === item.lokasi_makloon.toLowerCase())
+    if (matchedKab) {
+      form.value.provinsi_id = matchedKab.provinsi_id
+      form.value.kabupaten_id = matchedKab.id
+      formKabupatenOptions.value = allKabupaten.value.filter(k => k.provinsi_id == matchedKab.provinsi_id)
+      formKecamatanOptions.value = allKecamatan.value.filter(k => k.kabupaten_id == matchedKab.id)
+    }
+  }
+  if (item.kabupaten_id) {
+    formKecamatanOptions.value = allKecamatan.value.filter(k => k.kabupaten_id == item.kabupaten_id)
+  }
+  if (item.kecamatan_id) {
+    formKalurahanOptions.value = allKalurahan.value.filter(k => k.kecamatan_id == item.kecamatan_id)
+  }
+
   showModal.value = true
 }
 
@@ -1101,6 +1341,11 @@ const closeModal = () => {
     // Pre-fill untuk role penggilingan
     nama_penggilingan: authStore.isPenggilingan ? (authStore.namaPenggilingan || '') : '',
     lokasi_makloon: '',
+    komoditas: '',
+    provinsi_id: '',
+    kabupaten_id: '',
+    kecamatan_id: '',
+    kalurahan_id: '',
     foto_gkp_1: null,
     foto_gkp_2: null,
     foto_gkp_1_preview: '',
@@ -1123,6 +1368,9 @@ const closeModal = () => {
       },
     ],
   }
+  formKabupatenOptions.value = []
+  formKecamatanOptions.value = []
+  formKalurahanOptions.value = []
 }
 
 const openVerifikasiModal = (item) => {

@@ -232,6 +232,7 @@ class ApiWorkflowTest extends TestCase
             'tanggal_pengajuan' => now()->toDateString(),
             'nama_penggilingan' => 'Penggilingan Uji',
             'lokasi_makloon' => 'Gudang Uji',
+            'komoditas' => 'Gabah',
             'transports' => [
                 [
                     'nama_pengemudi' => 'Driver Uji',
@@ -251,6 +252,7 @@ class ApiWorkflowTest extends TestCase
             'id' => $penggilinganId,
             'nama_penggilingan' => 'Penggilingan Uji',
             'lokasi_makloon' => 'Gudang Uji',
+            'komoditas' => 'Gabah',
         ]);
 
         $this->assertDatabaseHas('penggilingan_transport', [

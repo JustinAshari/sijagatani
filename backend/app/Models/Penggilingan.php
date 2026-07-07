@@ -13,9 +13,14 @@ class Penggilingan extends Model
     protected $fillable = [
         'tanggal_pengajuan',
         'nama_penggilingan',
+        'komoditas',
         'foto_gkp_1',
         'foto_gkp_2',
         'lokasi_makloon',
+        'provinsi_id',
+        'kabupaten_id',
+        'kecamatan_id',
+        'kalurahan_id',
         'total_tonase',
         'jumlah_angkutan',
         'status_verifikasi',
@@ -31,9 +36,29 @@ class Penggilingan extends Model
         'verified_at' => 'datetime'
     ];
 
-    protected $with = ['transports']; // Eager load transports by default
+    protected $with = ['transports', 'provinsi', 'kabupaten', 'kecamatan', 'kalurahan']; // Eager load relations by default
 
     protected $appends = ['foto_gkp_1_url', 'foto_gkp_2_url'];
+
+    public function provinsi(): BelongsTo
+    {
+        return $this->belongsTo(Provinsi::class, 'provinsi_id');
+    }
+
+    public function kabupaten(): BelongsTo
+    {
+        return $this->belongsTo(Kabupaten::class, 'kabupaten_id');
+    }
+
+    public function kecamatan(): BelongsTo
+    {
+        return $this->belongsTo(Kecamatan::class, 'kecamatan_id');
+    }
+
+    public function kalurahan(): BelongsTo
+    {
+        return $this->belongsTo(Kalurahan::class, 'kalurahan_id');
+    }
 
     // Removed petani relationship since we now store nama_petani as string
     // public function petani(): BelongsTo

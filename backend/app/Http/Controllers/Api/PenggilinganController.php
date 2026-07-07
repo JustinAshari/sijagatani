@@ -63,7 +63,29 @@ class PenggilinganController extends Controller
             $query->whereDate('tanggal_pengajuan', '<=', $request->tanggal_sampai);
         }
 
-        // Removed kabupaten filter since we no longer have petani relationship
+        // Filter by komoditas
+        if ($request->filled('komoditas')) {
+            $query->where('komoditas', $request->komoditas);
+        }
+
+        // Filter by status_verifikasi
+        if ($request->filled('status_verifikasi')) {
+            $query->where('status_verifikasi', $request->status_verifikasi);
+        }
+
+        // Filter by wilayah
+        if ($request->filled('provinsi_id')) {
+            $query->where('provinsi_id', $request->provinsi_id);
+        }
+        if ($request->filled('kabupaten_id')) {
+            $query->where('kabupaten_id', $request->kabupaten_id);
+        }
+        if ($request->filled('kecamatan_id')) {
+            $query->where('kecamatan_id', $request->kecamatan_id);
+        }
+        if ($request->filled('kalurahan_id')) {
+            $query->where('kalurahan_id', $request->kalurahan_id);
+        }
 
         $query->latest('tanggal_pengajuan');
 
@@ -127,6 +149,11 @@ class PenggilinganController extends Controller
             'tanggal_pengajuan' => 'required|date',
             'nama_penggilingan' => $namaPenggilinganRule,
             'lokasi_makloon' => 'required|string|max:255',
+            'komoditas' => 'required|string|in:Gabah,Jagung,Beras',
+            'provinsi_id' => 'nullable|exists:provinsi,id',
+            'kabupaten_id' => 'nullable|exists:kabupaten,id',
+            'kecamatan_id' => 'nullable|exists:kecamatan,id',
+            'kalurahan_id' => 'nullable|exists:kalurahan,id',
             'foto_gkp_1' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
             'foto_gkp_2' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
             
@@ -157,7 +184,12 @@ class PenggilinganController extends Controller
             $data = [
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
                 'nama_penggilingan' => $namaPenggilingan,
-                'lokasi_makloon' => $request->lokasi_makloon
+                'lokasi_makloon' => $request->lokasi_makloon,
+                'komoditas' => $request->komoditas,
+                'provinsi_id' => $request->provinsi_id,
+                'kabupaten_id' => $request->kabupaten_id,
+                'kecamatan_id' => $request->kecamatan_id,
+                'kalurahan_id' => $request->kalurahan_id,
             ];
 
             // Handle image uploads for GKP
@@ -289,6 +321,11 @@ class PenggilinganController extends Controller
             'tanggal_pengajuan' => 'required|date',
             'nama_penggilingan' => $namaPenggilinganRuleUpdate,
             'lokasi_makloon' => 'required|string|max:255',
+            'komoditas' => 'required|string|in:Gabah,Jagung,Beras',
+            'provinsi_id' => 'nullable|exists:provinsi,id',
+            'kabupaten_id' => 'nullable|exists:kabupaten,id',
+            'kecamatan_id' => 'nullable|exists:kecamatan,id',
+            'kalurahan_id' => 'nullable|exists:kalurahan,id',
             'foto_gkp_1' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
             'foto_gkp_2' => 'sometimes|file|mimes:jpeg,png,jpg|max:5120',
             
@@ -335,7 +372,12 @@ class PenggilinganController extends Controller
             $data = [
                 'tanggal_pengajuan' => $request->tanggal_pengajuan,
                 'nama_penggilingan' => $namaPenggilingan,
-                'lokasi_makloon' => $request->lokasi_makloon
+                'lokasi_makloon' => $request->lokasi_makloon,
+                'komoditas' => $request->komoditas,
+                'provinsi_id' => $request->provinsi_id,
+                'kabupaten_id' => $request->kabupaten_id,
+                'kecamatan_id' => $request->kecamatan_id,
+                'kalurahan_id' => $request->kalurahan_id,
             ];
 
             // Handle image uploads
@@ -514,22 +556,40 @@ class PenggilinganController extends Controller
         if ($user->isAdminPenggilingan()) {
             $query->where('nama_penggilingan', $user->nama_penggilingan);
         } else {
-            if ($request->has('tanggal_dari')) {
-                $query->whereDate('tanggal_pengajuan', '>=', $request->tanggal_dari);
-            }
-            if ($request->has('tanggal_sampai')) {
-                $query->whereDate('tanggal_pengajuan', '<=', $request->tanggal_sampai);
-            }
             if ($request->has('nama_penggilingan')) {
                 $query->where('nama_penggilingan', 'LIKE', '%' . $request->nama_penggilingan . '%');
             }
         }
 
-        if ($user->isAdminPenggilingan() && $request->has('tanggal_dari')) {
+        if ($request->has('tanggal_dari')) {
             $query->whereDate('tanggal_pengajuan', '>=', $request->tanggal_dari);
         }
-        if ($user->isAdminPenggilingan() && $request->has('tanggal_sampai')) {
+        if ($request->has('tanggal_sampai')) {
             $query->whereDate('tanggal_pengajuan', '<=', $request->tanggal_sampai);
+        }
+
+        // Filter by komoditas
+        if ($request->filled('komoditas')) {
+            $query->where('komoditas', $request->komoditas);
+        }
+
+        // Filter by status_verifikasi
+        if ($request->filled('status_verifikasi')) {
+            $query->where('status_verifikasi', $request->status_verifikasi);
+        }
+
+        // Filter by wilayah
+        if ($request->filled('provinsi_id')) {
+            $query->where('provinsi_id', $request->provinsi_id);
+        }
+        if ($request->filled('kabupaten_id')) {
+            $query->where('kabupaten_id', $request->kabupaten_id);
+        }
+        if ($request->filled('kecamatan_id')) {
+            $query->where('kecamatan_id', $request->kecamatan_id);
+        }
+        if ($request->filled('kalurahan_id')) {
+            $query->where('kalurahan_id', $request->kalurahan_id);
         }
 
         $totalTonase = $query->sum('total_tonase');

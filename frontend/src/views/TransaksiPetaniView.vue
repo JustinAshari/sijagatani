@@ -145,6 +145,43 @@
               </select>
             </div>
             <div class="fd-field">
+              <label class="fd-label">Komoditi</label>
+              <select v-model="filterKomoditi" class="fd-select">
+                <option value="">Semua Komoditi</option>
+                <option value="Gabah">Gabah</option>
+                <option value="Jagung">Jagung</option>
+                <option value="Beras">Beras</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Provinsi</label>
+              <select v-model="filterProvinsi" @change="onFilterProvinsiChange" class="fd-select">
+                <option value="">Semua Provinsi</option>
+                <option v-for="prov in provinsiList" :key="prov.id" :value="prov.id">{{ prov.nama }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Kabupaten</label>
+              <select v-model="filterKabupatenId" @change="onFilterKabupatenChange" :disabled="!filterProvinsi" class="fd-select">
+                <option value="">Semua Kabupaten</option>
+                <option v-for="kab in filterKabupatenOptions" :key="kab.id" :value="kab.id">{{ kab.nama }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Kecamatan</label>
+              <select v-model="filterKecamatan" @change="onFilterKecamatanChange" :disabled="!filterKabupatenId" class="fd-select">
+                <option value="">Semua Kecamatan</option>
+                <option v-for="kec in filterKecamatanOptions" :key="kec.id" :value="kec.id">{{ kec.nama }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Kelurahan/Desa</label>
+              <select v-model="filterKalurahan" :disabled="!filterKecamatan" class="fd-select">
+                <option value="">Semua Kelurahan/Desa</option>
+                <option v-for="kal in filterKalurahanOptions" :key="kal.id" :value="kal.id">{{ kal.nama }}</option>
+              </select>
+            </div>
+            <div class="fd-field">
               <label class="fd-label">Tanggal Dari</label>
               <input v-model="filterTanggalDari" type="date" class="fd-input" />
             </div>
@@ -594,15 +631,88 @@ const filterStatus = ref('')
 const filterStatusVerifikasi = ref('')
 const filterTanggalDari = ref('')
 const filterTanggalSampai = ref('')
+const filterKomoditi = ref('')
+const filterProvinsi = ref('')
+const filterKabupatenId = ref('')
+const filterKecamatan = ref('')
+const filterKalurahan = ref('')
+
+// Region lists
+const provinsiList = ref([])
+const allKabupaten = ref([])
+const allKecamatan = ref([])
+const allKalurahan = ref([])
+
+// Dynamic filtered options
+const filterKabupatenOptions = ref([])
+const filterKecamatanOptions = ref([])
+const filterKalurahanOptions = ref([])
 
 const activeFilterCount = computed(() => {
   let count = 0
   if (filterStatus.value) count++
   if (filterStatusVerifikasi.value) count++
+  if (filterKomoditi.value) count++
+  if (filterProvinsi.value) count++
+  if (filterKabupatenId.value) count++
+  if (filterKecamatan.value) count++
+  if (filterKalurahan.value) count++
   if (filterTanggalDari.value) count++
   if (filterTanggalSampai.value) count++
   return count
 })
+
+const onFilterProvinsiChange = () => {
+  filterKabupatenId.value = ''
+  filterKecamatan.value = ''
+  filterKalurahan.value = ''
+  if (filterProvinsi.value) {
+    filterKabupatenOptions.value = allKabupaten.value.filter(k => k.provinsi_id == filterProvinsi.value)
+  } else {
+    filterKabupatenOptions.value = []
+  }
+  filterKecamatanOptions.value = []
+  filterKalurahanOptions.value = []
+}
+
+const onFilterKabupatenChange = () => {
+  filterKecamatan.value = ''
+  filterKalurahan.value = ''
+  if (filterKabupatenId.value) {
+    filterKecamatanOptions.value = allKecamatan.value.filter(k => k.kabupaten_id == filterKabupatenId.value)
+  } else {
+    filterKecamatanOptions.value = []
+  }
+  filterKalurahanOptions.value = []
+}
+
+const onFilterKecamatanChange = () => {
+  filterKalurahan.value = ''
+  if (filterKecamatan.value) {
+    filterKalurahanOptions.value = allKalurahan.value.filter(k => k.kecamatan_id == filterKecamatan.value)
+  } else {
+    filterKalurahanOptions.value = []
+  }
+}
+
+// Wilayah functions
+const loadWilayahData = async () => {
+  try {
+    const [provRes, kabRes, kecRes, kalRes] = await Promise.all([
+      api.get('/provinsi'),
+      api.get('/kabupaten'),
+      api.get('/kecamatan'),
+      api.get('/kalurahan')
+    ])
+    
+    provinsiList.value = provRes.data.data
+    allKabupaten.value = kabRes.data.data
+    allKecamatan.value = kecRes.data.data
+    allKalurahan.value = kalRes.data.data
+  } catch (error) {
+    console.error('Error loading wilayah:', error)
+  }
+}
 
 // Statistics computed
 const statistics = computed(() => {
@@ -653,6 +763,11 @@ const fetchTransaksi = async () => {
     const params = {}
     if (filterStatus.value) params.status_transaksi = filterStatus.value
     if (filterStatusVerifikasi.value) params.status_verifikasi = filterStatusVerifikasi.value
+    if (filterKomoditi.value) params.komoditas = filterKomoditi.value
+    if (filterProvinsi.value) params.provinsi_id = filterProvinsi.value
+    if (filterKabupatenId.value) params.kabupaten_id = filterKabupatenId.value
+    if (filterKecamatan.value) params.kecamatan_id = filterKecamatan.value
+    if (filterKalurahan.value) params.kalurahan_id = filterKalurahan.value
     if (filterTanggalDari.value) params.tanggal_dari = filterTanggalDari.value
     if (filterTanggalSampai.value) params.tanggal_sampai = filterTanggalSampai.value
 
@@ -683,9 +798,17 @@ const applyFilters = async () => {
 const resetFilters = async () => {
   filterStatus.value = ''
   filterStatusVerifikasi.value = ''
+  filterKomoditi.value = ''
+  filterProvinsi.value = ''
+  filterKabupatenId.value = ''
+  filterKecamatan.value = ''
+  filterKalurahan.value = ''
   filterTanggalDari.value = ''
   filterTanggalSampai.value = ''
   searchQuery.value = ''
+  filterKabupatenOptions.value = []
+  filterKecamatanOptions.value = []
+  filterKalurahanOptions.value = []
   currentPage.value = 1
   await fetchTransaksi()
 }
@@ -888,7 +1011,8 @@ onMounted(async () => {
   document.addEventListener('click', handleDocumentClick)
   await Promise.all([
     fetchTransaksi(),
-    fetchPetaniList()
+    fetchPetaniList(),
+    loadWilayahData()
   ])
 })
 

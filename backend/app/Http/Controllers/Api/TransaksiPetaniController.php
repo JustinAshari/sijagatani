@@ -20,25 +20,58 @@ class TransaksiPetaniController extends Controller
         $query = TransaksiPetani::with(['petani', 'verifier']);
 
         // Filter by tanggal_transaksi
-        if ($request->has('tanggal_dari')) {
+        if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_transaksi', '>=', $request->tanggal_dari);
         }
-        if ($request->has('tanggal_sampai')) {
+        if ($request->filled('tanggal_sampai')) {
             $query->whereDate('tanggal_transaksi', '<=', $request->tanggal_sampai);
         }
 
         // Filter by status_transaksi
-        if ($request->has('status_transaksi') && $request->status_transaksi !== '') {
+        if ($request->filled('status_transaksi')) {
             $query->where('status_transaksi', $request->status_transaksi);
         }
 
         // Filter by status_verifikasi
-        if ($request->has('status_verifikasi') && $request->status_verifikasi !== '') {
+        if ($request->filled('status_verifikasi')) {
             $query->where('status_verifikasi', $request->status_verifikasi);
         }
 
+        // Filter by komoditas (commodity)
+        if ($request->filled('komoditas')) {
+            $query->where('komoditas', $request->komoditas);
+        }
+
+        // Filter by provinsi_id
+        if ($request->filled('provinsi_id')) {
+            $query->whereHas('petani', function ($q) use ($request) {
+                $q->where('provinsi_id', $request->provinsi_id);
+            });
+        }
+
+        // Filter by kabupaten_id
+        if ($request->filled('kabupaten_id')) {
+            $query->whereHas('petani', function ($q) use ($request) {
+                $q->where('kabupaten_id', $request->kabupaten_id);
+            });
+        }
+
+        // Filter by kecamatan_id
+        if ($request->filled('kecamatan_id')) {
+            $query->whereHas('petani', function ($q) use ($request) {
+                $q->where('kecamatan_id', $request->kecamatan_id);
+            });
+        }
+
+        // Filter by kalurahan_id
+        if ($request->filled('kalurahan_id')) {
+            $query->whereHas('petani', function ($q) use ($request) {
+                $q->where('kalurahan_id', $request->kalurahan_id);
+            });
+        }
+
         // Search by nama or NIK of petani
-        if ($request->has('search') && $request->search !== '') {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('petani', function ($q) use ($search) {
                 $q->where('nama', 'LIKE', "%{$search}%")
