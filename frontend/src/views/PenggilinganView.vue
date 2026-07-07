@@ -1,6 +1,5 @@
 <template>
-  <div class="penggilingan-container">
-    <div class="page-card">
+  <div class="penggilingan-container" style="padding: 20px;">
 
     <!-- Hero Banner -->
     <div class="hero-banner orange">
@@ -19,205 +18,249 @@
       </div>
     </div>
 
-    <div class="header">
-      <h1>Data Makloon GKP</h1>
-      <button v-if="authStore.canManagePenggilingan" @click="openAddModal" class="btn-add">
-        <span>+</span> Tambah Makloon
-      </button>
-    </div>
-
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-      <div class="stat-item">
-        <span class="stat-label">Total Makloon:</span>
-        <span class="stat-value">{{ filteredData.length }}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Tonase Diterima:</span>
-        <span class="stat-value text-green">{{ totalTonaseDiterima }} KG</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Tonase Pending:</span>
-        <span class="stat-value text-yellow">{{ totalTonasePending }} KG</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Tonase Ditolak:</span>
-        <span class="stat-value text-red">{{ totalTonaseDitolak }} KG</span>
-      </div>
-    </div>
-
-    <!-- Filter Section -->
-    <div class="filter-section">
-      <div class="filter-toolbar">
-        <input
-          v-if="!authStore.isPenggilingan"
-          v-model="filters.namaPenggilingan"
-          @keyup.enter="applyFilters"
-          type="text"
-          placeholder="Cari nama makloon/MPP..."
-          class="search-input"
-        />
-        <FilterDropdown
-          :active-count="penggilinganActiveFilterCount"
-          @apply="applyFilters"
-          @reset="resetFilters"
-        >
-          <div class="fd-field">
-            <label class="fd-label">Status Verifikasi</label>
-            <select v-model="filters.statusVerifikasi" class="fd-select">
-              <option value="">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="disetujui">Disetujui</option>
-              <option value="ditolak">Ditolak</option>
-            </select>
-          </div>
-          <div class="fd-field">
-            <label class="fd-label">Tanggal Dari</label>
-            <input v-model="filters.tanggalDari" type="date" class="fd-input" />
-          </div>
-          <div class="fd-field">
-            <label class="fd-label">Tanggal Sampai</label>
-            <input v-model="filters.tanggalSampai" type="date" class="fd-input" />
-          </div>
-        </FilterDropdown>
-      </div>
-    </div>
-
-    <!-- Table -->
-    <!-- Column Picker -->
-    <div class="col-picker-bar">
-      <div class="col-picker-wrapper">
-        <div v-if="showColPicker" class="col-picker-overlay" @click="showColPicker = false"></div>
-        <button @click="showColPicker = !showColPicker" class="btn-col-picker" :class="{ active: showColPicker }">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-blue">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+            <path d="M9 22v-4h6v4"/>
           </svg>
-          Tampilkan Kolom
-          <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="6 9 12 15 18 9"/>
+        </div>
+        <div class="stat-info">
+          <h3>Total Makloon</h3>
+          <p class="stat-val">{{ filteredData.length }}</p>
+          <span class="stat-sub">Terdaftar/terfilter</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
-        </button>
-        <div v-if="showColPicker" class="col-picker-dropdown">
-          <div class="col-picker-header">
-            <span>Pilih Kolom Tampil</span>
-          </div>
-          <label v-for="col in colDefs" :key="col.key" class="col-picker-item" :class="{ 'col-active': visibleCols[col.key] }">
-            <span class="col-check-box">
-              <svg v-if="visibleCols[col.key]" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </span>
-            <input type="checkbox" v-model="visibleCols[col.key]" style="display:none" />
-            <span class="col-label">{{ col.label }}</span>
-          </label>
+        </div>
+        <div class="stat-info">
+          <h3>Tonase Diterima</h3>
+          <p class="stat-val text-green-val">{{ totalTonaseDiterima }} KG</p>
+          <span class="stat-sub">Disetujui oleh admin</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-orange">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <h3>Tonase Pending</h3>
+          <p class="stat-val text-orange-val">{{ totalTonasePending }} KG</p>
+          <span class="stat-sub">Menunggu verifikasi</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-red">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <h3>Tonase Ditolak</h3>
+          <p class="stat-val text-red-val">{{ totalTonaseDitolak }} KG</p>
+          <span class="stat-sub">Ditolak oleh admin</span>
         </div>
       </div>
     </div>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>No</th>
-            <th v-if="visibleCols.tanggal_pengajuan">Tanggal Pengajuan</th>
-            <th v-if="visibleCols.nama_penggilingan">Nama Penggilingan</th>
-            <th v-if="visibleCols.lokasi_makloon">Lokasi Makloon</th>
-            <th v-if="visibleCols.total_tonase">Total Tonase</th>
-            <th v-if="visibleCols.jumlah_angkutan">Jumlah Angkutan</th>
-            <th v-if="visibleCols.status_verifikasi">Status Verifikasi</th>
-            <th v-if="visibleCols.catatan_verifikasi">Catatan Verifikasi</th>
-            <th>Aksi</th>
-            <th v-if="authStore.canVerify">Verifikasi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loading">
-            <td :colspan="colSpan" class="loading-cell">
-              <div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div>
-            </td>
-          </tr>
-          <tr v-else-if="filteredData.length === 0">
-            <td :colspan="colSpan" class="empty-cell">Tidak ada data</td>
-          </tr>
-          <tr v-else v-for="(item, index) in paginatedData" :key="item.id">
-            <td>{{ rowNumber(index) }}</td>
-            <td v-if="visibleCols.tanggal_pengajuan">{{ formatDate(item.tanggal_pengajuan) }}</td>
-            <td v-if="visibleCols.nama_penggilingan">{{ item.nama_penggilingan }}</td>
-            <td v-if="visibleCols.lokasi_makloon">{{ item.lokasi_makloon }}</td>
-            <td v-if="visibleCols.total_tonase" class="text-right">{{ formatNumber(item.total_tonase) }} KG</td>
-            <td v-if="visibleCols.jumlah_angkutan" class="text-center">{{ item.jumlah_angkutan }}</td>
-            <td v-if="visibleCols.status_verifikasi" class="text-center">
-              <span :class="['badge-status', 'badge-' + item.status_verifikasi]">
-                {{ item.status_verifikasi === 'disetujui' ? 'Disetujui' : item.status_verifikasi === 'ditolak' ? 'Ditolak' : 'Pending' }}
-              </span>
-            </td>
-            <td v-if="visibleCols.catatan_verifikasi">{{ item.catatan_verifikasi || '-' }}</td>
-            <td class="action-buttons">
-              <button @click="viewDetail(item)" class="btn-view" title="Lihat Detail">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-              <button @click="downloadMakloonGKP(item.id)" class="btn-download" title="Download Form GKP Maklon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-              </button>
-              <button v-if="authStore.canManagePenggilingan" @click="editItem(item)" class="btn-edit" title="Edit">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-              </button>
-              <button v-if="authStore.canManagePenggilingan" @click="deleteItem(item.id)" class="btn-delete" title="Hapus">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                </svg>
-              </button>
-            </td>
-            <td v-if="authStore.canVerify" class="verifikasi-cell">
-              <button @click="openVerifikasiModal(item)" class="btn-verify" title="Verifikasi">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <div class="pagination-bar" v-if="filteredData.length">
-      <div class="pagination-info">
-        Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ filteredData.length }} data
+    <!-- Main Card Content -->
+    <div class="page-card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input
+            v-if="!authStore.isPenggilingan"
+            v-model="filters.namaPenggilingan"
+            @keyup.enter="applyFilters"
+            type="text"
+            placeholder="Cari nama makloon/MPP..."
+            class="search-input"
+          />
+          <FilterDropdown
+            :active-count="penggilinganActiveFilterCount"
+            @apply="applyFilters"
+            @reset="resetFilters"
+          >
+            <div class="fd-field">
+              <label class="fd-label">Status Verifikasi</label>
+              <select v-model="filters.statusVerifikasi" class="fd-select">
+                <option value="">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="disetujui">Disetujui</option>
+                <option value="ditolak">Ditolak</option>
+              </select>
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Tanggal Dari</label>
+              <input v-model="filters.tanggalDari" type="date" class="fd-input" />
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Tanggal Sampai</label>
+              <input v-model="filters.tanggalSampai" type="date" class="fd-input" />
+            </div>
+          </FilterDropdown>
+        </div>
+        <div class="toolbar-right">
+          <button v-if="authStore.canManagePenggilingan" @click="openAddModal" class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline" style="width: 14px; height: 14px; margin-right: 4px;">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Tambah Makloon
+          </button>
+        </div>
       </div>
-      <div class="pagination-controls">
-        <label for="makloon-per-page">Baris:</label>
-        <select id="makloon-per-page" v-model="perPage" class="per-page-select">
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-        <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
-        <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
-        <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+
+      <!-- Column Picker -->
+      <div class="col-picker-bar">
+        <div class="col-picker-wrapper">
+          <div v-if="showColPicker" class="col-picker-overlay" @click="showColPicker = false"></div>
+          <button @click="showColPicker = !showColPicker" class="btn-col-picker" :class="{ active: showColPicker }">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            Tampilkan Kolom
+            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div v-if="showColPicker" class="col-picker-dropdown">
+            <div class="col-picker-header">
+              <span>Pilih Kolom Tampil</span>
+            </div>
+            <label v-for="col in colDefs" :key="col.key" class="col-picker-item" :class="{ 'col-active': visibleCols[col.key] }">
+              <span class="col-check-box">
+                <svg v-if="visibleCols[col.key]" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </span>
+              <input type="checkbox" v-model="visibleCols[col.key]" style="display:none" />
+              <span class="col-label">{{ col.label }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th v-if="visibleCols.tanggal_pengajuan">Tanggal Pengajuan</th>
+              <th v-if="visibleCols.nama_penggilingan">Nama Penggilingan</th>
+              <th v-if="visibleCols.lokasi_makloon">Lokasi Makloon</th>
+              <th v-if="visibleCols.total_tonase">Total Tonase</th>
+              <th v-if="visibleCols.jumlah_angkutan">Jumlah Angkutan</th>
+              <th v-if="visibleCols.status_verifikasi">Status Verifikasi</th>
+              <th v-if="visibleCols.catatan_verifikasi">Catatan Verifikasi</th>
+              <th>Aksi</th>
+              <th v-if="authStore.canVerify">Verifikasi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td :colspan="colSpan" class="loading-cell">
+                <div class="loading-wrap">
+                  <div class="spinner"></div>
+                  <span>Memuat data makloon...</span>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredData.length === 0">
+              <td :colspan="colSpan" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data makloon</td>
+            </tr>
+            <tr v-else v-for="(item, index) in paginatedData" :key="item.id">
+              <td class="td-num">{{ rowNumber(index) }}</td>
+              <td v-if="visibleCols.tanggal_pengajuan" class="td-date">{{ formatDate(item.tanggal_pengajuan) }}</td>
+              <td v-if="visibleCols.nama_penggilingan" class="td-name">{{ item.nama_penggilingan }}</td>
+              <td v-if="visibleCols.lokasi_makloon">{{ item.lokasi_makloon }}</td>
+              <td v-if="visibleCols.total_tonase" class="text-right font-medium">{{ formatNumber(item.total_tonase) }} KG</td>
+              <td v-if="visibleCols.jumlah_angkutan" class="text-center font-medium">{{ item.jumlah_angkutan }}</td>
+              <td v-if="visibleCols.status_verifikasi" class="text-center">
+                <span class="badge-status" :class="'badge-' + item.status_verifikasi">
+                  {{ item.status_verifikasi === 'disetujui' ? 'Disetujui' : item.status_verifikasi === 'ditolak' ? 'Ditolak' : 'Pending' }}
+                </span>
+              </td>
+              <td v-if="visibleCols.catatan_verifikasi">{{ item.catatan_verifikasi || '-' }}</td>
+              <td class="td-actions">
+                <button @click="viewDetail(item)" class="btn-icon btn-view" title="Lihat Detail">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <button @click="downloadMakloonGKP(item.id)" class="btn-icon btn-view" title="Download Form GKP Maklon" style="background: #ecfdf5; border-color: #a7f3d0; color: #059669;">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </button>
+                <button v-if="authStore.canManagePenggilingan" @click="editItem(item)" class="btn-icon btn-edit" title="Edit">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button v-if="authStore.canManagePenggilingan" @click="deleteItem(item.id)" class="btn-icon btn-del" title="Hapus">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </td>
+              <td v-if="authStore.canVerify" class="text-center verifikasi-cell">
+                <button @click="openVerifikasiModal(item)" class="btn-icon btn-view btn-verify" title="Verifikasi" style="background: #e0f2fe; border-color: #bae6fd; color: #0284c7;">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar" v-if="filteredData.length">
+        <div class="pagination-info">
+          Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ filteredData.length }} data
+        </div>
+        <div class="pagination-controls">
+          <label for="makloon-per-page">Baris:</label>
+          <select id="makloon-per-page" v-model="perPage" class="per-page-select">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
+          <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
+          <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+        </div>
       </div>
     </div>
 
     <!-- Modal Form -->
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
+      <div class="modal detail-modal">
         <div class="modal-header">
-          <h2>{{ isEditing ? 'Edit' : 'Tambah' }} Makloon</h2>
-          <button @click="closeModal" class="btn-close">×</button>
+          <h3>{{ isEditing ? 'Edit' : 'Tambah' }} Makloon</h3>
+          <button @click="closeModal" class="btn-close">&times;</button>
         </div>
-        <form @submit.prevent="submitForm" class="modal-body">
+        <form @submit.prevent="submitForm" class="modal-form" style="max-height: 80vh; overflow-y: auto;">
           <!-- Basic Info -->
           <div class="form-section">
             <h3>Informasi Pengajuan</h3>
@@ -549,7 +592,6 @@
       </div>
     </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -1145,94 +1187,193 @@ const downloadMakloonGKP = async (penggilinganId) => {
 }
 
 </script>
-
 <style scoped>
 .penggilingan-container {
   padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
-.header {
+/* Hero Banner */
+.hero-banner.orange {
   display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(234, 88, 12, 0.15);
+}
+.hero-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hero-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.hero-text h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.hero-text p {
+  font-size: 0.875rem;
+  opacity: 0.85;
+}
+
+/* Stats Cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e8ecf0;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.icon-blue { background: #eff6ff; color: #3b82f6; }
+.icon-green { background: #ecfdf5; color: #10b981; }
+.icon-orange { background: #fff7ed; color: #f97316; }
+.icon-red { background: #fef2f2; color: #ef4444; }
+.text-green-val { color: #10b981; font-weight: 700; }
+.text-orange-val { color: #f97316; font-weight: 700; }
+.text-red-val { color: #ef4444; font-weight: 700; }
+
+.stat-info h3 {
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.stat-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.15rem;
+}
+.stat-sub {
+  font-size: 0.72rem;
+  color: #9ea9b8;
+}
+
+/* Page Card */
+.page-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e8ecf0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.header h1 {
-  font-size: 28px;
-  color: #2c3e50;
-}
-
-.btn-add {
-  background: #1565c0;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-add:hover {
-  background: #0d47a1;
-}
-
-.stats-bar {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
   flex-wrap: wrap;
+  gap: 0.75rem;
 }
-
-.stat-item {
-  background: #ecf0f1;
-  padding: 15px 25px;
-  border-radius: 8px;
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   flex: 1;
-  min-width: 200px;
+  max-width: 500px;
 }
-
-.stat-label {
-  display: block;
-  color: #7f8c8d;
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-
-.stat-value {
-  display: block;
-  color: #2c3e50;
-  font-size: 24px;
-  font-weight: bold;
-}
-.text-green {
-  color: #27ae60 !important;
-}
-.text-yellow {
-  color: #f39c12 !important;
-}
-.text-red {
-  color: #e74c3c !important;
-}
-
-.filter-section {
-  background: white;
-  padding: 14px 20px;
+.search-input {
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
 }
 
-.filter-toolbar {
-  display: flex;
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 6px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+.btn-cancel {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.btn-cancel:hover { background: #e5e7eb; }
+
+/* Table Style */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 0.5rem;
 }
 
 .pagination-bar {
@@ -1243,462 +1384,431 @@ const downloadMakloonGKP = async (penggilinganId) => {
   margin-top: 0.85rem;
   flex-wrap: wrap;
 }
-
 .pagination-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
 .pagination-info,
 .page-label {
   color: #64748b;
   font-size: 0.85rem;
 }
-
 .per-page-select {
   height: 34px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0 8px;
 }
-
 .btn-page {
   width: 32px;
   height: 32px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   cursor: pointer;
 }
-
 .btn-page:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.search-input {
-  flex: 1;
-  min-width: 240px;
-  height: 36px;
-  padding: 0 12px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.search-input:focus {
-  border-color: #475569;
-}
-
-/* Filter panel field styles */
-.fd-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.fd-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.fd-select,
-.fd-input {
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  background: #fff;
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.fd-select:focus,
-.fd-input:focus {
-  border-color: #475569;
-}
-
-.btn-reset,
-.btn-export {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.btn-reset {
-  background: #95a5a6;
-  color: white;
-}
-
-.btn-reset:hover {
-  background: #7f8c8d;
-}
-
-.btn-export {
-  background: #1565c0;
-  color: white;
-}
-
-.btn-export:hover {
-  background: #0d47a1;
-}
-
-.table-wrapper {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  overflow-x: auto;
-  border: 1px solid #e8ecef;
-}
-
-table {
+.data-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.875rem;
 }
-
-thead {
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  color: white;
-}
-
-thead th {
-  padding: 13px 14px;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  border-right: 1px solid rgba(255,255,255,0.15);
-  border-bottom: none;
-}
-
-thead th:last-child {
-  border-right: none;
-}
-
-th,
-td {
-  padding: 11px 14px;
+.data-table th {
+  background: #f8fafc;
   text-align: left;
-}
-
-th {
-  font-weight: 600;
-  font-size: 13px;
-}
-
-td {
-  font-size: 13.5px;
-  color: #374151;
-  border-bottom: 1px solid #edf0f3;
-  border-right: 1px solid #edf0f3;
-}
-
-td:last-child {
-  border-right: none;
-}
-
-tbody tr {
-  transition: background 0.15s;
-}
-
-tbody tr:nth-child(even) {
-  background: #f0f7ff;
-}
-
-tbody tr:hover {
-  background: #dceeff;
-}
-
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.loading-cell,
-.empty-cell {
-  text-align: center;
-  padding: 40px;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e8ecf0;
 }
-.loading-inner {
+.data-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f0f3f7;
+  color: #374151;
+}
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.td-num { color: #9ea9b8; width: 40px; text-align: center; }
+.td-name { font-weight: 600; color: #1a2332; }
+.td-date { color: #6b7280; font-size: 0.82rem; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+
+/* Status Badges */
+.badge-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge-pending { background: #fef3c7; color: #d97706; }
+.badge-disetujui { background: #d1e7dd; color: #0f5132; }
+.badge-ditolak { background: #f8d7da; color: #842029; }
+
+/* Action Buttons */
+.td-actions {
+  width: 160px;
+  white-space: nowrap;
+}
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 4px;
+}
+.btn-icon svg { width: 14px; height: 14px; }
+.btn-view { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+.btn-view:hover { background: #dcfce7; }
+.btn-edit { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.btn-edit:hover { background: #dbeafe; }
+.btn-del { background: #fef2f2; border-color: #fecaca; color: #ef4444; }
+.btn-del:hover { background: #fee2e2; }
+
+/* Loading state */
+.loading-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  padding: 3rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
-.tbl-spinner {
-  width: 22px; height: 22px;
-  border: 2.5px solid #e8ecf0;
-  border-top-color: #3b82f6;
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e8ecf0;
+  border-top-color: #f97316;
   border-radius: 50%;
-  animation: spin .7s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-.verifikasi-cell {
-  text-align: center;
-  white-space: nowrap;
-}
-
-.no-verify {
-  color: #aaa;
-  font-size: 13px;
-}
-
-.btn-view,
-.btn-download,
-.btn-edit,
-.btn-delete {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-view {
-  background: #3498db;
-  color: white;
-}
-
-.btn-view:hover {
-  background: #2980b9;
-}
-
-.btn-download {
-  background: #27ae60;
-  color: white;
-}
-
-.btn-download:hover {
-  background: #229954;
-}
-
-.btn-edit {
-  background: #f39c12;
-  color: white;
-}
-
-.btn-edit:hover {
-  background: #d68910;
-}
-
-.btn-delete {
-  background: #e74c3c;
-  color: white;
-}
-
-.btn-delete:hover {
-  background: #c0392b;
-}
-
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
-  overflow-y: auto;
-  padding: 20px;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
 }
-
-.modal-content {
-  background: white;
-  border-radius: 12px;
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
   width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.2s ease;
+  overflow: hidden;
 }
-
-.modal-detail {
-  max-width: 1000px;
+.detail-modal {
+  max-width: 680px;
+}
+@keyframes slideIn {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #ddd;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f0f3f7;
 }
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 24px;
-  color: #2c3e50;
+.modal-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
 }
-
 .btn-close {
   background: none;
   border: none;
-  font-size: 32px;
+  font-size: 1.4rem;
+  color: #9ea9b8;
   cursor: pointer;
-  color: #7f8c8d;
+  padding: 2px 6px;
+  border-radius: 6px;
   line-height: 1;
 }
-
 .btn-close:hover {
-  color: #2c3e50;
+  background: #f3f4f6;
+  color: #374151;
 }
 
-.modal-body {
-  padding: 20px;
+.modal-form {
+  padding: 1.25rem 1.5rem 1.5rem;
 }
-
-.detail-body {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
 .form-section {
-  margin-bottom: 25px;
-  padding: 20px;
-  background: #f8f9fa;
+  background: #f8fafc;
+  padding: 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  border: 1px solid #e2e8f0;
+}
+.form-section h3 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.form-group {
+  margin-bottom: 1.1rem;
+}
+.form-group label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  background-color: #fff;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.required { color: #ef4444; }
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
+/* Detail modal styles */
+.modal-body {
+  padding: 1.5rem;
+}
 .detail-section {
-  margin-bottom: 25px;
-  padding: 20px;
-  background: #f8f9fa;
+  padding-bottom: 1.25rem;
+}
+.detail-section.border-top {
+  border-top: 1px solid #f0f3f7;
+  padding-top: 1.25rem;
+}
+.detail-section h3, .detail-section h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.detail-label {
+  font-size: 0.78rem;
+  color: #8a96a8;
+  font-weight: 500;
+}
+.detail-value {
+  font-size: 0.88rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Specific to Penggilingan */
+.preview-image, .preview-image-small {
+  max-width: 100%;
+  height: auto;
   border-radius: 8px;
+  margin-top: 8px;
+  border: 1px solid #cbd5e1;
+}
+.preview-image { max-width: 200px; }
+.preview-image-small { max-width: 120px; }
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+.photo-item {
+  text-align: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px;
+}
+.photo-item label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 6px;
+}
+.photo-item img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.photo-item img:hover {
+  transform: scale(1.03);
 }
 
-.form-section h3,
-.detail-section h3 {
-  margin: 0 0 15px 0;
-  font-size: 18px;
-  color: #2c3e50;
+.transport-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
-
-.section-header {
+.transport-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+.transport-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.5rem;
 }
-
-.section-header h3 {
+.transport-header h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e3a8a;
   margin: 0;
 }
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-  margin-bottom: 15px;
+.btn-add-transport {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-add-transport:hover {
+  background: #dbeafe;
+}
+.btn-remove-transport {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-remove-transport:hover {
+  background: #fee2e2;
 }
 
-.form-group {
+.transport-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+.transport-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.transport-table th {
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+  color: #4b5563;
+}
+.transport-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.resume-section {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 1rem;
+}
+.resume-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.resume-item {
   display: flex;
   flex-direction: column;
-  gap: 5px;
 }
-
-.form-group label {
-  font-size: 14px;
-  color: #555;
-  font-weight: 500;
-}
-
-.required {
-  color: #e74c3c;
-}
-
-.form-group input,
-.form-group select {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #3498db;
-}
-
-.input-readonly {
-  background-color: #f5f5f5;
-  color: #555;
-  cursor: not-allowed;
-  border-color: #e0e0e0 !important;
-}
-
-.image-preview {
-  margin-top: 10px;
-  position: relative;
-  width: 200px;
-  height: 200px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.preview-image {
-  margin-top: 10px;
-  max-width: 200px;
-  max-height: 200px;
-  border-radius: 8px;
-  border: 2px solid #ddd;
-  cursor: pointer;
-  display: block;
-}
-
-.preview-image-small {
-  margin-top: 10px;
-  max-width: 150px;
-  max-height: 150px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  display: block;
-}
-
-.pdf-indicator {
-  color: #16a34a;
+.resume-label {
+  font-size: 0.75rem;
+  color: #1e3a8a;
   font-weight: 600;
-  margin-top: 10px;
+}
+.resume-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #15803d;
 }
 
 .btn-doc-open {
@@ -1710,409 +1820,20 @@ tbody tr:last-child td {
   font-size: 0.85rem;
   cursor: pointer;
 }
-
 .btn-doc-open:hover {
   background: #eef2ff;
 }
 
-.btn-remove-image {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 20px;
-  line-height: 1;
-}
-
-.btn-remove-image:hover {
-  background: #c0392b;
-}
-
-.image-preview-small {
-  margin-top: 10px;
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.image-preview-small img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.btn-remove-image-small {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
-}
-
-.btn-remove-image-small:hover {
-  background: #c0392b;
-}
-
-.btn-add-transport {
-  background: #3498db;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-add-transport:hover:not(:disabled) {
-  background: #2980b9;
-}
-
-.btn-add-transport:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-}
-
-.transport-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.transport-item {
-  border: 1px solid #ddd;
-  padding: 15px;
-  border-radius: 8px;
-  background: white;
-}
-
-.transport-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.transport-header h4 {
-  margin: 0;
-  font-size: 16px;
-  color: #2c3e50;
-}
-
-.btn-remove-transport {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.btn-remove-transport:hover:not(:disabled) {
-  background: #c0392b;
-}
-
-.btn-remove-transport:disabled {
-  background: #95a5a6;
-  cursor: not-allowed;
-}
-
-.resume-section {
-  background: #e8f5e9;
-}
-
-.transport-photos {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-}
-
-.transport-photos h4 {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 15px;
-}
-
-.no-data {
-  text-align: center;
-  color: #999;
-  padding: 20px;
-  font-style: italic;
-}
-
-.resume-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.resume-item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.resume-label {
-  font-size: 14px;
-  color: #555;
-  font-weight: 500;
-}
-
-.resume-value {
-  font-size: 20px;
-  color: #27ae60;
-  font-weight: bold;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: #7f8c8d;
-  font-weight: 500;
-}
-
-.detail-value {
-  font-size: 14px;
-  color: #2c3e50;
-}
-
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.photo-item {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.photo-label {
-  font-size: 14px;
-  color: #555;
-  font-weight: 500;
-  margin: 0;
-}
-
-.photo-item img {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-}
-
-.transport-table-wrapper {
-  overflow-x: auto;
-}
-
-.transport-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-}
-
-.transport-table thead {
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  color: white;
-}
-
-.transport-table th,
-.transport-table td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-  font-size: 13px;
-}
-
-.link-view {
-  color: #3498db;
-  text-decoration: none;
-}
-
-.link-view:hover {
-  text-decoration: underline;
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 20px;
-  border-top: 1px solid #ddd;
-}
-
-.btn-cancel,
-.btn-submit {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-cancel {
-  background: #95a5a6;
-  color: white;
-}
-
-.btn-cancel:hover {
-  background: #7f8c8d;
-}
-
-.btn-submit {
-  background: #27ae60;
-  color: white;
-}
-
-.btn-submit:hover {
-  background: #229954;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-
-  .stats-bar {
-    flex-direction: column;
-  }
-
-  .filter-row {
-    flex-direction: column;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .photo-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .resume-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.icon-inline {
-  width: 18px;
-  height: 18px;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-
-.help-text {
-  display: block;
-  margin-top: 10px;
-  color: #6c757d;
-  font-size: 12px;
-}
-
-.btn-view svg,
-.btn-download svg,
-.btn-edit svg,
-.btn-delete svg {
-  width: 16px;
-  height: 16px;
-}
-
-.btn-export svg {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-}
-
-/* Badge Status Verifikasi */
-.badge-status {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.badge-pending {
-  background: #fff3cd;
-  color: #856404;
-}
-.badge-disetujui {
-  background: #d1e7dd;
-  color: #0a3622;
-}
-.badge-ditolak {
-  background: #f8d7da;
-  color: #58151c;
-}
-
-/* Tombol Verifikasi */
-.btn-verify {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  color: #0d6efd;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-.btn-verify:hover {
-  background: #e7f0ff;
-}
-.btn-verify svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Modal Verifikasi */
+/* Verification Modal */
 .modal-verifikasi {
-  max-width: 480px;
-  width: 95%;
+  max-width: 460px;
 }
 .verifikasi-info {
-  background: #f8f9fa;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  line-height: 1.6;
+  padding: 12px;
+  margin-bottom: 12px;
 }
 .select-status {
   width: 100%;
@@ -2128,7 +1849,6 @@ tbody tr:last-child td {
   border-radius: 6px;
   font-size: 14px;
   resize: vertical;
-  box-sizing: border-box;
 }
 .modal-footer-buttons {
   display: flex;
@@ -2136,17 +1856,9 @@ tbody tr:last-child td {
   gap: 10px;
   margin-top: 20px;
 }
-.btn-cancel {
-  padding: 8px 18px;
-  border: 1px solid #ced4da;
-  background: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
 .btn-submit-verifikasi {
   padding: 8px 18px;
-  background: #0d6efd;
+  background: #1565c0;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -2154,6 +1866,7 @@ tbody tr:last-child td {
   font-size: 14px;
   font-weight: 600;
 }
+.btn-submit-verifikasi:hover { background: #0d47a1; }
 .btn-submit-verifikasi:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -2172,19 +1885,19 @@ tbody tr:last-child td {
   gap: 7px;
   padding: 7px 14px;
   background: #fff;
-  border: 1.5px solid #1565c0;
+  border: 1.5px solid #f97316;
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  color: #1565c0;
+  color: #f97316;
   transition: all 0.18s;
-  box-shadow: 0 1px 4px rgba(21,101,192,0.08);
+  box-shadow: 0 1px 4px rgba(249,115,22,0.08);
 }
 .btn-col-picker:hover, .btn-col-picker.active {
-  background: #1565c0;
+  background: #f97316;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(21,101,192,0.22);
+  box-shadow: 0 2px 8px rgba(249,115,22,0.22);
 }
 .btn-col-picker.active .chevron-icon {
   transform: rotate(180deg);
@@ -2220,7 +1933,7 @@ tbody tr:last-child td {
   color: #495057;
   border-bottom: 1px solid #f0f0f0;
   margin-bottom: 4px;
-  background: #f5f8ff;
+  background: #fff7ed;
   border-radius: 10px 10px 0 0;
 }
 .col-picker-item {
@@ -2232,11 +1945,12 @@ tbody tr:last-child td {
   font-size: 13px;
   color: #343a40;
   transition: background 0.12s;
+  border-radius: 0;
 }
-.col-picker-item:hover { background: #f5f8ff; }
+.col-picker-item:hover { background: #fff7ed; }
 .col-picker-item.col-active {
-  background: #e8f0fe;
-  color: #0d47a1;
+  background: #ffedd5;
+  color: #7c2d12;
   font-weight: 600;
 }
 .col-check-box {
@@ -2252,170 +1966,18 @@ tbody tr:last-child td {
   transition: all 0.15s;
 }
 .col-picker-item.col-active .col-check-box {
-  background: #1565c0;
-  border-color: #1565c0;
+  background: #f97316;
+  border-color: #f97316;
   color: #fff;
 }
 .col-label {
   flex: 1;
   font-family: monospace;
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
-/* ===== HERO BANNER ===== */
-.hero-banner {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  color: white;
-  padding: 1.25rem 1.75rem;
-  border-radius: 12px 12px 0 0;
-  margin: -20px -20px 20px -20px;
-}
-
-.hero-banner.orange {
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-}
-
-.page-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  padding: 20px;
-}
-
-.hero-icon svg {
-  width: 48px;
-  height: 48px;
-  opacity: 0.9;
-  flex-shrink: 0;
-}
-
-.hero-text h2 {
-  margin: 0 0 4px 0;
-  font-size: 1.5rem;
-  color: white;
-}
-
-.hero-text p {
-  margin: 0;
-  opacity: 0.85;
-  font-size: 0.9rem;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .penggilingan-container {
-    padding: 8px;
-  }
-
-  .hero-banner {
-    padding: 1rem;
-    gap: 0.75rem;
-    margin: -12px -12px 12px -12px;
-  }
-
-  .page-card {
-    padding: 12px;
-  }
-
-  .hero-icon svg {
-    width: 36px;
-    height: 36px;
-  }
-
-  .hero-text h2 {
-    font-size: 1.1rem;
-  }
-
-  .hero-text p {
-    font-size: 0.8rem;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 6px;
-    align-items: stretch;
-    margin-bottom: 10px;
-  }
-
-  .header h2 {
-    font-size: 16px;
-  }
-
-  .header-actions {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .header-actions button,
-  .header button {
-    flex: 1;
-    padding: 7px 10px;
-    font-size: 12px;
-  }
-
-  .stats-bar {
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  .filter-section {
-    padding: 10px;
-    margin-bottom: 10px;
-  }
-
-  .filter-row {
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .filter-item {
-    width: 100%;
-  }
-
-  .filter-item input,
-  .filter-item select {
-    width: 100%;
-    padding: 7px 8px;
-    font-size: 12px;
-  }
-
-  .btn-reset {
-    width: 100%;
-    padding: 7px 10px;
-    font-size: 12px;
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  table {
-    min-width: 600px;
-    font-size: 12px;
-  }
-
-  th, td {
-    padding: 6px 8px;
-  }
-
-  .modal-overlay {
-    padding: 6px;
-  }
-
-  .modal-content,
-  .modal-detail,
-  .modal-verifikasi {
-    width: 98%;
-    max-height: 93vh;
+@media (max-width: 640px) {
+  .modal-content {
     overflow-y: auto;
     padding: 12px;
   }

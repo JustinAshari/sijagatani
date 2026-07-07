@@ -1,6 +1,5 @@
 <template>
-  <div class="petani-list">
-    <div class="page-card">
+  <div class="petani-list" style="padding: 20px;">
 
     <!-- Hero Banner -->
     <div class="hero-banner">
@@ -16,220 +15,267 @@
       </div>
     </div>
 
-    <div class="page-header">
-      <div class="header-left">
-        <h1>
-          <svg class="icon-title" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-blue">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
           </svg>
-          Data Petani
-        </h1>
-        <p class="subtitle">Kelola dan pantau data petani yang terdaftar di sistem</p>
+        </div>
+        <div class="stat-info">
+          <h3>Total Petani</h3>
+          <p class="stat-val">{{ statistics.totalCount }}</p>
+          <span class="stat-sub">Terdaftar/terfilter</span>
+        </div>
       </div>
-      <div class="header-actions">
-        <button @click="exportExcel" class="btn-success" :disabled="loading">
-          <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+            <line x1="15" y1="3" x2="15" y2="21"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="3" y1="15" x2="21" y2="15"/>
           </svg>
-          Export Excel
-        </button>
-        <button v-if="authStore.canManagePetani" @click="showAddModal = true" class="btn-primary">
-          <span>+</span> Tambah Data Petani
-        </button>
+        </div>
+        <div class="stat-info">
+          <h3>Total Luas Lahan</h3>
+          <p class="stat-val text-green-val">{{ formatVolume(statistics.totalLahan) }} HA</p>
+          <span class="stat-sub">Lahan terdaftar</span>
+        </div>
       </div>
-    </div>
-    <!-- end page-header -->
 
-    <div class="filter-section">
-      <div class="filter-toolbar">
-        <input
-          v-model="searchQuery"
-          @keyup.enter="applyFilter"
-          type="text"
-          placeholder="Cari nama atau NIK petani..."
-          class="search-input"
-        />
-        <FilterDropdown
-          :active-count="petaniActiveFilterCount"
-          @apply="applyFilter"
-          @reset="resetFilter"
-        >
-          <div class="fd-field">
-            <label class="fd-label">Kabupaten</label>
-            <select v-model="filterKabupaten" class="fd-select">
-              <option value="">Semua Kabupaten</option>
-              <option v-for="kab in kabupatenList" :key="kab" :value="kab">{{ kab }}</option>
-            </select>
-          </div>
-
-          <div class="fd-field">
-            <label class="fd-label">Tanggal Dari</label>
-            <input v-model="filterTanggalDari" type="date" class="fd-input" />
-          </div>
-          <div class="fd-field">
-            <label class="fd-label">Tanggal Sampai</label>
-            <input v-model="filterTanggalSampai" type="date" class="fd-input" />
-          </div>
-        </FilterDropdown>
-      </div>
-    </div>
-
-    <div class="stats-bar">
-      <div class="stat-item">
-        <span class="stat-label">Total Petani:</span>
-        <span class="stat-value">{{ filteredPetani.length }}</span>
-      </div>
-      <div class="stat-item" v-if="filterKabupaten">
-        <span class="stat-label">{{ filterKabupaten }}:</span>
-        <span class="stat-value">{{ filteredPetani.length }}</span>
-      </div>
-    </div>
-
-    <!-- Table dengan style baru -->
-    <!-- Column Picker -->
-    <div class="col-picker-bar">
-      <div class="col-picker-wrapper">
-        <div v-if="showColPicker" class="col-picker-overlay" @click="showColPicker = false"></div>
-        <button @click="showColPicker = !showColPicker" class="btn-col-picker" :class="{ active: showColPicker }">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      <div class="stat-card">
+        <div class="stat-icon icon-orange">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
-          Tampilkan Kolom
-          <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="6 9 12 15 18 9"/>
+        </div>
+        <div class="stat-info">
+          <h3>Potensi Panen</h3>
+          <p class="stat-val text-orange-val">{{ formatVolume(statistics.totalPotensi) }} KG</p>
+          <span class="stat-sub">Estimasi hasil panen</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-blue">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
+            <line x1="12" y1="4" x2="12" y2="20"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
           </svg>
-        </button>
-        <div v-if="showColPicker" class="col-picker-dropdown">
-          <div class="col-picker-header">
-            <span>Pilih Kolom Tampil</span>
-          </div>
-          <label v-for="col in colDefs" :key="col.key" class="col-picker-item" :class="{ 'col-active': visibleCols[col.key] }">
-            <span class="col-check-box">
-              <svg v-if="visibleCols[col.key]" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </span>
-            <input type="checkbox" v-model="visibleCols[col.key]" style="display:none" />
-            <span class="col-label">{{ col.label }}</span>
-          </label>
+        </div>
+        <div class="stat-info">
+          <h3>G / B / J</h3>
+          <p class="stat-val" style="font-size: 1.15rem; margin-top: 0.1rem;">
+            {{ statistics.countGabah }} / {{ statistics.countBeras }} / {{ statistics.countJagung }}
+          </p>
+          <span class="stat-sub">Jumlah Gabah/Beras/Jagung</span>
         </div>
       </div>
     </div>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>No</th>
-            <th v-if="visibleCols.tanggal">Tanggal</th>
-            <th v-if="visibleCols.nik">NIK</th>
-            <th v-if="visibleCols.nama">Nama</th>
-            <th v-if="visibleCols.luas_lahan">Luas Lahan</th>
-            <th v-if="visibleCols.alamat_lahan">Alamat Lahan</th>
-            <th v-if="visibleCols.potensi_panen">Potensi Panen</th>
-            <th v-if="visibleCols.komoditi">Komoditi</th>
-            <th v-if="visibleCols.alamat">Alamat</th>
-            <th v-if="visibleCols.provinsi_id">Provinsi</th>
-            <th v-if="visibleCols.kabupaten_id">Kabupaten</th>
-            <th v-if="visibleCols.kecamatan_id">Kecamatan</th>
-            <th v-if="visibleCols.kalurahan_id">Kalurahan</th>
-            <th v-if="visibleCols.no_telepon">No Telepon</th>
-            <th v-if="visibleCols.bank">Bank</th>
-            <th v-if="visibleCols.no_rekening">No Rekening</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loading">
-            <td :colspan="colSpan" class="loading-cell">
-              <div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div>
-            </td>
-          </tr>
-          <tr v-else-if="filteredPetani.length === 0">
-            <td :colspan="colSpan" class="empty-cell">Tidak ada data petani</td>
-          </tr>
-          <tr v-else v-for="(petani, index) in paginatedPetani" :key="petani.id">
-            <td>{{ rowNumber(index) }}</td>
-            <td v-if="visibleCols.tanggal">{{ formatDate(petani.tanggal) }}</td>
-            <td v-if="visibleCols.nik">{{ petani.nik }}</td>
-            <td v-if="visibleCols.nama">{{ petani.nama }}</td>
-            <td v-if="visibleCols.luas_lahan">{{ formatNumber(petani.luas_lahan) }} HA</td>
-            <td v-if="visibleCols.alamat_lahan">{{ petani.alamat_lahan || '-' }}</td>
-            <td v-if="visibleCols.potensi_panen">{{ formatNumber(petani.potensi_panen) }} KG</td>
-            <td v-if="visibleCols.komoditi" class="text-center">
-              <span class="badge" :class="`badge-${petani.komoditi.toLowerCase()}`">
-                {{ petani.komoditi }}
-              </span>
-            </td>
-            <td v-if="visibleCols.alamat">{{ petani.alamat || '-' }}</td>
-            <td v-if="visibleCols.provinsi_id">{{ petani.provinsi?.nama || '-' }}</td>
-            <td v-if="visibleCols.kabupaten_id">{{ petani.kabupaten?.nama || '-' }}</td>
-            <td v-if="visibleCols.kecamatan_id">{{ petani.kecamatan?.nama || '-' }}</td>
-            <td v-if="visibleCols.kalurahan_id">{{ petani.kalurahan?.nama || '-' }}</td>
-            <td v-if="visibleCols.no_telepon">{{ petani.no_telepon || '-' }}</td>
-            <td v-if="visibleCols.bank">{{ petani.bank || '-' }}</td>
-            <td v-if="visibleCols.no_rekening">{{ petani.no_rekening || '-' }}</td>
 
-            <td class="action-buttons">
-              <button @click="viewDetail(petani)" class="btn-view" title="Detail">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-              <button v-if="authStore.canManagePetani" @click="editPetani(petani)" class="btn-edit" title="Edit">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-              </button>
-              <button v-if="authStore.canManagePetani" @click="deletePetani(petani.id)" class="btn-delete" title="Hapus">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                </svg>
-              </button>
-            </td>
+    <!-- Main Page Content -->
+    <div class="page-card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input
+            v-model="searchQuery"
+            @keyup.enter="applyFilter"
+            type="text"
+            placeholder="Cari nama atau NIK petani..."
+            class="search-input"
+          />
+          <FilterDropdown
+            :active-count="petaniActiveFilterCount"
+            @apply="applyFilter"
+            @reset="resetFilter"
+          >
+            <div class="fd-field">
+              <label class="fd-label">Kabupaten</label>
+              <select v-model="filterKabupaten" class="fd-select">
+                <option value="">Semua Kabupaten</option>
+                <option v-for="kab in kabupatenList" :key="kab" :value="kab">{{ kab }}</option>
+              </select>
+            </div>
 
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="pagination-bar" v-if="filteredPetani.length">
-      <div class="pagination-info">
-        Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ filteredPetani.length }} data
+            <div class="fd-field">
+              <label class="fd-label">Tanggal Dari</label>
+              <input v-model="filterTanggalDari" type="date" class="fd-input" />
+            </div>
+            <div class="fd-field">
+              <label class="fd-label">Tanggal Sampai</label>
+              <input v-model="filterTanggalSampai" type="date" class="fd-input" />
+            </div>
+          </FilterDropdown>
+        </div>
+        <div class="toolbar-right" style="display: flex; gap: 0.5rem; align-items: center;">
+          <button @click="exportExcel" class="btn-primary" :disabled="loading" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+            <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export Excel
+          </button>
+          <button v-if="authStore.canManagePetani" @click="showAddModal = true" class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline" style="width: 14px; height: 14px; margin-right: 4px;">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Tambah Petani
+          </button>
+        </div>
       </div>
-      <div class="pagination-controls">
-        <label for="petani-per-page">Baris:</label>
-        <select id="petani-per-page" v-model="perPage" class="per-page-select">
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-        <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
-        <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
-        <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+
+      <!-- Column Picker -->
+      <div class="col-picker-bar">
+        <div class="col-picker-wrapper">
+          <div v-if="showColPicker" class="col-picker-overlay" @click="showColPicker = false"></div>
+          <button @click="showColPicker = !showColPicker" class="btn-col-picker" :class="{ active: showColPicker }">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            Tampilkan Kolom
+            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div v-if="showColPicker" class="col-picker-dropdown">
+            <div class="col-picker-header">
+              <span>Pilih Kolom Tampil</span>
+            </div>
+            <label v-for="col in colDefs" :key="col.key" class="col-picker-item" :class="{ 'col-active': visibleCols[col.key] }">
+              <span class="col-check-box">
+                <svg v-if="visibleCols[col.key]" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </span>
+              <input type="checkbox" v-model="visibleCols[col.key]" style="display:none" />
+              <span class="col-label">{{ col.label }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th v-if="visibleCols.tanggal">Tanggal</th>
+              <th v-if="visibleCols.nik">NIK</th>
+              <th v-if="visibleCols.nama">Nama</th>
+              <th v-if="visibleCols.luas_lahan">Luas Lahan</th>
+              <th v-if="visibleCols.alamat_lahan">Alamat Lahan</th>
+              <th v-if="visibleCols.potensi_panen">Potensi Panen</th>
+              <th v-if="visibleCols.komoditi">Komoditi</th>
+              <th v-if="visibleCols.alamat">Alamat</th>
+              <th v-if="visibleCols.provinsi_id">Provinsi</th>
+              <th v-if="visibleCols.kabupaten_id">Kabupaten</th>
+              <th v-if="visibleCols.kecamatan_id">Kecamatan</th>
+              <th v-if="visibleCols.kalurahan_id">Kalurahan</th>
+              <th v-if="visibleCols.no_telepon">No Telepon</th>
+              <th v-if="visibleCols.bank">Bank</th>
+              <th v-if="visibleCols.no_rekening">No Rekening</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td :colspan="colSpan" class="loading-cell">
+                <div class="loading-wrap">
+                  <div class="spinner"></div>
+                  <span>Memuat data petani...</span>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredPetani.length === 0">
+              <td :colspan="colSpan" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data petani</td>
+            </tr>
+            <tr v-else v-for="(petani, index) in paginatedPetani" :key="petani.id">
+              <td class="td-num">{{ rowNumber(index) }}</td>
+              <td v-if="visibleCols.tanggal" class="td-date">{{ formatDate(petani.tanggal) }}</td>
+              <td v-if="visibleCols.nik"><code>{{ petani.nik }}</code></td>
+              <td v-if="visibleCols.nama" class="td-name">{{ petani.nama }}</td>
+              <td v-if="visibleCols.luas_lahan" class="text-right font-medium">{{ formatNumber(petani.luas_lahan) }} HA</td>
+              <td v-if="visibleCols.alamat_lahan">{{ petani.alamat_lahan || '-' }}</td>
+              <td v-if="visibleCols.potensi_panen" class="text-right font-medium">{{ formatNumber(petani.potensi_panen) }} KG</td>
+              <td v-if="visibleCols.komoditi" class="text-center">
+                <span class="badge" :class="petani.komoditi ? `badge-${petani.komoditi.toLowerCase()}` : ''">
+                  {{ petani.komoditi }}
+                </span>
+              </td>
+              <td v-if="visibleCols.alamat">{{ petani.alamat || '-' }}</td>
+              <td v-if="visibleCols.provinsi_id">{{ petani.provinsi?.nama || '-' }}</td>
+              <td v-if="visibleCols.kabupaten_id">{{ petani.kabupaten?.nama || '-' }}</td>
+              <td v-if="visibleCols.kecamatan_id">{{ petani.kecamatan?.nama || '-' }}</td>
+              <td v-if="visibleCols.kalurahan_id">{{ petani.kalurahan?.nama || '-' }}</td>
+              <td v-if="visibleCols.no_telepon">{{ petani.no_telepon || '-' }}</td>
+              <td v-if="visibleCols.bank">{{ petani.bank || '-' }}</td>
+              <td v-if="visibleCols.no_rekening">{{ petani.no_rekening || '-' }}</td>
+
+              <td class="td-actions">
+                <button @click="viewDetail(petani)" class="btn-icon btn-view" title="Detail">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <button v-if="authStore.canManagePetani" @click="editPetani(petani)" class="btn-icon btn-edit" title="Edit">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button v-if="authStore.canManagePetani" @click="deletePetani(petani.id)" class="btn-icon btn-del" title="Hapus">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar" v-if="filteredPetani.length">
+        <div class="pagination-info">
+          Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ filteredPetani.length }} data
+        </div>
+        <div class="pagination-controls">
+          <label for="petani-per-page">Baris:</label>
+          <select id="petani-per-page" v-model="perPage" class="per-page-select">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
+          <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
+          <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+        </div>
       </div>
     </div>
 
     <!-- Modal Add/Edit -->
-    <div v-if="showAddModal || showEditModal" class="modal" @click.self="closeModal">
-      <div class="modal-content large-modal">
+    <div v-if="showAddModal || showEditModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal detail-modal">
         <div class="modal-header">
           <h3>{{ showEditModal ? 'Edit Data Petani' : 'Tambah Data Petani Baru' }}</h3>
-          <button @click="closeModal" class="close-btn">&times;</button>
+          <button @click="closeModal" class="btn-close">&times;</button>
         </div>
-        <form @submit.prevent="submitForm" class="petani-form">
+        <form @submit.prevent="submitForm" class="modal-form" style="max-height: 80vh; overflow-y: auto;">
           <div class="form-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #f0f3f7; padding-bottom: 4px;">
+              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: middle;">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                 <line x1="16" y1="2" x2="16" y2="6"/>
                 <line x1="8" y1="2" x2="8" y2="6"/>
@@ -237,35 +283,35 @@
               </svg>
               Informasi Umum
             </h4>
-            <div class="form-row">
+            <div class="form-row-2">
               <div class="form-group">
-                <label>Tanggal Penambahan Data *</label>
+                <label>Tanggal Penambahan Data <span class="req">*</span></label>
                 <input v-model="form.tanggal" type="date" required />
               </div>
               <div class="form-group">
-                <label>NIK * <span class="nik-status" :class="nikStatus.class">{{ nikStatus.message }}</span></label>
+                <label>NIK <span class="req">*</span> <span class="nik-status" :class="nikStatus.class" style="font-size: 0.72rem; margin-left: 4px;">{{ nikStatus.message }}</span></label>
                 <input v-model="form.nik" type="text" maxlength="16" required @input="checkNikDuplicate" />
               </div>
             </div>
             <div class="form-group">
-              <label>Nama Lengkap *</label>
+              <label>Nama Lengkap <span class="req">*</span></label>
               <input v-model="form.nama" type="text" required />
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="form-section" style="margin-top: 1.25rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #f0f3f7; padding-bottom: 4px;">
+              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: middle;">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                 <circle cx="12" cy="10" r="3"/>
               </svg>
               Alamat & Wilayah
             </h4>
             <div class="form-group">
-              <label>Alamat Lengkap *</label>
-              <textarea v-model="form.alamat" rows="2" required></textarea>
+              <label>Alamat Lengkap <span class="req">*</span></label>
+              <textarea v-model="form.alamat" rows="2" required style="width: 100%; border-radius: 8px; border: 1px solid #d1d5db; padding: 0.6rem 0.85rem; font-size: 0.875rem;"></textarea>
             </div>
-            <div class="form-row">
+            <div class="form-row-2">
               <div class="form-group">
                 <label>Provinsi</label>
                 <select v-model="form.provinsi_id" @change="onProvinsiChange">
@@ -285,7 +331,7 @@
                 </select>
               </div>
             </div>
-            <div class="form-row">
+            <div class="form-row-2">
               <div class="form-group">
                 <label>Kecamatan</label>
                 <select v-model="form.kecamatan_id" @change="onKecamatanChange" :disabled="!form.kabupaten_id">
@@ -307,14 +353,14 @@
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="form-section" style="margin-top: 1.25rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #f0f3f7; padding-bottom: 4px;">
+              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: middle;">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
               </svg>
               Kontak & Bank
             </h4>
-            <div class="form-row">
+            <div class="form-row-2">
               <div class="form-group">
                 <label>No. Telepon</label>
                 <input v-model="form.no_telepon" type="text" maxlength="15" />
@@ -323,16 +369,16 @@
                 <label>Bank</label>
                 <input v-model="form.bank" type="text" placeholder="Contoh: BRI, BCA, Mandiri" />
               </div>
-              <div class="form-group">
-                <label>No. Rekening</label>
-                <input v-model="form.no_rekening" type="text" />
-              </div>
+            </div>
+            <div class="form-group">
+              <label>No. Rekening</label>
+              <input v-model="form.no_rekening" type="text" />
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="form-section" style="margin-top: 1.25rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #f0f3f7; padding-bottom: 4px;">
+              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: middle;">
                 <path d="M2 12h20"/>
                 <path d="M6 8v8"/>
                 <path d="M10 8v8"/>
@@ -344,63 +390,63 @@
               Informasi Lahan & Panen
             </h4>
             <div class="form-group">
-              <label>Alamat Lahan *</label>
-              <textarea v-model="form.alamat_lahan" rows="2" required></textarea>
+              <label>Alamat Lahan <span class="req">*</span></label>
+              <textarea v-model="form.alamat_lahan" rows="2" required style="width: 100%; border-radius: 8px; border: 1px solid #d1d5db; padding: 0.6rem 0.85rem; font-size: 0.875rem;"></textarea>
             </div>
-            <div class="form-row">
+            <div class="form-row-2">
               <div class="form-group">
-                <label>Luas Lahan (Hektar/HA) *</label>
+                <label>Luas Lahan (HA) <span class="req">*</span></label>
                 <input v-model="form.luas_lahan" type="number" step="0.01" min="0" required />
               </div>
               <div class="form-group">
-                <label>Potensi Panen (KG) *</label>
+                <label>Potensi Panen (KG) <span class="req">*</span></label>
                 <input v-model="form.potensi_panen" type="number" step="0.01" min="0" required />
               </div>
-              <div class="form-group">
-                <label>Komoditi *</label>
-                <select v-model="form.komoditi" required>
-                  <option value="">Pilih Komoditi</option>
-                  <option value="Gabah">Gabah</option>
-                  <option value="Jagung">Jagung</option>
-                  <option value="Beras">Beras</option>
-                </select>
-              </div>
+            </div>
+            <div class="form-group">
+              <label>Komoditi <span class="req">*</span></label>
+              <select v-model="form.komoditi" required>
+                <option value="">Pilih Komoditi</option>
+                <option value="Gabah">Gabah</option>
+                <option value="Jagung">Jagung</option>
+                <option value="Beras">Beras</option>
+              </select>
             </div>
           </div>
 
-          <div class="form-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="form-section" style="margin-top: 1.25rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid #f0f3f7; padding-bottom: 4px;">
+              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px; vertical-align: middle;">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                 <circle cx="8.5" cy="8.5" r="1.5"/>
                 <polyline points="21 15 16 10 5 21"/>
               </svg>
               Upload Foto & Dokumen
             </h4>
-            <div class="form-row">
+            <div class="form-row-2">
               <div class="form-group">
                 <label>Foto KTP</label>
                 <input type="file" @change="handleFileUpload($event, 'foto_ktp')" accept="image/*" />
-                <img v-if="previews.foto_ktp" :src="previews.foto_ktp" class="preview-image" />
+                <img v-if="previews.foto_ktp" :src="previews.foto_ktp" class="preview-image" style="max-height: 120px; object-fit: contain; margin-top: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" />
               </div>
               <div class="form-group">
                 <label>Foto Petani</label>
                 <input type="file" @change="handleFileUpload($event, 'foto_petani')" accept="image/*" />
-                <img v-if="previews.foto_petani" :src="previews.foto_petani" class="preview-image" />
+                <img v-if="previews.foto_petani" :src="previews.foto_petani" class="preview-image" style="max-height: 120px; object-fit: contain; margin-top: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" />
               </div>
             </div>
-            <div class="form-row">
+            <div class="form-row-2" style="margin-top: 0.5rem;">
               <div class="form-group">
                 <label>Foto Komoditi</label>
                 <input type="file" @change="handleFileUpload($event, 'foto_komoditi')" accept="image/*" />
-                <img v-if="previews.foto_komoditi" :src="previews.foto_komoditi" class="preview-image" />
+                <img v-if="previews.foto_komoditi" :src="previews.foto_komoditi" class="preview-image" style="max-height: 120px; object-fit: contain; margin-top: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" />
               </div>
               <div class="form-group">
                 <label>Kwitansi Pembayaran</label>
                 <input type="file" @change="handleFileUpload($event, 'kwitansi_pembayaran')" accept="image/*,application/pdf" />
-                <img v-if="previews.kwitansi_pembayaran && !isPdfPreview('kwitansi_pembayaran')" :src="previews.kwitansi_pembayaran" class="preview-image" />
-                <p v-if="previews.kwitansi_pembayaran && isPdfPreview('kwitansi_pembayaran')" class="pdf-indicator">
-                  <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <img v-if="previews.kwitansi_pembayaran && !isPdfPreview('kwitansi_pembayaran')" :src="previews.kwitansi_pembayaran" class="preview-image" style="max-height: 120px; object-fit: contain; margin-top: 8px; border-radius: 6px; border: 1px solid #e2e8f0;" />
+                <p v-if="previews.kwitansi_pembayaran && isPdfPreview('kwitansi_pembayaran')" class="pdf-indicator" style="font-size: 0.8rem; color: #dc2626; margin-top: 8px; display: flex; align-items: center; gap: 4px;">
+                  <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
                   </svg>
@@ -408,25 +454,10 @@
                 </p>
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Surat Pernyataan (Opsional)</label>
-                <input type="file" @change="handleFileUpload($event, 'surat_pernyataan')" accept="image/*,application/pdf" />
-                <img v-if="previews.surat_pernyataan && !isPdfPreview('surat_pernyataan')" :src="previews.surat_pernyataan" class="preview-image" />
-                <p v-if="previews.surat_pernyataan && isPdfPreview('surat_pernyataan')" class="pdf-indicator">
-                  <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                  </svg>
-                  PDF telah dipilih
-                </p>
-                <small class="help-text">Surat pernyataan yang telah ditandatangani petugas</small>
-              </div>
-            </div>
-            <small class="help-text">* Format: JPG, PNG, PDF. Max: 5MB (akan dikompres otomatis)</small>
+            <small class="help-text" style="font-size: 0.72rem; color: #8a96a8; display: block; margin-top: 8px;">* Format: JPG, PNG, PDF. Max: 5MB (akan dikompres otomatis)</small>
           </div>
 
-          <div class="modal-footer">
+          <div class="modal-actions" style="margin-top: 1.5rem; border-top: 1px solid #f0f3f7; padding-top: 1rem;">
             <button type="button" @click="closeModal" class="btn-secondary">Batal</button>
             <button type="submit" class="btn-primary" :disabled="loading || nikStatus.isDuplicate">
               {{ loading ? 'Menyimpan...' : 'Simpan Data' }}
@@ -437,160 +468,120 @@
     </div>
 
     <!-- Modal Detail -->
-    <div v-if="showDetailModal" class="modal" @click.self="showDetailModal = false">
-      <div class="modal-content large-modal">
+    <div v-if="showDetailModal" class="modal-overlay" @click.self="showDetailModal = false">
+      <div class="modal detail-modal">
         <div class="modal-header">
           <h3>Detail Data Petani</h3>
-          <button @click="showDetailModal = false" class="close-btn">&times;</button>
+          <button @click="showDetailModal = false" class="btn-close">&times;</button>
         </div>
-        <div class="detail-content" v-if="selectedPetani">
+        <div class="modal-body" v-if="selectedPetani" style="max-height: 80vh; overflow-y: auto;">
           <div class="detail-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-              Informasi Umum
-            </h4>
-            <div class="info-grid">
-              <div class="info-item">
-                <strong>Tanggal Penambahan Data:</strong>
-                <span>{{ formatDate(selectedPetani.tanggal) }}</span>
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px;">Informasi Umum</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="det-label">Tanggal Penambahan Data</span>
+                <span class="det-val">{{ formatDate(selectedPetani.tanggal) }}</span>
               </div>
-              <div class="info-item">
-                <strong>NIK:</strong>
-                <span>{{ selectedPetani.nik }}</span>
+              <div class="detail-item">
+                <span class="det-label">NIK</span>
+                <span class="det-val"><code>{{ selectedPetani.nik }}</code></span>
               </div>
-              <div class="info-item">
-                <strong>Nama:</strong>
-                <span>{{ selectedPetani.nama }}</span>
+              <div class="detail-item full-width">
+                <span class="det-label">Nama Petani</span>
+                <span class="det-val font-semibold">{{ selectedPetani.nama }}</span>
               </div>
             </div>
           </div>
 
-          <div class="detail-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-              Alamat & Wilayah
-            </h4>
-            <div class="info-grid">
-              <div class="info-item full-width">
-                <strong>Alamat:</strong>
-                <span>{{ selectedPetani.alamat }}</span>
+          <div class="detail-section border-top">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px;">Alamat & Wilayah</h4>
+            <div class="detail-grid">
+              <div class="detail-item full-width">
+                <span class="det-label">Alamat Lengkap</span>
+                <span class="det-val">{{ selectedPetani.alamat }}</span>
               </div>
-              <div class="info-item">
-                <strong>Provinsi:</strong>
-                <span>{{ selectedPetani.provinsi?.nama || '-' }}</span>
+              <div class="detail-item">
+                <span class="det-label">Provinsi</span>
+                <span class="det-val">{{ selectedPetani.provinsi?.nama || '-' }}</span>
               </div>
-              <div class="info-item">
-                <strong>Kabupaten:</strong>
-                <span>{{ selectedPetani.kabupaten?.nama || '-' }}</span>
+              <div class="detail-item">
+                <span class="det-label">Kabupaten</span>
+                <span class="det-val">{{ selectedPetani.kabupaten?.nama || '-' }}</span>
               </div>
-              <div class="info-item">
-                <strong>Kecamatan:</strong>
-                <span>{{ selectedPetani.kecamatan?.nama || '-' }}</span>
+              <div class="detail-item">
+                <span class="det-label">Kecamatan</span>
+                <span class="det-val">{{ selectedPetani.kecamatan?.nama || '-' }}</span>
               </div>
-              <div class="info-item">
-                <strong>Kalurahan/Desa:</strong>
-                <span>{{ selectedPetani.kalurahan?.nama || '-' }}</span>
+              <div class="detail-item">
+                <span class="det-label">Kalurahan/Desa</span>
+                <span class="det-val">{{ selectedPetani.kalurahan?.nama || '-' }}</span>
               </div>
             </div>
           </div>
 
-          <div class="detail-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-              </svg>
-              Kontak & Bank
-            </h4>
-            <div class="info-grid">
-              <div class="info-item">
-                <strong>No. Telepon:</strong>
-                <span>{{ selectedPetani.no_telepon || '-' }}</span>
+          <div class="detail-section border-top">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px;">Kontak & Bank</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="det-label">No. Telepon</span>
+                <span class="det-val">{{ selectedPetani.no_telepon || '-' }}</span>
               </div>
-              <div class="info-item">
-                <strong>Bank:</strong>
-                <span>{{ selectedPetani.bank || '-' }}</span>
+              <div class="detail-item">
+                <span class="det-label">Bank</span>
+                <span class="det-val">{{ selectedPetani.bank || '-' }}</span>
               </div>
-              <div class="info-item">
-                <strong>No. Rekening:</strong>
-                <span>{{ selectedPetani.no_rekening || '-' }}</span>
+              <div class="detail-item full-width">
+                <span class="det-label">No. Rekening</span>
+                <span class="det-val">{{ selectedPetani.no_rekening || '-' }}</span>
               </div>
             </div>
           </div>
 
-          <div class="detail-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M2 12h20"/>
-                <path d="M6 8v8"/>
-                <path d="M10 8v8"/>
-                <path d="M14 8v8"/>
-                <path d="M18 8v8"/>
-                <path d="M2 16h20"/>
-                <path d="M2 8h20"/>
-              </svg>
-              Informasi Lahan & Panen
-            </h4>
-            <div class="info-grid">
-              <div class="info-item full-width">
-                <strong>Alamat Lahan:</strong>
-                <span>{{ selectedPetani.alamat_lahan }}</span>
+          <div class="detail-section border-top">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px;">Informasi Lahan & Panen</h4>
+            <div class="detail-grid">
+              <div class="detail-item full-width">
+                <span class="det-label">Alamat Lahan</span>
+                <span class="det-val">{{ selectedPetani.alamat_lahan }}</span>
               </div>
-              <div class="info-item">
-                <strong>Luas Lahan:</strong>
-                <span>{{ formatNumber(selectedPetani.luas_lahan) }} HA</span>
+              <div class="detail-item">
+                <span class="det-label">Luas Lahan</span>
+                <span class="det-val font-medium">{{ formatNumber(selectedPetani.luas_lahan) }} HA</span>
               </div>
-              <div class="info-item">
-                <strong>Potensi Panen:</strong>
-                <span>{{ formatNumber(selectedPetani.potensi_panen) }} KG</span>
+              <div class="detail-item">
+                <span class="det-label">Potensi Panen</span>
+                <span class="det-val font-medium">{{ formatNumber(selectedPetani.potensi_panen) }} KG</span>
               </div>
-              <div class="info-item">
-                <strong>Komoditi:</strong>
-                <span class="badge" :class="`badge-${selectedPetani.komoditi.toLowerCase()}`">
+              <div class="detail-item full-width">
+                <span class="det-label">Komoditi</span>
+                <span class="badge" :class="selectedPetani.komoditi ? `badge-${selectedPetani.komoditi.toLowerCase()}` : ''">
                   {{ selectedPetani.komoditi }}
                 </span>
               </div>
             </div>
           </div>
 
-          <div class="detail-section">
-            <h4>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
-              Foto & Dokumen
-            </h4>
-            <div class="photo-grid">
-              <div class="photo-item" v-if="selectedPetani.foto_ktp">
-                <label>Foto KTP</label>
-                <img :src="getImageUrl(selectedPetani.foto_ktp)" alt="Foto KTP" @click="openImage(getImageUrl(selectedPetani.foto_ktp))" />
+          <div class="detail-section border-top">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.85rem; text-transform: uppercase; letter-spacing: 0.3px;">Foto & Dokumen</h4>
+            <div class="photo-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+              <div class="photo-item" v-if="selectedPetani.foto_ktp" style="display: flex; flex-direction: column; gap: 4px;">
+                <span class="det-label">Foto KTP</span>
+                <img :src="getImageUrl(selectedPetani.foto_ktp)" alt="Foto KTP" @click="openImage(getImageUrl(selectedPetani.foto_ktp))" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0; transition: transform 0.2s;" class="hover-scale" />
               </div>
-              <div class="photo-item" v-if="selectedPetani.foto_petani">
-                <label>Foto Petani</label>
-                <img :src="getImageUrl(selectedPetani.foto_petani)" alt="Foto Petani" @click="openImage(getImageUrl(selectedPetani.foto_petani))" />
+              <div class="photo-item" v-if="selectedPetani.foto_petani" style="display: flex; flex-direction: column; gap: 4px;">
+                <span class="det-label">Foto Petani</span>
+                <img :src="getImageUrl(selectedPetani.foto_petani)" alt="Foto Petani" @click="openImage(getImageUrl(selectedPetani.foto_petani))" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0; transition: transform 0.2s;" class="hover-scale" />
               </div>
-              <div class="photo-item" v-if="selectedPetani.foto_komoditi">
-                <label>Foto Komoditi</label>
-                <img :src="getImageUrl(selectedPetani.foto_komoditi)" alt="Foto Komoditi" @click="openImage(getImageUrl(selectedPetani.foto_komoditi))" />
+              <div class="photo-item" v-if="selectedPetani.foto_komoditi" style="display: flex; flex-direction: column; gap: 4px;">
+                <span class="det-label">Foto Komoditi</span>
+                <img :src="getImageUrl(selectedPetani.foto_komoditi)" alt="Foto Komoditi" @click="openImage(getImageUrl(selectedPetani.foto_komoditi))" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0; transition: transform 0.2s;" class="hover-scale" />
               </div>
-              <div class="photo-item" v-if="selectedPetani.kwitansi_pembayaran">
-                <label>Kwitansi Pembayaran</label>
-                <img v-if="!isPdfPath(selectedPetani.kwitansi_pembayaran)" :src="getImageUrl(selectedPetani.kwitansi_pembayaran)" alt="Kwitansi" @click="openImage(getImageUrl(selectedPetani.kwitansi_pembayaran))" />
-                <button v-else type="button" class="btn-doc-open" @click="openImage(getImageUrl(selectedPetani.kwitansi_pembayaran))">Buka Dokumen PDF</button>
-              </div>
-              <div class="photo-item" v-if="selectedPetani.surat_pernyataan">
-                <label>Surat Pernyataan</label>
-                <img v-if="!isPdfPath(selectedPetani.surat_pernyataan)" :src="getImageUrl(selectedPetani.surat_pernyataan)" alt="Surat Pernyataan" @click="openImage(getImageUrl(selectedPetani.surat_pernyataan))" />
-                <button v-else type="button" class="btn-doc-open" @click="openImage(getImageUrl(selectedPetani.surat_pernyataan))">Buka Dokumen PDF</button>
+              <div class="photo-item" v-if="selectedPetani.kwitansi_pembayaran" style="display: flex; flex-direction: column; gap: 4px;">
+                <span class="det-label">Kwitansi Pembayaran</span>
+                <img v-if="!isPdfPath(selectedPetani.kwitansi_pembayaran)" :src="getImageUrl(selectedPetani.kwitansi_pembayaran)" alt="Kwitansi" @click="openImage(getImageUrl(selectedPetani.kwitansi_pembayaran))" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0; transition: transform 0.2s;" class="hover-scale" />
+                <button v-else type="button" class="btn-secondary" @click="openImage(getImageUrl(selectedPetani.kwitansi_pembayaran))" style="padding: 1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; height: 120px; display: flex; align-items: center; justify-content: center;">
+                  Buka Dokumen PDF
+                </button>
               </div>
             </div>
           </div>
@@ -598,8 +589,6 @@
       </div>
     </div>
 
-
-    </div>
   </div>
 </template>
 
@@ -624,6 +613,36 @@ const petaniActiveFilterCount = computed(() => {
   if (filterTanggalSampai.value) count++
   return count
 })
+
+const statistics = computed(() => {
+  let totalLahan = 0
+  let totalPotensi = 0
+  let countGabah = 0
+  let countBeras = 0
+  let countJagung = 0
+  
+  filteredPetani.value.forEach(p => {
+    totalLahan += parseFloat(p.luas_lahan) || 0
+    totalPotensi += parseFloat(p.potensi_panen) || 0
+    if (p.komoditi === 'Gabah') countGabah++
+    if (p.komoditi === 'Beras') countBeras++
+    if (p.komoditi === 'Jagung') countJagung++
+  })
+
+  return {
+    totalCount: filteredPetani.value.length,
+    totalLahan,
+    totalPotensi,
+    countGabah,
+    countBeras,
+    countJagung
+  }
+})
+
+const formatVolume = (vol) => {
+  if (!vol) return '0'
+  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(vol)
+}
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDetailModal = ref(false)
@@ -692,20 +711,17 @@ const form = ref({
   foto_ktp: null,
   foto_petani: null,
   foto_komoditi: null,
-  kwitansi_pembayaran: null,
-  surat_pernyataan: null
+  kwitansi_pembayaran: null
 })
 
 const previews = ref({
   foto_ktp: null,
   foto_petani: null,
   foto_komoditi: null,
-  kwitansi_pembayaran: null,
-  surat_pernyataan: null
+  kwitansi_pembayaran: null
 })
 const docPreviewIsPdf = ref({
   kwitansi_pembayaran: false,
-  surat_pernyataan: false,
 })
 
 const filteredPetani = computed(() => {
@@ -844,7 +860,7 @@ const handleFileUpload = (event, fieldName) => {
   const file = event.target.files[0]
   if (file) {
     form.value[fieldName] = file
-    if (fieldName === 'kwitansi_pembayaran' || fieldName === 'surat_pernyataan') {
+    if (fieldName === 'kwitansi_pembayaran') {
       docPreviewIsPdf.value[fieldName] = file.type === 'application/pdf'
     }
     const reader = new FileReader()
@@ -913,8 +929,7 @@ const editPetani = (petani) => {
     foto_ktp: null,
     foto_petani: null,
     foto_komoditi: null,
-    kwitansi_pembayaran: null,
-    surat_pernyataan: null
+    kwitansi_pembayaran: null
   }
   
   // Load cascading options
@@ -933,9 +948,7 @@ const editPetani = (petani) => {
   if (petani.foto_petani) previews.value.foto_petani = getImageUrl(petani.foto_petani)
   if (petani.foto_komoditi) previews.value.foto_komoditi = getImageUrl(petani.foto_komoditi)
   if (petani.kwitansi_pembayaran) previews.value.kwitansi_pembayaran = getImageUrl(petani.kwitansi_pembayaran)
-  if (petani.surat_pernyataan) previews.value.surat_pernyataan = getImageUrl(petani.surat_pernyataan)
   docPreviewIsPdf.value.kwitansi_pembayaran = isPdfPath(petani.kwitansi_pembayaran)
-  docPreviewIsPdf.value.surat_pernyataan = isPdfPath(petani.surat_pernyataan)
   
   showEditModal.value = true
 }
@@ -966,12 +979,10 @@ const closeModal = () => {
     foto_ktp: null,
     foto_petani: null,
     foto_komoditi: null,
-    kwitansi_pembayaran: null,
-    surat_pernyataan: null
+    kwitansi_pembayaran: null
   }
   docPreviewIsPdf.value = {
-    kwitansi_pembayaran: false,
-    surat_pernyataan: false,
+    kwitansi_pembayaran: false
   }
   form.value = {
     tanggal: new Date().toISOString().split('T')[0],
@@ -1128,56 +1139,190 @@ onMounted(() => {
   padding: 20px;
 }
 
-.page-header {
+/* Hero Banner */
+.hero-banner {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  gap: 1rem;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+}
+.hero-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hero-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.hero-text h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: white;
+}
+.hero-text p {
+  font-size: 0.875rem;
+  opacity: 0.85;
 }
 
-.header-left h1 {
+/* Stats Cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e8ecf0;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.icon-blue { background: #eff6ff; color: #3b82f6; }
+.icon-green { background: #ecfdf5; color: #10b981; }
+.icon-orange { background: #fff7ed; color: #f97316; }
+.text-green-val { color: #10b981; }
+.text-orange-val { color: #f97316; }
+
+.stat-info h3 {
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.stat-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.15rem;
+}
+.stat-sub {
+  font-size: 0.72rem;
+  color: #9ea9b8;
+}
+
+/* Page Card */
+.page-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e8ecf0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.toolbar-left {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.75rem;
-  color: #2c3e50;
-  margin: 0 0 0.5rem 0;
+  flex: 1;
+  max-width: 500px;
 }
-
-.icon-title {
-  width: 32px;
-  height: 32px;
-  color: #3498db;
-  flex-shrink: 0;
-}
-
-.subtitle {
-  color: #7f8c8d;
-  margin: 0;
-  font-size: 0.9rem;
-}
-
-.header-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.filter-section {
-  background: white;
-  padding: 14px 20px;
+.search-input {
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
 }
 
-.filter-toolbar {
-  display: flex;
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 6px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.btn-primary svg {
+  width: 14px;
+  height: 14px;
+}
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+.btn-cancel {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.btn-cancel:hover { background: #e5e7eb; }
+
+/* Table Style */
+.table-wrap {
+  overflow-x: auto;
 }
 
 .pagination-bar {
@@ -1185,532 +1330,307 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: 0.9rem 0.5rem;
+  margin-top: 0.85rem;
   flex-wrap: wrap;
 }
-
 .pagination-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
 .pagination-info,
 .page-label {
   color: #64748b;
   font-size: 0.85rem;
 }
-
 .per-page-select {
   height: 34px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0 8px;
-  background: #fff;
+  background-color: #fff;
 }
-
 .btn-page {
   width: 32px;
   height: 32px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   cursor: pointer;
 }
-
 .btn-page:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.search-input {
-  flex: 1;
-  min-width: 240px;
-  height: 36px;
-  padding: 0 12px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.search-input:focus {
-  border-color: #475569;
-}
-
-/* Filter panel field styles (used inside FilterDropdown slot) */
-.fd-field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.fd-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.fd-select,
-.fd-input {
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  background: #fff;
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.fd-select:focus,
-.fd-input:focus {
-  border-color: #475569;
-}
-
-.btn-success {
-  background: #1565c0;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.btn-primary {
-  background: #1565c0;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.stats-bar {
-  display: flex;
-  gap: 20px;
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  padding: 15px 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  color: white;
-}
-
-.stat-item {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.stat-label {
-  font-weight: 500;
-}
-
-.stat-value {
-  font-size: 1.3rem;
-  font-weight: 700;
-}
-
-.badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.badge-gabah {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.badge-jagung {
-  background: #cce5ff;
-  color: #004085;
-}
-
-.badge-beras {
-  background: #d4edda;
-  color: #155724;
-}
-
-.nik-status {
-  font-size: 12px;
-  margin-left: 10px;
-}
-
-.nik-status.checking {
-  color: #17a2b8;
-}
-
-.nik-status.available {
-  color: #28a745;
-}
-
-.nik-status.duplicate {
-  color: #dc3545;
-  font-weight: 600;
-}
-
-/* Table styling yang baru - mengikuti PenggilinganView */
-.table-wrapper {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  overflow-x: auto;
-  border: 1px solid #e8ecef;
-}
-
-table {
+.data-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.875rem;
 }
-
-thead {
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  color: white;
-}
-
-thead th {
-  padding: 13px 14px;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  border-right: 1px solid rgba(255,255,255,0.15);
-  border-bottom: none;
-}
-
-thead th:last-child {
-  border-right: none;
-}
-
-th,
-td {
-  padding: 11px 14px;
+.data-table th {
+  background: #f8fafc;
   text-align: left;
-}
-
-th {
-  font-weight: 600;
-  font-size: 13px;
-}
-
-td {
-  font-size: 13.5px;
-  color: #374151;
-  border-bottom: 1px solid #edf0f3;
-  border-right: 1px solid #edf0f3;
-}
-
-td:last-child {
-  border-right: none;
-}
-
-tbody tr {
-  transition: background 0.15s;
-}
-
-tbody tr:nth-child(even) {
-  background: #f0f7ff;
-}
-
-tbody tr:hover {
-  background: #dceeff;
-}
-
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.loading-cell,
-.empty-cell {
-  text-align: center;
-  padding: 40px;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e8ecf0;
 }
-.loading-inner {
+.data-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f0f3f7;
+  color: #374151;
+}
+.data-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.td-num { color: #9ea9b8; width: 40px; text-align: center; }
+.td-name { font-weight: 600; color: #1a2332; }
+.td-date { color: #6b7280; font-size: 0.82rem; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+
+/* Status Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.badge-gabah { background: #fff7ed; color: #c2410c; }
+.badge-jagung { background: #eff6ff; color: #1d4ed8; }
+.badge-beras { background: #f0fdf4; color: #15803d; }
+
+/* Action Buttons */
+.td-actions {
+  width: 120px;
+  white-space: nowrap;
+}
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 4px;
+}
+.btn-icon svg { width: 14px; height: 14px; }
+.btn-view { background: #f0fdfa; border-color: #99f6e4; color: #0d9488; }
+.btn-view:hover { background: #ccfbf1; }
+.btn-edit { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.btn-edit:hover { background: #dbeafe; }
+.btn-del { background: #fef2f2; border-color: #fecaca; color: #ef4444; }
+.btn-del:hover { background: #fee2e2; }
+
+/* Loading state */
+.loading-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  padding: 3rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
-.tbl-spinner {
-  width: 22px; height: 22px;
-  border: 2.5px solid #e8ecf0;
-  border-top-color: #3b82f6;
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e8ecf0;
+  border-top-color: #10b981;
   border-radius: 50%;
-  animation: spin .7s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-.verifikasi-cell {
-  text-align: center;
-  white-space: nowrap;
-}
-
-.no-verify {
-  color: #aaa;
-  font-size: 13px;
-}
-
-.btn-view,
-.btn-edit,
-.btn-delete {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-view {
-  background: #3498db;
-  color: white;
-}
-
-.btn-view:hover {
-  background: #2980b9;
-}
-
-.btn-edit {
-  background: #f39c12;
-  color: white;
-}
-
-.btn-edit:hover {
-  background: #d68910;
-}
-
-.btn-delete {
-  background: #e74c3c;
-  color: white;
-}
-
-.btn-delete:hover {
-  background: #c0392b;
-}
-
-.btn-view svg,
-.btn-edit svg,
-.btn-delete svg {
-  width: 16px;
-  height: 16px;
-}
-
-.modal {
+/* Modal Styles */
+.modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  overflow-y: auto;
+  z-index: 2000;
+  padding: 1rem;
 }
-
-.modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  max-width: 700px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  margin: 20px;
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.2s ease;
+  overflow: hidden;
 }
-
-.large-modal {
-  max-width: 900px;
+.modal.detail-modal {
+  max-width: 720px;
+}
+@keyframes slideIn {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 15px;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f0f3f7;
 }
-
 .modal-header h3 {
-  margin: 0;
-  color: #2c3e50;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
 }
-
-.close-btn {
+.btn-close {
   background: none;
   border: none;
-  font-size: 30px;
+  font-size: 1.4rem;
+  color: #9ea9b8;
   cursor: pointer;
-  color: #6c757d;
+  padding: 2px 6px;
+  border-radius: 6px;
   line-height: 1;
 }
-
-.petani-form .form-section {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+.btn-close:hover {
+  background: #f3f4f6;
+  color: #374151;
 }
 
-.petani-form .form-section h4 {
-  margin: 0 0 15px 0;
-  color: #495057;
-  font-size: 1.1rem;
-  border-bottom: 2px solid #dee2e6;
-  padding-bottom: 10px;
+.modal-form {
+  padding: 1.25rem 1.5rem 1.5rem;
 }
-
+.form-section {
+  background: #f8fafc;
+  padding: 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  border: 1px solid #e8ecf0;
+}
+.form-section h4 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #047857;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid #f0f3f7;
+  padding-bottom: 4px;
+}
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 1.1rem;
 }
-
 .form-group label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: 500;
-  color: #495057;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.preview-image {
-  margin-top: 10px;
-  max-width: 150px;
-  max-height: 150px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.help-text {
-  display: block;
-  margin-top: 10px;
-  color: #6c757d;
-  font-size: 12px;
-}
-
-.pdf-indicator {
-  color: #28a745;
+  font-size: 0.82rem;
   font-weight: 600;
-  margin-top: 10px;
+  color: #374151;
+  margin-bottom: 0.4rem;
 }
-
-.btn-doc-open {
-  background: #f8fafc;
-  color: #1d4ed8;
-  border: 1px solid #cbd5e1;
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  cursor: pointer;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  background-color: #fff;
 }
-
-.btn-doc-open:hover {
-  background: #eef2ff;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
 }
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.req { color: #ef4444; }
 
-.modal-footer {
+.modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 2px solid #eee;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
-.detail-content {
-  padding: 10px 0;
+/* Detail modal styles */
+.modal-body {
+  padding: 1.5rem;
 }
-
 .detail-section {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  padding-bottom: 1.25rem;
 }
-
+.detail-section.border-top {
+  border-top: 1px solid #f0f3f7;
+  padding-top: 1.25rem;
+}
 .detail-section h4 {
-  margin: 0 0 15px 0;
-  color: #495057;
-  font-size: 1.1rem;
-  border-bottom: 2px solid #dee2e6;
-  padding-bottom: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #047857;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
-
-.info-grid {
+.detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
-
-.info-item {
+.detail-item {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
+}
+.detail-item.full-width {
+  grid-column: span 2;
+}
+.det-label {
+  font-size: 0.78rem;
+  color: #8a96a8;
+  font-weight: 500;
+}
+.det-val {
+  font-size: 0.88rem;
+  color: #1f2937;
 }
 
-.info-item.full-width {
-  grid-column: 1 / -1;
+/* NIK checking indicators */
+.nik-status {
+  font-size: 0.75rem;
+  font-weight: bold;
 }
+.nik-status.duplicate { color: #ef4444; }
+.nik-status.available { color: #10b981; }
+.nik-status.checking { color: #f59e0b; }
 
-.info-item strong {
-  color: #6c757d;
-  font-size: 0.9rem;
-}
-
-.info-item span {
-  color: #212529;
-  font-size: 1rem;
+.preview-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 8px;
+  border: 1px solid #cbd5e1;
 }
 
 .photo-grid {
@@ -1718,18 +1638,9 @@ tbody tr:last-child td {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 15px;
 }
-
 .photo-item {
   text-align: center;
 }
-
-.photo-item label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: #495057;
-}
-
 .photo-item img {
   width: 100%;
   height: 200px;
@@ -1738,335 +1649,8 @@ tbody tr:last-child td {
   cursor: pointer;
   transition: transform 0.2s;
 }
-
-.photo-item img:hover {
+.photo-item img:hover, .hover-scale:hover {
   transform: scale(1.05);
-}
-
-/* Hero Banner */
-.hero-banner {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  color: white;
-  padding: 1.25rem 1.75rem;
-  border-radius: 12px 12px 0 0;
-  margin: -20px -20px 20px -20px;
-}
-
-.page-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  padding: 20px;
-}
-
-.hero-icon svg {
-  width: 48px;
-  height: 48px;
-  opacity: 0.9;
-  flex-shrink: 0;
-}
-
-.hero-text h2 {
-  margin: 0 0 4px 0;
-  font-size: 1.5rem;
-  color: white;
-}
-
-.hero-text p {
-  margin: 0;
-  opacity: 0.85;
-  font-size: 0.9rem;
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .table-wrapper {
-    overflow-x: auto;
-  }
-  
-  table {
-    min-width: 900px;
-  }
-}
-
-@media (max-width: 768px) {
-  .petani-list {
-    padding: 8px;
-  }
-
-  .hero-banner {
-    padding: 1rem;
-    gap: 0.75rem;
-    margin: -12px -12px 12px -12px;
-  }
-
-  .page-card {
-    padding: 12px;
-  }
-
-  .hero-icon svg {
-    width: 36px;
-    height: 36px;
-  }
-
-  .hero-text h2 {
-    font-size: 1.1rem;
-  }
-
-  .hero-text p {
-    font-size: 0.8rem;
-  }
-
-  .page-header {
-    flex-direction: column;
-    gap: 6px;
-    align-items: stretch;
-    margin-bottom: 10px;
-  }
-
-  .header-left h1 {
-    font-size: 1.2rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .header-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px;
-    width: 100%;
-  }
-
-  .header-actions button {
-    flex: 1;
-    min-width: 0;
-    padding: 7px 10px;
-    font-size: 12px;
-  }
-
-  .filter-section {
-    padding: 10px;
-    margin-bottom: 10px;
-  }
-
-  .filter-row {
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .search-input,
-  .filter-select {
-    width: 100%;
-    min-width: 100%;
-    padding: 7px 10px;
-    font-size: 13px;
-  }
-
-  .date-filter {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .date-filter label {
-    font-size: 12px;
-    white-space: nowrap;
-    min-width: 50px;
-  }
-
-  .date-input {
-    flex: 1;
-    padding: 7px 8px;
-    font-size: 12px;
-  }
-
-  .btn-filter,
-  .btn-reset {
-    flex: 1;
-    padding: 7px 10px;
-    font-size: 12px;
-  }
-
-  .stats-bar {
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  table {
-    min-width: 600px;
-  }
-
-  .modal {
-    padding: 6px;
-  }
-
-  .modal-content {
-    width: 98%;
-    padding: 12px;
-    max-height: 94vh;
-    overflow-y: auto;
-  }
-
-  .large-modal {
-    width: 98%;
-    max-height: 95vh;
-    overflow-y: auto;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .photo-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-section {
-    padding: 12px;
-    margin-bottom: 12px;
-  }
-
-  .modal-footer {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .modal-footer button {
-    flex: 1;
-    padding: 8px 10px;
-    font-size: 13px;
-  }
-}
-
-.icon-inline {
-  width: 18px;
-  height: 18px;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-
-.btn-success svg,
-.btn-filter svg,
-.btn-reset svg {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-}
-/* Badge Status Verifikasi */
-.badge-status {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.badge-pending {
-  background: #fff3cd;
-  color: #856404;
-}
-.badge-disetujui {
-  background: #d1e7dd;
-  color: #0a3622;
-}
-.badge-ditolak {
-  background: #f8d7da;
-  color: #58151c;
-}
-
-/* Tombol Verifikasi */
-.btn-verify {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  color: #0d6efd;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-.btn-verify:hover {
-  background: #e7f0ff;
-}
-.btn-verify svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Modal Verifikasi */
-.modal-verifikasi {
-  max-width: 480px;
-  width: 95%;
-}
-.verifikasi-info {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  line-height: 1.6;
-}
-.select-status {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 14px;
-}
-.textarea-catatan {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 14px;
-  resize: vertical;
-  box-sizing: border-box;
-}
-.modal-footer-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
-}
-.btn-cancel {
-  padding: 8px 18px;
-  border: 1px solid #ced4da;
-  background: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-.btn-submit-verifikasi {
-  padding: 8px 18px;
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-}
-.btn-submit-verifikasi:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* Column Picker */
@@ -2082,19 +1666,19 @@ tbody tr:last-child td {
   gap: 7px;
   padding: 7px 14px;
   background: #fff;
-  border: 1.5px solid #1565c0;
+  border: 1.5px solid #10b981;
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  color: #1565c0;
+  color: #10b981;
   transition: all 0.18s;
-  box-shadow: 0 1px 4px rgba(21,101,192,0.08);
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.08);
 }
 .btn-col-picker:hover, .btn-col-picker.active {
-  background: #1565c0;
+  background: #10b981;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(21,101,192,0.22);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.22);
 }
 .btn-col-picker.active .chevron-icon {
   transform: rotate(180deg);
@@ -2146,8 +1730,8 @@ tbody tr:last-child td {
 }
 .col-picker-item:hover { background: #f5f8ff; }
 .col-picker-item.col-active {
-  background: #e8f0fe;
-  color: #0d47a1;
+  background: #ecfdf5;
+  color: #047857;
   font-weight: 600;
 }
 .col-check-box {
@@ -2163,13 +1747,33 @@ tbody tr:last-child td {
   transition: all 0.15s;
 }
 .col-picker-item.col-active .col-check-box {
-  background: #1565c0;
-  border-color: #1565c0;
+  background: #10b981;
+  border-color: #10b981;
   color: #fff;
 }
 .col-label {
   flex: 1;
   font-family: monospace;
-  font-size: 12.5px;
+  font-size: 12px;
+}
+
+/* Filter panel dropdown specific adjustments */
+.fd-field { display: flex; flex-direction: column; gap: 4px; }
+.fd-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+.fd-select, .fd-input {
+  height: 34px; padding: 0 10px; border: 1px solid #d1d5db;
+  border-radius: 6px; font-size: 0.875rem; background: #fff; outline: none;
+  width: 100%; box-sizing: border-box;
+}
+.fd-select:focus, .fd-input:focus { border-color: #10b981; }
+
+@media (max-width: 640px) {
+  .hero-banner { padding: 1.25rem; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .form-row-2 { grid-template-columns: 1fr; gap: 0; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-item.full-width { grid-column: span 1; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .td-date { display: none; }
 }
 </style>

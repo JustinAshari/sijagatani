@@ -1,6 +1,5 @@
 <template>
-  <div class="user-management">
-    <div class="page-card">
+  <div class="user-management" style="padding: 20px;">
 
     <!-- Hero Banner -->
     <div class="hero-banner purple">
@@ -18,120 +17,139 @@
       </div>
     </div>
 
-    <div class="header">
-      <h2>Kelola Akun Pengguna</h2>
-      <button @click="showModal = true" class="btn-primary">
-        <span>+</span> Tambah User
-      </button>
-    </div>
-
-    <div class="table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Nama</th>
-            <th>Username</th>
-            <th>Role</th>
-            <th>Nama Penggilingan</th>
-            <th>Dibuat</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loading">
-            <td colspan="7" class="loading-cell">
-              <div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div>
-            </td>
-          </tr>
-          <tr v-else v-for="(user, index) in paginatedUsers" :key="user.id">
-            <td>{{ rowNumber(index) }}</td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.username }}</td>
-            <td>
-              <span class="badge" :class="'badge-' + user.role">
-                {{ getRoleLabel(user.role) }}
-              </span>
-            </td>
-            <td>
-              <span v-if="user.role === 'penggilingan'" class="penggilingan-name">
-                {{ user.nama_penggilingan || '-' }}
-              </span>
-              <span v-else class="text-muted">-</span>
-            </td>
-            <td>{{ formatDate(user.created_at) }}</td>
-            <td class="actions">
-              <button 
-                v-if="user.role !== 'superadmin'" 
-                @click="editUser(user)" 
-                class="btn-warning" 
-                title="Edit">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-              </button>
-              <button 
-                v-if="user.role !== 'superadmin'" 
-                @click="deleteUser(user.id)" 
-                class="btn-danger" 
-                title="Hapus">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                </svg>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="pagination-bar" v-if="users.length">
-      <div class="pagination-info">
-        Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ users.length }} data
+    <!-- Main Card Content -->
+    <div class="page-card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: #6b21a8; margin: 0;">Daftar Pengguna</h3>
+        </div>
+        <div class="toolbar-right">
+          <button @click="showModal = true" class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline" style="width: 14px; height: 14px; margin-right: 4px; display: inline-block; vertical-align: middle;">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Tambah User
+          </button>
+        </div>
       </div>
-      <div class="pagination-controls">
-        <label for="user-per-page">Baris:</label>
-        <select id="user-per-page" v-model="perPage" class="per-page-select">
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-        <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
-        <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
-        <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+
+      <!-- Data Table -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Nama Penggilingan</th>
+              <th>Dibuat</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="7" class="loading-cell">
+                <div class="loading-wrap">
+                  <div class="spinner"></div>
+                  <span>Memuat data user...</span>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="users.length === 0">
+              <td colspan="7" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data user</td>
+            </tr>
+            <tr v-else v-for="(user, index) in paginatedUsers" :key="user.id">
+              <td class="td-num">{{ rowNumber(index) }}</td>
+              <td class="font-semibold">{{ user.name }}</td>
+              <td class="font-medium">{{ user.username }}</td>
+              <td>
+                <span class="badge" :class="'badge-' + user.role">
+                  {{ getRoleLabel(user.role) }}
+                </span>
+              </td>
+              <td>
+                <span v-if="user.role === 'penggilingan'" class="font-semibold" style="color: #6b21a8;">
+                  {{ user.nama_penggilingan || '-' }}
+                </span>
+                <span v-else class="text-muted">-</span>
+              </td>
+              <td class="td-date">{{ formatDate(user.created_at) }}</td>
+              <td class="td-actions">
+                <button 
+                  v-if="user.role !== 'superadmin'" 
+                  @click="editUser(user)" 
+                  class="btn-icon btn-edit" 
+                  title="Edit">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button 
+                  v-if="user.role !== 'superadmin'" 
+                  @click="deleteUser(user.id)" 
+                  class="btn-icon btn-del" 
+                  title="Hapus">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar" v-if="users.length">
+        <div class="pagination-info">
+          Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ users.length }} data
+        </div>
+        <div class="pagination-controls">
+          <label for="user-per-page">Baris:</label>
+          <select id="user-per-page" v-model="perPage" class="per-page-select">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
+          <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
+          <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+        </div>
       </div>
     </div>
 
     <!-- Modal Add/Edit User -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal">
         <div class="modal-header">
           <h3>{{ isEdit ? 'Edit User' : 'Tambah User' }}</h3>
           <button @click="closeModal" class="btn-close">&times;</button>
         </div>
-        <form @submit.prevent="submitForm">
+        <form @submit.prevent="submitForm" class="modal-form">
           <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input v-model="form.name" type="text" required />
+            <label>Nama Lengkap <span class="required">*</span></label>
+            <input v-model="form.name" type="text" required placeholder="Contoh: Ahmad Fauzi" />
           </div>
           <div class="form-group">
-            <label>Username</label>
-            <input v-model="form.username" type="text" required />
+            <label>Username <span class="required">*</span></label>
+            <input v-model="form.username" type="text" required placeholder="Contoh: fauzi123" />
           </div>
           <div class="form-group">
-            <label>Password {{ isEdit ? '(kosongkan jika tidak diubah)' : '' }}</label>
+            <label>Password <span v-if="isEdit" style="font-weight: normal; color: #6b7280;">(kosongkan jika tidak diubah)</span><span v-else class="required">*</span></label>
             <input 
               v-model="form.password" 
               type="password" 
               :required="!isEdit"
               minlength="6"
+              placeholder="Minimal 6 karakter"
             />
           </div>
           <div class="form-group">
-            <label>Role</label>
+            <label>Role <span class="required">*</span></label>
             <select v-model="form.role" required>
               <option value="">Pilih Role</option>
               <option value="admin">Administrator</option>
@@ -148,15 +166,14 @@
               placeholder="Contoh: Penggilingan Maju Bersama"
               :required="form.role === 'penggilingan'"
             />
-            <small class="form-hint">Akun ini hanya dapat mengelola data dengan nama penggilingan tersebut.</small>
+            <small class="form-hint" style="display: block; margin-top: 4px; color: #6b7280; font-size: 0.75rem;">Akun ini hanya dapat mengelola data dengan nama penggilingan tersebut.</small>
           </div>
-          <div class="form-actions">
-            <button type="button" @click="closeModal" class="btn-secondary">Batal</button>
+          <div class="modal-actions">
+            <button type="button" @click="closeModal" class="btn-cancel">Batal</button>
             <button type="submit" class="btn-primary">{{ isEdit ? 'Update' : 'Simpan' }}</button>
           </div>
         </form>
       </div>
-    </div>
     </div>
   </div>
 </template>
@@ -343,11 +360,112 @@ onMounted(() => {
   padding: 20px;
 }
 
-.header {
+/* Hero Banner */
+.hero-banner.purple {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(107, 33, 168, 0.15);
+}
+.hero-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hero-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.hero-text h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.hero-text p {
+  font-size: 0.875rem;
+  opacity: 0.85;
+}
+
+/* Page Card */
+.page-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e8ecf0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #6b21a8, #7e22ce);
+  color: #ffffff;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+.btn-cancel {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.btn-cancel:hover { background: #e5e7eb; }
+
+/* Table Style */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 0.5rem;
 }
 
 .pagination-bar {
@@ -358,461 +476,216 @@ onMounted(() => {
   margin-top: 0.85rem;
   flex-wrap: wrap;
 }
-
 .pagination-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
 .pagination-info,
 .page-label {
   color: #64748b;
   font-size: 0.85rem;
 }
-
 .per-page-select {
   height: 34px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0 8px;
 }
-
 .btn-page {
   width: 32px;
   height: 32px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   cursor: pointer;
 }
-
 .btn-page:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.header h2 {
-  color: #2c3e50;
-  font-size: 24px;
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.data-table th {
+  background: #f8fafc;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e8ecf0;
+}
+.data-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f0f3f7;
+  color: #374151;
+}
+.data-table tbody tr:hover {
+  background: #f8fafc;
 }
 
-.loading-cell,
-.empty-cell {
-  text-align: center;
-  padding: 40px;
-  color: #6b7280;
+.td-num { color: #9ea9b8; width: 40px; text-align: center; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.td-date { color: #6b7280; font-size: 0.82rem; }
+
+/* Status Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
 }
-.loading-inner {
+.badge-superadmin { background: #eff6ff; color: #1e40af; }
+.badge-admin { background: #faf5ff; color: #6b21a8; }
+.badge-lapangan { background: #f0fdf4; color: #166534; }
+.badge-penggilingan { background: #fff7ed; color: #9a3412; }
+
+/* Action Buttons */
+.td-actions {
+  width: 120px;
+  white-space: nowrap;
+}
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 4px;
+}
+.btn-icon svg { width: 14px; height: 14px; }
+.btn-edit { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.btn-edit:hover { background: #dbeafe; }
+.btn-del { background: #fef2f2; border-color: #fecaca; color: #ef4444; }
+.btn-del:hover { background: #fee2e2; }
+
+/* Loading state */
+.loading-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  padding: 3rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
-.tbl-spinner {
-  width: 22px; height: 22px;
-  border: 2.5px solid #e8ecf0;
-  border-top-color: #3b82f6;
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e8ecf0;
+  border-top-color: #6b21a8;
   border-radius: 50%;
-  animation: spin .7s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  overflow: hidden;
-  border: 1px solid #e8ecef;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table thead {
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-}
-
-.data-table th {
-  padding: 13px 14px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 13px;
-  color: white;
-  white-space: nowrap;
-  border-right: 1px solid rgba(255,255,255,0.15);
-  border-bottom: none;
-}
-
-.data-table th:last-child {
-  border-right: none;
-}
-
-.data-table td {
-  padding: 11px 14px;
-  border-bottom: 1px solid #edf0f3;
-  border-right: 1px solid #edf0f3;
-  font-size: 13.5px;
-  color: #374151;
-}
-
-.data-table td:last-child {
-  border-right: none;
-}
-
-.data-table tbody tr:nth-child(even) {
-  background: #f0f7ff;
-}
-
-.data-table tbody tr:hover {
-  background: #dceeff;
-}
-
-.badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.badge-superadmin {
-  background: #e3f2fd;
-  color: #1976d2;
-}
-
-.badge-admin {
-  background: #f3e5f5;
-  color: #7b1fa2;
-}
-
-.badge-lapangan {
-  background: #e8f5e9;
-  color: #388e3c;
-}
-
-.badge-penggilingan {
-  background: #fff3e0;
-  color: #f57c00;
-}
-
-.penggilingan-name {
-  font-weight: 600;
-  color: #f57c00;
-}
-
-.text-muted {
-  color: #aaa;
-}
-
-.required {
-  color: #dc3545;
-  margin-left: 2px;
-}
-
-.form-hint {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
-  color: #6c757d;
-  font-style: italic;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-primary {
-  background: #1565c0;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.btn-primary:hover {
-  background: #0d47a1;
-}
-
-.btn-warning, .btn-danger {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.btn-warning {
-  background: #ffc107;
-  color: #000;
-}
-
-.btn-warning:hover {
-  background: #e0a800;
-}
-
-.btn-danger {
-  background: #dc3545;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #c82333;
-}
-
-.btn-warning svg, .btn-danger svg {
-  width: 16px;
-  height: 16px;
-}
-
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 2000;
+  padding: 1rem;
 }
-
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  padding: 0;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.2s ease;
+  overflow: hidden;
+}
+@keyframes slideIn {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #dee2e6;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f0f3f7;
 }
-
 .modal-header h3 {
-  margin: 0;
-  color: #2c3e50;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
 }
-
 .btn-close {
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: 1.4rem;
+  color: #9ea9b8;
   cursor: pointer;
-  color: #999;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 6px;
+  line-height: 1;
 }
-
 .btn-close:hover {
-  color: #000;
+  background: #f3f4f6;
+  color: #374151;
 }
 
-form {
-  padding: 20px;
+.modal-form {
+  padding: 1.25rem 1.5rem 1.5rem;
 }
-
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 1.1rem;
 }
-
 .form-group label {
   display: block;
-  margin-bottom: 6px;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: #495057;
+  color: #374151;
+  margin-bottom: 0.4rem;
 }
-
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  background-color: #fff;
 }
-
 .form-group input:focus,
 .form-group select:focus {
-  outline: none;
-  border-color: #1565c0;
-  box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
+  border-color: #6b21a8;
+  box-shadow: 0 0 0 3px rgba(107, 33, 168, 0.12);
 }
+.required { color: #ef4444; }
 
-.form-actions {
+.modal-actions {
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
-  margin-top: 20px;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn-secondary:hover {
-  background: #5a6268;
-}
-
-/* ===== HERO BANNER ===== */
-.hero-banner {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  color: white;
-  padding: 1.25rem 1.75rem;
-  border-radius: 12px 12px 0 0;
-  margin: -20px -20px 20px -20px;
-}
-
-.hero-banner.purple {
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-}
-
-.page-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  padding: 20px;
-}
-
-.hero-icon svg {
-  width: 48px;
-  height: 48px;
-  opacity: 0.9;
-  flex-shrink: 0;
-}
-
-.hero-text h2 {
-  margin: 0 0 4px 0;
-  font-size: 1.5rem;
-  color: white;
-}
-
-.hero-text p {
-  margin: 0;
-  opacity: 0.85;
-  font-size: 0.9rem;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .user-management {
-    padding: 8px;
-  }
-
-  .hero-banner {
-    padding: 1rem;
-    gap: 0.75rem;
-    margin: -12px -12px 12px -12px;
-  }
-
-  .page-card {
-    padding: 12px;
-  }
-
-  .hero-icon svg {
-    width: 36px;
-    height: 36px;
-  }
-
-  .hero-text h2 {
-    font-size: 1.1rem;
-  }
-
-  .hero-text p {
-    font-size: 0.8rem;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 6px;
-    align-items: stretch;
-    margin-bottom: 10px;
-  }
-
-  .header h2 {
-    font-size: 16px;
-  }
-
-  .header .btn-primary {
-    padding: 7px 12px;
-    font-size: 13px;
-  }
-
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .data-table {
-    min-width: 480px;
-    font-size: 12px;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 6px 8px;
-  }
-
-  .modal-overlay {
-    padding: 6px;
-  }
-
-  .modal-content {
-    width: 98%;
-    padding: 14px;
-    max-height: 93vh;
-    overflow-y: auto;
-  }
-
-  .modal-header h3 {
-    font-size: 15px;
-  }
-
-  .form-group input,
-  .form-group select {
-    padding: 7px 10px;
-    font-size: 13px;
-  }
-
-  .form-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .form-actions button {
-    flex: 1;
-    padding: 8px 12px;
-    font-size: 13px;
-  }
+@media (max-width: 640px) {
+  .hero-banner.purple { padding: 1.25rem; }
+  .toolbar { flex-direction: column; align-items: stretch; }
 }
 </style>

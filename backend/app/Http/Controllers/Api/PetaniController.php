@@ -181,16 +181,6 @@ class PetaniController extends Controller
                     70
                 );
             }
-
-            if ($request->hasFile('surat_pernyataan')) {
-                $data['surat_pernyataan'] = $this->imageService->uploadImageOrFile(
-                    $request->file('surat_pernyataan'),
-                    'petani/surat-pernyataan',
-                    800,
-                    70
-                );
-            }
-
             $petani = Petani::create($data);
 
             ActivityLogService::log($request, 'create', 'petani', "Menambahkan data petani: {$petani->nama} (NIK: {$petani->nik})");
@@ -294,19 +284,6 @@ class PetaniController extends Controller
                     70
                 );
             }
-
-            if ($request->hasFile('surat_pernyataan')) {
-                if ($petani->surat_pernyataan) {
-                    $this->imageService->delete($petani->surat_pernyataan);
-                }
-                $data['surat_pernyataan'] = $this->imageService->uploadImageOrFile(
-                    $request->file('surat_pernyataan'),
-                    'petani/surat-pernyataan',
-                    800,
-                    70
-                );
-            }
-
             $petani->update($data);
 
             ActivityLogService::log($request, 'update', 'petani', "Mengupdate data petani: {$petani->nama} (NIK: {$petani->nik})");
@@ -353,10 +330,6 @@ class PetaniController extends Controller
             if ($petani->kwitansi_pembayaran) {
                 $this->imageService->delete($petani->kwitansi_pembayaran);
             }
-            if ($petani->surat_pernyataan) {
-                $this->imageService->delete($petani->surat_pernyataan);
-            }
-
             ActivityLogService::log($request, 'delete', 'petani', "Menghapus data petani: {$petani->nama} (NIK: {$petani->nik})");
 
             $petani->delete();

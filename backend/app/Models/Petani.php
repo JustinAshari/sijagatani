@@ -30,7 +30,6 @@ class Petani extends Model
         'foto_petani',
         'foto_komoditi',
         'kwitansi_pembayaran',
-        'surat_pernyataan',
     ];
 
     protected $casts = [
@@ -39,7 +38,7 @@ class Petani extends Model
         'potensi_panen' => 'decimal:2',
     ];
 
-    protected $appends = ['foto_ktp_url', 'foto_petani_url', 'foto_komoditi_url', 'kwitansi_pembayaran_url', 'surat_pernyataan_url'];
+    protected $appends = ['foto_ktp_url', 'foto_petani_url', 'foto_komoditi_url', 'kwitansi_pembayaran_url'];
 
     public function penggilingan(): HasMany
     {
@@ -102,12 +101,4 @@ class Petani extends Model
         return null;
     }
 
-    // Accessor untuk full URL surat pernyataan
-    public function getSuratPernyataanUrlAttribute(): ?string
-    {
-        if ($this->surat_pernyataan) {
-            return url('storage/' . $this->surat_pernyataan);
-        }
-        return null;
-    }
 }

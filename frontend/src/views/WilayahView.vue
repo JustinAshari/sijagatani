@@ -1,6 +1,5 @@
 <template>
-  <div class="wilayah-container">
-    <div class="page-card">
+  <div class="wilayah-container" style="padding: 20px;">
 
     <!-- Hero Banner -->
     <div class="hero-banner teal">
@@ -15,223 +14,313 @@
       </div>
     </div>
 
-    <div class="header">
-      <h2>Data Wilayah</h2>
-      <div class="header-actions">
-        <button @click="exportAllData" class="btn-export">📥 Export Semua Data</button>
-        <button @click="showImportModal = true" class="btn-import">📤 Import Data</button>
+    <!-- Main Card Content -->
+    <div class="page-card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <!-- Tabs inside toolbar left for clean alignment -->
+          <div class="tabs">
+            <button 
+              v-for="tab in tabs" 
+              :key="tab.id"
+              :class="['tab', { active: activeTab === tab.id }]"
+              @click="changeTab(tab.id)">
+              {{ tab.label }}
+            </button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button @click="exportAllData" class="btn-secondary" style="margin-right: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline" style="width: 14px; height: 14px; margin-right: 4px; display: inline-block; vertical-align: middle;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export Semua Data
+          </button>
+          <button @click="showImportModal = true" class="btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline" style="width: 14px; height: 14px; margin-right: 4px; display: inline-block; vertical-align: middle;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Import Data
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button 
-        v-for="tab in tabs" 
-        :key="tab.id"
-        :class="['tab', { active: activeTab === tab.id }]"
-        @click="changeTab(tab.id)">
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <!-- Content for each tab -->
-    <div class="tab-content">
-      <!-- PROVINSI -->
-      <div v-if="activeTab === 'provinsi'" class="content-section">
-        <div class="section-header">
-          <h3>Data Provinsi</h3>
-          <div class="header-actions">
+      <!-- Content for each tab -->
+      <div class="tab-content">
+        <!-- PROVINSI -->
+        <div v-if="activeTab === 'provinsi'" class="content-section">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; font-weight: 700; color: #0d9488; margin: 0;">Data Provinsi</h3>
             <button @click="openModal('provinsi')" class="btn-primary">+ Tambah Provinsi</button>
           </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Provinsi</th>
+                  <th>Jumlah Kabupaten</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="loading">
+                  <td colspan="4" class="loading-cell">
+                    <div class="loading-wrap">
+                      <div class="spinner"></div>
+                      <span>Memuat data provinsi...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else-if="provinsiList.length === 0">
+                  <td colspan="4" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data provinsi</td>
+                </tr>
+                <tr v-else v-for="(item, index) in paginatedActiveData" :key="item.id">
+                  <td class="td-num">{{ rowNumber(index) }}</td>
+                  <td class="font-semibold">{{ item.nama }}</td>
+                  <td class="font-medium">{{ item.kabupaten_count || 0 }}</td>
+                  <td class="td-actions">
+                    <button @click="editItem('provinsi', item)" class="btn-icon btn-edit" title="Edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button @click="deleteItem('provinsi', item.id)" class="btn-icon btn-del" title="Hapus">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nama Provinsi</th>
-              <th>Jumlah Kabupaten</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading"><td colspan="4" class="loading-cell"><div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div></td></tr>
-            <tr v-else-if="provinsiList.length === 0"><td colspan="4" class="empty-cell">Tidak ada data</td></tr>
-            <tr v-else v-for="(item, index) in paginatedActiveData" :key="item.id">
-              <td>{{ rowNumber(index) }}</td>
-              <td>{{ item.nama }}</td>
-              <td>{{ item.kabupaten_count || 0 }}</td>
-              <td class="actions">
-                <button @click="editItem('provinsi', item)" class="btn-edit">Edit</button>
-                <button @click="deleteItem('provinsi', item.id)" class="btn-delete">Hapus</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
-      <!-- KABUPATEN -->
-      <div v-if="activeTab === 'kabupaten'" class="content-section">
-        <div class="section-header">
-          <h3>Data Kabupaten</h3>
-          <div class="header-actions">
+        <!-- KABUPATEN -->
+        <div v-if="activeTab === 'kabupaten'" class="content-section">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; font-weight: 700; color: #0d9488; margin: 0;">Data Kabupaten</h3>
             <button @click="openModal('kabupaten')" class="btn-primary">+ Tambah Kabupaten</button>
           </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Kabupaten</th>
+                  <th>Provinsi</th>
+                  <th>Jumlah Kecamatan</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="loading">
+                  <td colspan="5" class="loading-cell">
+                    <div class="loading-wrap">
+                      <div class="spinner"></div>
+                      <span>Memuat data kabupaten...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else-if="kabupatenList.length === 0">
+                  <td colspan="5" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data kabupaten</td>
+                </tr>
+                <tr v-else v-for="(item, index) in paginatedActiveData" :key="item.id">
+                  <td class="td-num">{{ rowNumber(index) }}</td>
+                  <td class="font-semibold">{{ item.nama }}</td>
+                  <td>{{ item.provinsi?.nama || '-' }}</td>
+                  <td class="font-medium">{{ item.kecamatan_count || 0 }}</td>
+                  <td class="td-actions">
+                    <button @click="editItem('kabupaten', item)" class="btn-icon btn-edit" title="Edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button @click="deleteItem('kabupaten', item.id)" class="btn-icon btn-del" title="Hapus">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nama Kabupaten</th>
-              <th>Provinsi</th>
-              <th>Jumlah Kecamatan</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading"><td colspan="5" class="loading-cell"><div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div></td></tr>
-            <tr v-else-if="kabupatenList.length === 0"><td colspan="5" class="empty-cell">Tidak ada data</td></tr>
-            <tr v-else v-for="(item, index) in paginatedActiveData" :key="item.id">
-              <td>{{ rowNumber(index) }}</td>
-              <td>{{ item.nama }}</td>
-              <td>{{ item.provinsi?.nama || '-' }}</td>
-              <td>{{ item.kecamatan_count || 0 }}</td>
-              <td class="actions">
-                <button @click="editItem('kabupaten', item)" class="btn-edit">Edit</button>
-                <button @click="deleteItem('kabupaten', item.id)" class="btn-delete">Hapus</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
-      <!-- KECAMATAN -->
-      <div v-if="activeTab === 'kecamatan'" class="content-section">
-        <div class="section-header">
-          <h3>Data Kecamatan</h3>
-          <div class="header-actions">
+        <!-- KECAMATAN -->
+        <div v-if="activeTab === 'kecamatan'" class="content-section">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; font-weight: 700; color: #0d9488; margin: 0;">Data Kecamatan</h3>
             <button @click="openModal('kecamatan')" class="btn-primary">+ Tambah Kecamatan</button>
           </div>
-        </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nama Kecamatan</th>
-              <th>Kabupaten</th>
-              <th>Provinsi</th>
-              <th>Jumlah Kalurahan</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading"><td colspan="6" class="loading-cell"><div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div></td></tr>
-            <tr v-else-if="kecamatanList.length === 0"><td colspan="6" class="empty-cell">Tidak ada data</td></tr>
-            <tr v-else v-for="(item, index) in paginatedActiveData" :key="item.id">
-              <td>{{ rowNumber(index) }}</td>
-              <td>{{ item.nama }}</td>
-              <td>{{ item.kabupaten?.nama || '-' }}</td>
-              <td>{{ item.kabupaten?.provinsi?.nama || '-' }}</td>
-              <td>{{ item.kalurahan_count || 0 }}</td>
-              <td class="actions">
-                <button @click="editItem('kecamatan', item)" class="btn-edit">Edit</button>
-                <button @click="deleteItem('kecamatan', item.id)" class="btn-delete">Hapus</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- KALURAHAN -->
-      <div v-if="activeTab === 'kalurahan'" class="content-section">
-        <div class="section-header">
-          <h3>Data Kalurahan/Desa</h3>
-          <div class="header-actions">
-            <button @click="openModal('kalurahan')" class="btn-primary">+ Tambah Kalurahan</button>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Kecamatan</th>
+                  <th>Kabupaten</th>
+                  <th>Provinsi</th>
+                  <th>Jumlah Kalurahan</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="loading">
+                  <td colspan="6" class="loading-cell">
+                    <div class="loading-wrap">
+                      <div class="spinner"></div>
+                      <span>Memuat data kecamatan...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else-if="kecamatanList.length === 0">
+                  <td colspan="6" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data kecamatan</td>
+                </tr>
+                <tr v-else v-for="(item, index) in paginatedActiveData" :key="item.id">
+                  <td class="td-num">{{ rowNumber(index) }}</td>
+                  <td class="font-semibold">{{ item.nama }}</td>
+                  <td>{{ item.kabupaten?.nama || '-' }}</td>
+                  <td>{{ item.kabupaten?.provinsi?.nama || '-' }}</td>
+                  <td class="font-medium">{{ item.kalurahan_count || 0 }}</td>
+                  <td class="td-actions">
+                    <button @click="editItem('kecamatan', item)" class="btn-icon btn-edit" title="Edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button @click="deleteItem('kecamatan', item.id)" class="btn-icon btn-del" title="Hapus">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nama Kalurahan/Desa</th>
-              <th>Kecamatan</th>
-              <th>Kabupaten</th>
-              <th>Provinsi</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading"><td colspan="6" class="loading-cell"><div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div></td></tr>
-            <tr v-else-if="kalurahanList.length === 0"><td colspan="6" class="empty-cell">Tidak ada data</td></tr>
-            <tr v-else v-for="(item, index) in paginatedActiveData" :key="item.id">
-              <td>{{ rowNumber(index) }}</td>
-              <td>{{ item.nama }}</td>
-              <td>{{ item.kecamatan?.nama || '-' }}</td>
-              <td>{{ item.kecamatan?.kabupaten?.nama || '-' }}</td>
-              <td>{{ item.kecamatan?.kabupaten?.provinsi?.nama || '-' }}</td>
-              <td class="actions">
-                <button @click="editItem('kalurahan', item)" class="btn-edit">Edit</button>
-                <button @click="deleteItem('kalurahan', item.id)" class="btn-delete">Hapus</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+        <!-- KALURAHAN -->
+        <div v-if="activeTab === 'kalurahan'" class="content-section">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; font-weight: 700; color: #0d9488; margin: 0;">Data Kalurahan/Desa</h3>
+            <button @click="openModal('kalurahan')" class="btn-primary">+ Tambah Kalurahan</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama Kalurahan/Desa</th>
+                  <th>Kecamatan</th>
+                  <th>Kabupaten</th>
+                  <th>Provinsi</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="loading">
+                  <td colspan="6" class="loading-cell">
+                    <div class="loading-wrap">
+                      <div class="spinner"></div>
+                      <span>Memuat data kalurahan...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-else-if="kalurahanList.length === 0">
+                  <td colspan="6" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data kalurahan/desa</td>
+                </tr>
+                <tr v-else v-for="(item, index) in paginatedActiveData" :key="item.id">
+                  <td class="td-num">{{ rowNumber(index) }}</td>
+                  <td class="font-semibold">{{ item.nama }}</td>
+                  <td>{{ item.kecamatan?.nama || '-' }}</td>
+                  <td>{{ item.kecamatan?.kabupaten?.nama || '-' }}</td>
+                  <td>{{ item.kecamatan?.kabupaten?.provinsi?.nama || '-' }}</td>
+                  <td class="td-actions">
+                    <button @click="editItem('kalurahan', item)" class="btn-icon btn-edit" title="Edit">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button @click="deleteItem('kalurahan', item.id)" class="btn-icon btn-del" title="Hapus">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar" v-if="activeData.length">
+        <div class="pagination-info">
+          Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ activeData.length }} data
+        </div>
+        <div class="pagination-controls">
+          <label for="wilayah-per-page">Baris:</label>
+          <select id="wilayah-per-page" v-model="perPage" class="per-page-select">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
+          <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
+          <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
+        </div>
       </div>
     </div>
 
-    <div class="pagination-bar" v-if="activeData.length">
-      <div class="pagination-info">
-        Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ activeData.length }} data
-      </div>
-      <div class="pagination-controls">
-        <label for="wilayah-per-page">Baris:</label>
-        <select id="wilayah-per-page" v-model="perPage" class="per-page-select">
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-        </select>
-        <button class="btn-page" @click="prevPage" :disabled="currentPage === 1">&laquo;</button>
-        <span class="page-label">{{ currentPage }} / {{ totalPages }}</span>
-        <button class="btn-page" @click="nextPage" :disabled="currentPage === totalPages">&raquo;</button>
-      </div>
-    </div>
-
-    <!-- Modal -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
+    <!-- Modal Form -->
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal">
         <div class="modal-header">
           <h3>{{ isEdit ? 'Edit' : 'Tambah' }} {{ modalTitle }}</h3>
           <button @click="closeModal" class="btn-close">&times;</button>
         </div>
-        <form @submit.prevent="submitForm">
+        <form @submit.prevent="submitForm" class="modal-form">
           <!-- Provinsi form -->
-          <div v-if="modalType === 'provinsi'" class="form-body">
+          <div v-if="modalType === 'provinsi'">
             <div class="form-group">
-              <label>Nama Provinsi</label>
-              <input v-model="form.nama" type="text" required />
+              <label>Nama Provinsi <span class="required">*</span></label>
+              <input v-model="form.nama" type="text" required placeholder="Contoh: Jawa Tengah" />
             </div>
           </div>
 
           <!-- Kabupaten form -->
-          <div v-if="modalType === 'kabupaten'" class="form-body">
+          <div v-if="modalType === 'kabupaten'">
             <div class="form-group">
-              <label>Provinsi</label>
+              <label>Provinsi <span class="required">*</span></label>
               <select v-model="form.provinsi_id" required>
                 <option value="">Pilih Provinsi</option>
                 <option v-for="p in provinsiList" :key="p.id" :value="p.id">{{ p.nama }}</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Nama Kabupaten</label>
-              <input v-model="form.nama" type="text" required />
+              <label>Nama Kabupaten <span class="required">*</span></label>
+              <input v-model="form.nama" type="text" required placeholder="Contoh: Pemalang" />
             </div>
           </div>
 
           <!-- Kecamatan form -->
-          <div v-if="modalType === 'kecamatan'" class="form-body">
+          <div v-if="modalType === 'kecamatan'">
             <div class="form-group">
-              <label>Kabupaten</label>
+              <label>Kabupaten <span class="required">*</span></label>
               <select v-model="form.kabupaten_id" required>
                 <option value="">Pilih Kabupaten</option>
                 <option v-for="k in kabupatenList" :key="k.id" :value="k.id">
@@ -240,15 +329,15 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Nama Kecamatan</label>
-              <input v-model="form.nama" type="text" required />
+              <label>Nama Kecamatan <span class="required">*</span></label>
+              <input v-model="form.nama" type="text" required placeholder="Contoh: Comal" />
             </div>
           </div>
 
           <!-- Kalurahan form -->
-          <div v-if="modalType === 'kalurahan'" class="form-body">
+          <div v-if="modalType === 'kalurahan'">
             <div class="form-group">
-              <label>Kecamatan</label>
+              <label>Kecamatan <span class="required">*</span></label>
               <select v-model="form.kecamatan_id" required>
                 <option value="">Pilih Kecamatan</option>
                 <option v-for="k in kecamatanList" :key="k.id" :value="k.id">
@@ -257,13 +346,13 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Nama Kalurahan/Desa</label>
-              <input v-model="form.nama" type="text" required />
+              <label>Nama Kalurahan/Desa <span class="required">*</span></label>
+              <input v-model="form.nama" type="text" required placeholder="Contoh: Purwosari" />
             </div>
           </div>
 
-          <div class="form-actions">
-            <button type="button" @click="closeModal" class="btn-secondary">Batal</button>
+          <div class="modal-actions">
+            <button type="button" @click="closeModal" class="btn-cancel">Batal</button>
             <button type="submit" class="btn-primary">{{ isEdit ? 'Update' : 'Simpan' }}</button>
           </div>
         </form>
@@ -271,53 +360,51 @@
     </div>
 
     <!-- Import Modal -->
-    <div v-if="showImportModal" class="modal-overlay" @click="closeImportModal">
-      <div class="modal-content" @click.stop>
+    <div v-if="showImportModal" class="modal-overlay" @click.self="closeImportModal">
+      <div class="modal" style="max-width: 520px;">
         <div class="modal-header">
           <h3>Import Data Wilayah</h3>
           <button @click="closeImportModal" class="btn-close">&times;</button>
         </div>
-        <div class="import-body">
-          <div class="import-section">
-            <h4>1. Download Template</h4>
-            <p>Download template Excel dengan format: NO, PROVINSI, KABUPATEN, KECAMATAN, KELURAHAN/DESA:</p>
-            <button @click="downloadTemplate" class="btn-template">
+        <div class="modal-body" style="padding: 1.25rem 1.5rem;">
+          <div class="import-section" style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.5rem; text-transform: uppercase;">1. Download Template</h4>
+            <p style="font-size: 0.85rem; color: #4b5563; margin-bottom: 0.75rem;">Download template Excel dengan format standard untuk import:</p>
+            <button @click="downloadTemplate" class="btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
               📄 Download Template Data Wilayah
             </button>
           </div>
 
-          <div class="import-section">
-            <h4>2. Upload File Excel</h4>
-            <p>Pilih file Excel (.xlsx, .xls, atau .csv):</p>
+          <div class="import-section" style="margin-bottom: 1.25rem; border-top: 1px solid #f0f3f7; padding-top: 1.25rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.5rem; text-transform: uppercase;">2. Upload File Excel</h4>
+            <p style="font-size: 0.85rem; color: #4b5563; margin-bottom: 0.75rem;">Pilih file Excel (.xlsx, .xls, atau .csv):</p>
             <input 
               type="file" 
               @change="handleFileSelect" 
               accept=".xlsx,.xls,.csv"
               ref="fileInput"
               class="file-input"
+              style="display: block; width: 100%; font-size: 0.875rem;"
             />
-            <p v-if="selectedFile" class="file-name">📎 {{ selectedFile.name }}</p>
+            <p v-if="selectedFile" class="file-name" style="margin-top: 8px; font-weight: 600; color: #0d9488; font-size: 0.85rem;">📎 {{ selectedFile.name }}</p>
           </div>
 
-          <div class="import-info">
-            <strong>⚠️ Catatan:</strong>
-            <ul>
+          <div class="import-info" style="background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #9d174d;">
+            <strong style="display: block; margin-bottom: 4px;">⚠️ Catatan Penting:</strong>
+            <ul style="margin: 0; padding-left: 16px;">
               <li>Format: NO, PROVINSI, KABUPATEN, KECAMATAN, KELURAHAN/DESA</li>
-              <li>Setiap baris adalah data kelurahan lengkap dengan hierarkinya</li>
               <li>Sistem akan otomatis membuat Provinsi, Kabupaten, Kecamatan jika belum ada</li>
               <li>Data duplikat akan diabaikan</li>
-              <li>Maksimal ukuran: 5 MB</li>
             </ul>
           </div>
         </div>
-        <div class="form-actions">
-          <button type="button" @click="closeImportModal" class="btn-secondary">Batal</button>
+        <div class="modal-actions" style="padding: 0 1.5rem 1.5rem;">
+          <button type="button" @click="closeImportModal" class="btn-cancel">Batal</button>
           <button @click="importData" class="btn-primary" :disabled="!selectedFile || importing">
             {{ importing ? 'Mengimport...' : 'Import Sekarang' }}
           </button>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
@@ -595,50 +682,140 @@ onMounted(() => {
   padding: 20px;
 }
 
-.header {
+/* Hero Banner */
+.hero-banner.teal {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.15);
+}
+.hero-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hero-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.hero-text h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.hero-text p {
+  font-size: 0.875rem;
+  opacity: 0.85;
 }
 
-.header h2 {
-  color: #2c3e50;
-  margin: 0;
+/* Page Card */
+.page-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e8ecf0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  border-bottom: 1px solid #f0f3f7;
+  padding-bottom: 0.5rem;
+}
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+/* Tabs */
 .tabs {
   display: flex;
-  gap: 5px;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #e0e0e0;
+  gap: 0.5rem;
 }
-
 .tab {
-  padding: 12px 24px;
+  padding: 8px 16px;
   border: none;
-  background: transparent;
-  cursor: pointer;
+  background: none;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #666;
-  border-bottom: 3px solid transparent;
-  transition: all 0.3s;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
 }
-
 .tab:hover {
-  color: #1565c0;
+  color: #0f172a;
 }
-
 .tab.active {
-  color: #1565c0;
-  border-bottom-color: #1565c0;
+  color: #0d9488;
+  border-bottom-color: #0d9488;
 }
 
-.content-section {
-  background: white;
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  color: #ffffff;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+.btn-cancel {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.btn-cancel:hover { background: #e5e7eb; }
+
+/* Table Style */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 0.5rem;
 }
 
 .pagination-bar {
@@ -649,534 +826,211 @@ onMounted(() => {
   margin-top: 0.85rem;
   flex-wrap: wrap;
 }
-
 .pagination-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
 .pagination-info,
 .page-label {
   color: #64748b;
   font-size: 0.85rem;
 }
-
 .per-page-select {
   height: 34px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0 8px;
 }
-
 .btn-page {
   width: 32px;
   height: 32px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   cursor: pointer;
 }
-
 .btn-page:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.section-header h3 {
-  margin: 0;
-  color: #2c3e50;
-}
-
-.header-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-export {
-  background: #1565c0;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-export:hover {
-  background: #0d47a1;
-}
-
-.btn-import {
-  background: #1565c0;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-import:hover {
-  background: #0d47a1;
-}
-
 .data-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.875rem;
 }
-
-.data-table thead {
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-}
-
 .data-table th {
-  padding: 13px 14px;
+  background: #f8fafc;
   text-align: left;
-  font-weight: 600;
-  font-size: 13px;
-  color: white;
-  white-space: nowrap;
-  border-right: 1px solid rgba(255,255,255,0.15);
-  border-bottom: none;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e8ecf0;
 }
-
-.data-table th:last-child {
-  border-right: none;
-}
-
 .data-table td {
-  padding: 11px 14px;
-  border-bottom: 1px solid #edf0f3;
-  border-right: 1px solid #edf0f3;
-  font-size: 13.5px;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f0f3f7;
   color: #374151;
 }
-
-.data-table td:last-child {
-  border-right: none;
-}
-
-.data-table tbody tr:nth-child(even) {
-  background: #f0f7ff;
-}
-
 .data-table tbody tr:hover {
-  background: #dceeff;
+  background: #f8fafc;
 }
 
-.loading-cell,
-.empty-cell {
-  text-align: center;
-  padding: 40px;
-  color: #6b7280;
+.td-num { color: #9ea9b8; width: 40px; text-align: center; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+
+/* Action Buttons */
+.td-actions {
+  width: 120px;
+  white-space: nowrap;
 }
-.loading-inner {
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 4px;
+}
+.btn-icon svg { width: 14px; height: 14px; }
+.btn-edit { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.btn-edit:hover { background: #dbeafe; }
+.btn-del { background: #fef2f2; border-color: #fecaca; color: #ef4444; }
+.btn-del:hover { background: #fee2e2; }
+
+/* Loading state */
+.loading-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  padding: 3rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
-.tbl-spinner {
-  width: 22px; height: 22px;
-  border: 2.5px solid #e8ecf0;
-  border-top-color: #3b82f6;
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e8ecf0;
+  border-top-color: #0d9488;
   border-radius: 50%;
-  animation: spin .7s linear infinite;
+  animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-primary {
-  background: #1565c0;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn-primary:hover {
-  background: #0d47a1;
-}
-
-.btn-edit {
-  padding: 6px 12px;
-  background: #ffc107;
-  color: #000;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-edit:hover {
-  background: #e0a800;
-}
-
-.btn-delete {
-  padding: 6px 12px;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-delete:hover {
-  background: #c82333;
-}
-
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 2000;
+  padding: 1rem;
 }
-
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.2s ease;
+  overflow: hidden;
+}
+@keyframes slideIn {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #dee2e6;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f0f3f7;
 }
-
 .modal-header h3 {
-  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
 }
-
 .btn-close {
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: 1.4rem;
+  color: #9ea9b8;
   cursor: pointer;
-  color: #999;
+  padding: 2px 6px;
+  border-radius: 6px;
+  line-height: 1;
 }
-
 .btn-close:hover {
-  color: #000;
+  background: #f3f4f6;
+  color: #374151;
 }
 
-.form-body {
-  padding: 20px;
+.modal-form {
+  padding: 1.25rem 1.5rem 1.5rem;
 }
-
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 1.1rem;
 }
-
 .form-group label {
   display: block;
-  margin-bottom: 6px;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: #495057;
+  color: #374151;
+  margin-bottom: 0.4rem;
 }
-
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  background-color: #fff;
 }
-
 .form-group input:focus,
 .form-group select:focus {
-  outline: none;
-  border-color: #1565c0;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
 }
+.required { color: #ef4444; }
 
-.form-actions {
+.modal-actions {
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
-  padding: 20px;
-  border-top: 1px solid #dee2e6;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn-secondary:hover {
-  background: #5a6268;
-}
-
-.import-body {
-  padding: 20px;
-}
-
-.import-section {
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 5px;
-}
-
+/* Specific to Import */
 .import-section h4 {
-  margin: 0 0 10px 0;
-  color: #2c3e50;
-  font-size: 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
 }
 
-.import-section p {
-  margin: 5px 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.btn-template {
-  background: #6c757d;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-.btn-template:hover {
-  background: #5a6268;
-}
-
-.file-input {
-  margin-top: 10px;
-  padding: 10px;
-  border: 2px dashed #ddd;
-  border-radius: 5px;
-  width: 100%;
-  cursor: pointer;
-}
-
-.file-name {
-  margin-top: 10px;
-  padding: 10px;
-  background: #e7f3ff;
-  border-radius: 5px;
-  color: #004085;
-  font-size: 14px;
-}
-
-.import-info {
-  background: #fff3cd;
-  padding: 15px;
-  border-radius: 5px;
-  border-left: 4px solid #ffc107;
-}
-
-.import-info strong {
-  color: #856404;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.import-info ul {
-  margin: 5px 0 0 20px;
-  color: #856404;
-}
-
-.import-info li {
-  margin: 5px 0;
-  font-size: 14px;
-}
-
-/* ===== HERO BANNER ===== */
-.hero-banner {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-  color: white;
-  padding: 1.25rem 1.75rem;
-  border-radius: 12px 12px 0 0;
-  margin: -20px -20px 20px -20px;
-}
-
-.hero-banner.teal {
-  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
-}
-
-.page-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  padding: 20px;
-}
-
-.hero-icon svg {
-  width: 48px;
-  height: 48px;
-  opacity: 0.9;
-  flex-shrink: 0;
-}
-
-.hero-text h2 {
-  margin: 0 0 4px 0;
-  font-size: 1.5rem;
-  color: white;
-}
-
-.hero-text p {
-  margin: 0;
-  opacity: 0.85;
-  font-size: 0.9rem;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .wilayah-container {
-    padding: 8px;
-  }
-
-  .hero-banner {
-    padding: 1rem;
-    gap: 0.75rem;
-    margin: -12px -12px 12px -12px;
-  }
-
-  .page-card {
-    padding: 12px;
-  }
-
-  .hero-icon svg {
-    width: 36px;
-    height: 36px;
-  }
-
-  .hero-text h2 {
-    font-size: 1.1rem;
-  }
-
-  .hero-text p {
-    font-size: 0.8rem;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 6px;
-    align-items: stretch;
-    margin-bottom: 10px;
-  }
-
-  .header h2 {
-    font-size: 16px;
-  }
-
-  .header-actions {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .header-actions button {
-    flex: 1;
-    padding: 7px 10px;
-    font-size: 12px;
-  }
-
-  .tabs {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    flex-wrap: nowrap;
-    gap: 4px;
-    padding-bottom: 4px;
-    margin-bottom: 10px;
-  }
-
-  .tab {
-    flex-shrink: 0;
-    white-space: nowrap;
-    padding: 7px 12px;
-    font-size: 12px;
-  }
-
-  .section-header {
-    flex-direction: column;
-    gap: 8px;
-    align-items: stretch;
-    margin-bottom: 10px;
-  }
-
-  .section-header h3 {
-    font-size: 14px;
-  }
-
-  .section-header .header-actions button {
-    flex: 1;
-  }
-
-  .content-section {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .data-table {
-    min-width: 400px;
-    font-size: 12px;
-  }
-
-  .data-table th,
-  .data-table td {
-    padding: 6px 8px;
-  }
-
-  .modal-overlay {
-    padding: 6px;
-  }
-
-  .modal-content {
-    width: 98%;
-    padding: 14px;
-    max-height: 93vh;
-    overflow-y: auto;
-  }
-
-  .form-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .form-actions button {
-    flex: 1;
-    padding: 8px 12px;
-    font-size: 13px;
-  }
+@media (max-width: 640px) {
+  .hero-banner.teal { padding: 1.25rem; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-left { overflow-x: auto; }
 }
 </style>

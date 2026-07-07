@@ -71,6 +71,16 @@ const nextPage = () => { if (currentPage.value < lastPage.value) fetchLogs(curre
 
 const rowNumber = (index) => ((currentPage.value - 1) * (Number(responsePerPage.value) || 0)) + index + 1
 
+const pageStart = computed(() => {
+  if (!logs.value.length) return 0
+  return (currentPage.value - 1) * (Number(responsePerPage.value) || 10) + 1
+})
+
+const pageEnd = computed(() => {
+  if (!logs.value.length) return 0
+  return Math.min(currentPage.value * (Number(responsePerPage.value) || 10), total.value)
+})
+
 watch(perPage, () => {
   currentPage.value = 1
   fetchLogs(1)
@@ -121,35 +131,35 @@ const roleLabel = (role) => {
 </script>
 
 <template>
-  <div class="activity-log">
-    <div class="page-card">
+  <div class="activity-log" style="padding: 20px;">
 
-      <!-- Hero Banner -->
-      <div class="hero-banner slate">
-        <div class="hero-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <line x1="10" y1="9" x2="8" y2="9"/>
-          </svg>
-        </div>
-        <div class="hero-text">
-          <h2>Log Aktivitas</h2>
-          <p>Riwayat aktivitas seluruh pengguna dalam sistem</p>
-        </div>
+    <!-- Hero Banner -->
+    <div class="hero-banner slate">
+      <div class="hero-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <line x1="10" y1="9" x2="8" y2="9"/>
+        </svg>
       </div>
+      <div class="hero-text">
+        <h2>Log Aktivitas</h2>
+        <p>Riwayat aktivitas seluruh pengguna dalam sistem</p>
+      </div>
+    </div>
 
-      <!-- Filters -->
-      <div class="filters-bar">
-        <div class="filter-toolbar">
+    <!-- Main Card Content -->
+    <div class="page-card">
+      <div class="toolbar">
+        <div class="toolbar-left">
           <input
             v-model="filters.search"
             @keyup.enter="applyFilters"
             type="text"
             placeholder="Cari nama, username, deskripsi..."
-            class="filter-input search-input"
+            class="search-input"
           />
           <FilterDropdown
             :active-count="logActiveFilterCount"
@@ -180,13 +190,15 @@ const roleLabel = (role) => {
             </div>
           </FilterDropdown>
         </div>
-        <div class="result-info" v-if="!loading">
-          Menampilkan <strong>{{ logs.length }}</strong> dari <strong>{{ total }}</strong> entri
+        <div class="toolbar-right">
+          <div class="result-info" v-if="!loading" style="font-size: 0.85rem; color: #64748b;">
+            Menampilkan <strong>{{ logs.length }}</strong> dari <strong>{{ total }}</strong> entri
+          </div>
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="table-container">
+      <!-- Data Table -->
+      <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
@@ -203,19 +215,22 @@ const roleLabel = (role) => {
           <tbody>
             <tr v-if="loading">
               <td colspan="8" class="loading-cell">
-                <div class="loading-inner"><div class="tbl-spinner"></div><span>Memuat data...</span></div>
+                <div class="loading-wrap">
+                  <div class="spinner"></div>
+                  <span>Memuat log aktivitas...</span>
+                </div>
               </td>
             </tr>
             <tr v-else-if="logs.length === 0">
-              <td colspan="8" class="empty-cell">Tidak ada data log</td>
+              <td colspan="8" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data log aktivitas</td>
             </tr>
             <tr v-else v-for="(log, index) in logs" :key="log.id">
-              <td>{{ rowNumber(index) }}</td>
-              <td class="cell-datetime">{{ formatDateTime(log.created_at) }}</td>
+              <td class="td-num">{{ rowNumber(index) }}</td>
+              <td class="td-date">{{ formatDateTime(log.created_at) }}</td>
               <td>
                 <div class="user-cell">
-                  <span class="user-name">{{ log.name || '-' }}</span>
-                  <span class="user-username">@{{ log.username || '-' }}</span>
+                  <div class="font-semibold">{{ log.name || '-' }}</div>
+                  <div style="font-size: 0.78rem; color: #64748b;">@{{ log.username || '-' }}</div>
                 </div>
               </td>
               <td>
@@ -231,8 +246,8 @@ const roleLabel = (role) => {
               <td>
                 <span class="module-tag">{{ moduleLabel(log.module) }}</span>
               </td>
-              <td class="cell-description">{{ log.description || '-' }}</td>
-              <td class="cell-ip">{{ log.ip_address || '-' }}</td>
+              <td style="max-width: 320px; white-space: normal; line-height: 1.4; font-size: 0.82rem;">{{ log.description || '-' }}</td>
+              <td style="font-family: monospace; font-size: 0.8rem; color: #64748b;">{{ log.ip_address || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -240,7 +255,7 @@ const roleLabel = (role) => {
 
       <!-- Pagination -->
       <div v-if="lastPage > 1 || logs.length" class="pagination-bar">
-        <div class="pagination-info">Halaman {{ currentPage }} dari {{ lastPage }}</div>
+        <div class="pagination-info">Menampilkan {{ pageStart }}-{{ pageEnd }} dari {{ total }} data</div>
         <div class="pagination-controls">
           <label for="log-per-page">Baris:</label>
           <select id="log-per-page" v-model="perPage" class="per-page-select">
@@ -254,137 +269,178 @@ const roleLabel = (role) => {
           <button @click="nextPage" :disabled="currentPage === lastPage" class="btn-page">&raquo;</button>
         </div>
       </div>
-
     </div>
   </div>
 </template>
 
 <style scoped>
-.activity-log { padding: 20px; }
-.page-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); overflow: hidden; }
+.activity-log {
+  padding: 20px;
+}
 
 /* Hero Banner */
-.hero-banner {
+.hero-banner.slate {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.5rem 2rem;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
   color: #fff;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(71, 85, 105, 0.15);
 }
-.hero-banner.slate { background: linear-gradient(135deg, #475569 0%, #1e293b 100%); }
 .hero-icon {
-  width: 52px; height: 52px; background: rgba(255,255,255,0.2);
-  border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.hero-icon svg { width: 26px; height: 26px; }
-.hero-text h2 { margin: 0 0 0.2rem; font-size: 1.3rem; font-weight: 700; }
-.hero-text p  { margin: 0; opacity: 0.85; font-size: 0.875rem; }
-
-/* Filters */
-.filters-bar { padding: 1.2rem 1.5rem; border-bottom: 1px solid #e8ecf0; background: #f8fafc; }
-.filter-toolbar { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
-.filter-input {
-  height: 36px; border: 1.5px solid #d1d5db; border-radius: 8px;
-  padding: 0 0.75rem; font-size: 0.875rem; background: #fff; outline: none;
-  transition: border-color 0.15s;
+.hero-icon svg {
+  width: 26px;
+  height: 26px;
 }
-.filter-input:focus { border-color: #475569; }
-.search-input { min-width: 220px; flex: 1; }
-
-/* Filter panel field styles */
-.fd-field { display: flex; flex-direction: column; gap: 4px; }
-.fd-label { font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
-.fd-select, .fd-input {
-  height: 34px; padding: 0 10px; border: 1px solid #d1d5db;
-  border-radius: 6px; font-size: 0.875rem; background: #fff; outline: none;
-  width: 100%; box-sizing: border-box;
+.hero-text h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
 }
-.fd-select:focus, .fd-input:focus { border-color: #475569; }
+.hero-text p {
+  font-size: 0.875rem;
+  opacity: 0.85;
+}
 
-.result-info { margin-top: 0.5rem; font-size: 0.8rem; color: #64748b; }
+/* Page Card */
+.page-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e8ecf0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
 
-.pagination-bar {
+.toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.2rem;
-  border-top: 1px solid #e8ecf0;
+  margin-bottom: 1.25rem;
   flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  max-width: 500px;
+}
+.search-input {
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus {
+  border-color: #475569;
+  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.12);
 }
 
+/* Table Style */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+}
 .pagination-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
 .pagination-info,
 .page-label {
-  font-size: 0.875rem;
   color: #64748b;
+  font-size: 0.85rem;
 }
-
 .per-page-select {
-  height: 32px;
+  height: 34px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0 8px;
 }
+.btn-page {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.btn-page:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
-/* Table */
-.table-container { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
 .data-table th {
-  background: #f1f5f9; padding: 0.75rem 1rem; text-align: left;
-  font-weight: 600; color: #374151; border-bottom: 2px solid #e2e8f0; white-space: nowrap;
-}
-.data-table td { padding: 0.65rem 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-.data-table tr:hover td { background: #f8fafc; }
-.loading-cell,
-.empty-cell {
-  text-align: center;
-  padding: 40px;
+  background: #f8fafc;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e8ecf0;
 }
-.loading-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+.data-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f0f3f7;
+  color: #374151;
+  vertical-align: middle;
 }
-.tbl-spinner {
-  width: 22px; height: 22px;
-  border: 2.5px solid #e8ecf0;
-  border-top-color: #3b82f6;
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Cell types */
-.cell-datetime { white-space: nowrap; font-size: 0.8rem; color: #475569; }
-.cell-description { max-width: 280px; color: #374151; }
-.cell-ip { font-size: 0.78rem; color: #94a3b8; font-family: monospace; white-space: nowrap; }
-.user-cell { display: flex; flex-direction: column; gap: 1px; }
-.user-name { font-weight: 600; color: #1e293b; }
-.user-username { font-size: 0.78rem; color: #94a3b8; }
-.module-tag {
-  display: inline-block; padding: 2px 8px; background: #f1f5f9;
-  border-radius: 4px; font-size: 0.78rem; color: #475569; font-weight: 500;
+.data-table tbody tr:hover {
+  background: #f8fafc;
 }
 
-/* Badges */
+.td-num { color: #9ea9b8; width: 40px; text-align: center; }
+.font-semibold { font-weight: 600; }
+.td-date { color: #6b7280; font-size: 0.82rem; white-space: nowrap; }
+
+/* Status Badges */
 .badge {
-  display: inline-block; padding: 3px 10px; border-radius: 20px;
-  font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
-.badge-login  { background: #dcfce7; color: #15803d; }
-.badge-logout { background: #fef3c7; color: #92400e; }
-.badge-create { background: #dbeafe; color: #1d4ed8; }
-.badge-update { background: #ede9fe; color: #6d28d9; }
-.badge-delete { background: #fee2e2; color: #b91c1c; }
-.badge-verify { background: #ccfbf1; color: #0f766e; }
+.badge-login  { background: #ecfdf5; color: #047857; }
+.badge-logout { background: #fffbeb; color: #b45309; }
+.badge-create { background: #eff6ff; color: #1d4ed8; }
+.badge-update { background: #faf5ff; color: #7c3aed; }
+.badge-delete { background: #fef2f2; color: #b91c1c; }
+.badge-verify { background: #f0fdf4; color: #0f766e; }
 .badge-default { background: #f1f5f9; color: #475569; }
 
 .badge-role { font-weight: 500; }
@@ -393,14 +449,39 @@ const roleLabel = (role) => {
 .badge-role-lapangan  { background: #dcfce7; color: #15803d; }
 .badge-role-penggilingan { background: #ede9fe; color: #6d28d9; }
 
-.btn-page {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
+.module-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: #475569;
+  font-weight: 500;
 }
-.btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-page:not(:disabled):hover { background: #f1f5f9; }
+
+/* Loading state */
+.loading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e8ecf0;
+  border-top-color: #475569;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 640px) {
+  .hero-banner.slate { padding: 1.25rem; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .td-date { display: none; }
+}
 </style>
