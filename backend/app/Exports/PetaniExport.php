@@ -23,16 +23,25 @@ class PetaniExport implements FromCollection, WithHeadings, WithMapping, WithSty
         $query = Petani::with(['provinsi', 'kabupaten', 'kecamatan', 'kalurahan']);
 
         // Apply filters
-        if (isset($this->filters['kabupaten'])) {
-            $query->where('kabupaten_id', $this->filters['kabupaten']);
+        if (!empty($this->filters['provinsi_id'])) {
+            $query->where('provinsi_id', $this->filters['provinsi_id']);
         }
-        if (isset($this->filters['kecamatan'])) {
-            $query->where('kecamatan_id', $this->filters['kecamatan']);
+        if (!empty($this->filters['kabupaten_id'])) {
+            $query->where('kabupaten_id', $this->filters['kabupaten_id']);
         }
-        if (isset($this->filters['tanggal_dari'])) {
+        if (!empty($this->filters['kecamatan_id'])) {
+            $query->where('kecamatan_id', $this->filters['kecamatan_id']);
+        }
+        if (!empty($this->filters['kalurahan_id'])) {
+            $query->where('kalurahan_id', $this->filters['kalurahan_id']);
+        }
+        if (!empty($this->filters['komoditi'])) {
+            $query->where('komoditi', $this->filters['komoditi']);
+        }
+        if (!empty($this->filters['tanggal_dari'])) {
             $query->whereDate('tanggal', '>=', $this->filters['tanggal_dari']);
         }
-        if (isset($this->filters['tanggal_sampai'])) {
+        if (!empty($this->filters['tanggal_sampai'])) {
             $query->whereDate('tanggal', '<=', $this->filters['tanggal_sampai']);
         }
 

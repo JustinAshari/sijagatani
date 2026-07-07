@@ -12,7 +12,50 @@ onUnmounted(() => clearInterval(clockTimer))
 
 const timeStr = computed(() => now.value.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
 const dateStr = computed(() => now.value.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }))
-const periodLabel = computed(() => now.value.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }))
+const selectedPeriodType = ref('semua') // Default to Semua to match original loading of all data
+const customMonth = ref(new Date().toISOString().split('T')[0].substring(0, 7))
+
+const getStartOfMonth = (date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  return `${y}-${m}-01`
+}
+
+const getEndOfMonth = (date) => {
+  const y = date.getFullYear()
+  const m = date.getMonth() + 1
+  const lastDay = new Date(y, m, 0).getDate()
+  const mStr = String(m).padStart(2, '0')
+  return `${y}-${mStr}-${String(lastDay).padStart(2, '0')}`
+}
+
+const onPeriodTypeChange = () => {
+  fetchAll()
+}
+
+const periodLabel = computed(() => {
+  if (selectedPeriodType.value === 'semua') {
+    return 'Semua Periode'
+  }
+  if (selectedPeriodType.value === 'bulan_ini') {
+    return now.value.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+  }
+  if (selectedPeriodType.value === 'bulan_lalu') {
+    const d = new Date()
+    d.setMonth(d.getMonth() - 1)
+    return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+  }
+  if (selectedPeriodType.value === 'tahun_ini') {
+    return `Tahun ${now.value.getFullYear()}`
+  }
+  if (selectedPeriodType.value === 'kustom' && customMonth.value) {
+    const parts = customMonth.value.split('-')
+    const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+    return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+  }
+  return 'Kustom'
+})
+
 const greeting = computed(() => {
   const h = now.value.getHours()
   if (h < 11) return 'Selamat Pagi'
@@ -37,12 +80,35 @@ const loading = ref(true)
 
 const fetchAll = async () => {
   loading.value = true
+  
+  const params = {}
+  if (selectedPeriodType.value === 'bulan_ini') {
+    params.tanggal_dari = getStartOfMonth(new Date())
+    params.tanggal_sampai = getEndOfMonth(new Date())
+  } else if (selectedPeriodType.value === 'bulan_lalu') {
+    const d = new Date()
+    d.setMonth(d.getMonth() - 1)
+    params.tanggal_dari = getStartOfMonth(d)
+    params.tanggal_sampai = getEndOfMonth(d)
+  } else if (selectedPeriodType.value === 'tahun_ini') {
+    const y = new Date().getFullYear()
+    params.tanggal_dari = `${y}-01-01`
+    params.tanggal_sampai = `${y}-12-31`
+  } else if (selectedPeriodType.value === 'kustom' && customMonth.value) {
+    const parts = customMonth.value.split('-')
+    const y = parseInt(parts[0])
+    const m = parseInt(parts[1]) - 1
+    const d = new Date(y, m, 1)
+    params.tanggal_dari = getStartOfMonth(d)
+    params.tanggal_sampai = getEndOfMonth(d)
+  }
+
   const tasks = []
   if (authStore.canAccessPetani) {
-    tasks.push(api.get('/petani').then(r => { petaniData.value = r.data.data || [] }))
-    tasks.push(api.get('/transaksi-petani').then(r => { transaksiData.value = r.data.data || [] }))
+    tasks.push(api.get('/petani', { params }).then(r => { petaniData.value = r.data.data || [] }))
+    tasks.push(api.get('/transaksi-petani', { params }).then(r => { transaksiData.value = r.data.data || [] }))
   }
-  if (authStore.canAccessPenggilingan) tasks.push(api.get('/penggilingan').then(r => { penggilinganData.value = r.data.data || [] }))
+  if (authStore.canAccessPenggilingan) tasks.push(api.get('/penggilingan', { params }).then(r => { penggilinganData.value = r.data.data || [] }))
   if (authStore.canAccessUsers)        tasks.push(api.get('/users').then(r => { usersData.value = r.data.data || [] }))
   if (authStore.canManageSubAdmins)    tasks.push(api.get('/my-sub-admins').then(r => { subAdminData.value = r.data.data || [] }))
   await Promise.allSettled(tasks)
@@ -177,6 +243,27 @@ const roleDesc = computed(() => {
         </div>
       </div>
     </section>
+
+    <!-- ══════════════════ FILTER PERIODE ══════════════════ -->
+    <div class="period-filter-bar">
+      <div class="pf-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pf-icon">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>Filter Periode Data</span>
+      </div>
+      <div class="pf-controls">
+        <select v-model="selectedPeriodType" @change="onPeriodTypeChange" class="pf-select">
+          <option value="semua">Semua Periode</option>
+          <option value="bulan_ini">Bulan Ini</option>
+          <option value="bulan_lalu">Bulan Lalu</option>
+          <option value="tahun_ini">Tahun Ini</option>
+          <option value="kustom">Pilih Bulan &amp; Tahun...</option>
+        </select>
+        
+        <input v-if="selectedPeriodType === 'kustom'" type="month" v-model="customMonth" @change="fetchAll" class="pf-month-input" />
+      </div>
+    </div>
 
     <!-- ══════════════════ LOADING ══════════════════ -->
     <div v-if="loading" class="loading-wrap">
@@ -665,6 +752,72 @@ const roleDesc = computed(() => {
   width: 7px; height: 7px; border-radius: 50%; background: #10b981;
   display: inline-block; animation: pulse 2s infinite;
   box-shadow: 0 0 0 2px rgba(16,185,129,.25);
+}
+
+/* ─── Period Filter Bar ──────────────────────────────── */
+.period-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  gap: 1rem;
+  flex-wrap: wrap;
+  transition: box-shadow 0.2s ease;
+}
+.period-filter-bar:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+.pf-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+.pf-icon {
+  width: 18px;
+  height: 18px;
+  color: #2563eb;
+}
+.pf-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.pf-select {
+  padding: 0.45rem 1.5rem 0.45rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  outline: none;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  min-width: 180px;
+}
+.pf-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.pf-month-input {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  background-color: #fff;
+  transition: border-color 0.15s;
+}
+.pf-month-input:focus {
+  border-color: #2563eb;
 }
 
 /* ─── Footer ─────────────────────────────────────────── */

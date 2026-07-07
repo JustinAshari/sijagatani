@@ -28,30 +28,35 @@ class PetaniController extends Controller
         $query = Petani::with(['provinsi', 'kabupaten', 'kecamatan', 'kalurahan']);
 
         // Filter by provinsi_id
-        if ($request->has('provinsi_id')) {
+        if ($request->filled('provinsi_id')) {
             $query->where('provinsi_id', $request->provinsi_id);
         }
 
         // Filter by kabupaten_id
-        if ($request->has('kabupaten_id')) {
+        if ($request->filled('kabupaten_id')) {
             $query->where('kabupaten_id', $request->kabupaten_id);
         }
 
         // Filter by kecamatan_id
-        if ($request->has('kecamatan_id')) {
+        if ($request->filled('kecamatan_id')) {
             $query->where('kecamatan_id', $request->kecamatan_id);
         }
 
         // Filter by kalurahan_id
-        if ($request->has('kalurahan_id')) {
+        if ($request->filled('kalurahan_id')) {
             $query->where('kalurahan_id', $request->kalurahan_id);
         }
 
+        // Filter by komoditi
+        if ($request->filled('komoditi')) {
+            $query->where('komoditi', $request->komoditi);
+        }
+
         // Filter by tanggal (tanggal field, not created_at)
-        if ($request->has('tanggal_dari')) {
+        if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal', '>=', $request->tanggal_dari);
         }
-        if ($request->has('tanggal_sampai')) {
+        if ($request->filled('tanggal_sampai')) {
             $query->whereDate('tanggal', '<=', $request->tanggal_sampai);
         }
 
@@ -352,7 +357,15 @@ class PetaniController extends Controller
      */
     public function export(Request $request)
     {
-        $filters = $request->only(['kabupaten', 'kecamatan', 'tanggal_dari', 'tanggal_sampai']);
+        $filters = $request->only([
+            'provinsi_id',
+            'kabupaten_id',
+            'kecamatan_id',
+            'kalurahan_id',
+            'komoditi',
+            'tanggal_dari',
+            'tanggal_sampai'
+        ]);
         
         $filename = 'data_petani_' . date('Y-m-d_His') . '.xlsx';
         
