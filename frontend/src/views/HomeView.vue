@@ -11,9 +11,8 @@ onMounted(() => { clockTimer = setInterval(() => { now.value = new Date() }, 100
 onUnmounted(() => clearInterval(clockTimer))
 
 const timeStr = computed(() => now.value.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
-const dateStr = computed(() => now.value.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }))
-const selectedPeriodType = ref('semua') // Default to Semua to match original loading of all data
-const customMonth = ref(new Date().toISOString().split('T')[0].substring(0, 7))
+const customMonthDari = ref(new Date().toISOString().split('T')[0].substring(0, 7))
+const customMonthSampai = ref(new Date().toISOString().split('T')[0].substring(0, 7))
 
 const getStartOfMonth = (date) => {
   const y = date.getFullYear()
@@ -29,31 +28,24 @@ const getEndOfMonth = (date) => {
   return `${y}-${mStr}-${String(lastDay).padStart(2, '0')}`
 }
 
-const onPeriodTypeChange = () => {
-  fetchAll()
-}
-
 const periodLabel = computed(() => {
-  if (selectedPeriodType.value === 'semua') {
-    return 'Semua Periode'
-  }
-  if (selectedPeriodType.value === 'bulan_ini') {
-    return now.value.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
-  }
-  if (selectedPeriodType.value === 'bulan_lalu') {
-    const d = new Date()
-    d.setMonth(d.getMonth() - 1)
-    return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
-  }
-  if (selectedPeriodType.value === 'tahun_ini') {
-    return `Tahun ${now.value.getFullYear()}`
-  }
-  if (selectedPeriodType.value === 'kustom' && customMonth.value) {
-    const parts = customMonth.value.split('-')
+  let labelDari = ''
+  let labelSampai = ''
+  if (customMonthDari.value) {
+    const parts = customMonthDari.value.split('-')
     const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
-    return d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+    labelDari = d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
   }
-  return 'Kustom'
+  if (customMonthSampai.value) {
+    const parts = customMonthSampai.value.split('-')
+    const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+    labelSampai = d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
+  }
+  if (labelDari && labelSampai) {
+    if (labelDari === labelSampai) return labelDari
+    return `${labelDari} - ${labelSampai}`
+  }
+  return labelDari || labelSampai || ''
 })
 
 const greeting = computed(() => {
@@ -82,24 +74,18 @@ const fetchAll = async () => {
   loading.value = true
   
   const params = {}
-  if (selectedPeriodType.value === 'bulan_ini') {
-    params.tanggal_dari = getStartOfMonth(new Date())
-    params.tanggal_sampai = getEndOfMonth(new Date())
-  } else if (selectedPeriodType.value === 'bulan_lalu') {
-    const d = new Date()
-    d.setMonth(d.getMonth() - 1)
-    params.tanggal_dari = getStartOfMonth(d)
-    params.tanggal_sampai = getEndOfMonth(d)
-  } else if (selectedPeriodType.value === 'tahun_ini') {
-    const y = new Date().getFullYear()
-    params.tanggal_dari = `${y}-01-01`
-    params.tanggal_sampai = `${y}-12-31`
-  } else if (selectedPeriodType.value === 'kustom' && customMonth.value) {
-    const parts = customMonth.value.split('-')
+  if (customMonthDari.value) {
+    const parts = customMonthDari.value.split('-')
     const y = parseInt(parts[0])
     const m = parseInt(parts[1]) - 1
     const d = new Date(y, m, 1)
     params.tanggal_dari = getStartOfMonth(d)
+  }
+  if (customMonthSampai.value) {
+    const parts = customMonthSampai.value.split('-')
+    const y = parseInt(parts[0])
+    const m = parseInt(parts[1]) - 1
+    const d = new Date(y, m, 1)
     params.tanggal_sampai = getEndOfMonth(d)
   }
 
@@ -253,15 +239,12 @@ const roleDesc = computed(() => {
         <span>Filter Periode Data</span>
       </div>
       <div class="pf-controls">
-        <select v-model="selectedPeriodType" @change="onPeriodTypeChange" class="pf-select">
-          <option value="semua">Semua Periode</option>
-          <option value="bulan_ini">Bulan Ini</option>
-          <option value="bulan_lalu">Bulan Lalu</option>
-          <option value="tahun_ini">Tahun Ini</option>
-          <option value="kustom">Pilih Bulan &amp; Tahun...</option>
-        </select>
-        
-        <input v-if="selectedPeriodType === 'kustom'" type="month" v-model="customMonth" @change="fetchAll" class="pf-month-input" />
+        <div class="pf-range" style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.85rem; font-weight: 500; color: #4b5563;">Dari:</span>
+          <input type="month" v-model="customMonthDari" @change="fetchAll" class="pf-month-input" />
+          <span style="font-size: 0.85rem; font-weight: 500; color: #4b5563; margin-left: 10px;">Sampai:</span>
+          <input type="month" v-model="customMonthSampai" @change="fetchAll" class="pf-month-input" />
+        </div>
       </div>
     </div>
 

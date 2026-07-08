@@ -138,12 +138,12 @@
               </select>
             </div>
             <div class="fd-field">
-              <label class="fd-label">Tanggal Dari</label>
-              <input v-model="filters.tanggalDari" type="date" class="fd-input" />
+              <label class="fd-label">Dari Bulan</label>
+              <input v-model="filters.dariBulan" type="month" class="fd-input" />
             </div>
             <div class="fd-field">
-              <label class="fd-label">Tanggal Sampai</label>
-              <input v-model="filters.tanggalSampai" type="date" class="fd-input" />
+              <label class="fd-label">Sampai Bulan</label>
+              <input v-model="filters.sampaiBulan" type="month" class="fd-input" />
             </div>
           </FilterDropdown>
         </div>
@@ -741,8 +741,8 @@ const verifikasiForm = ref({
 })
 
 const filters = ref({
-  tanggalDari: '',
-  tanggalSampai: '',
+  dariBulan: '',
+  sampaiBulan: '',
   namaPenggilingan: '',
   statusVerifikasi: '',
   komoditas: '',
@@ -752,10 +752,24 @@ const filters = ref({
   kalurahanId: '',
 })
 
+const getStartOfMonth = (date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  return `${y}-${m}-01`
+}
+
+const getEndOfMonth = (date) => {
+  const y = date.getFullYear()
+  const m = date.getMonth() + 1
+  const lastDay = new Date(y, m, 0).getDate()
+  const mStr = String(m).padStart(2, '0')
+  return `${y}-${mStr}-${String(lastDay).padStart(2, '0')}`
+}
+
 const penggilinganActiveFilterCount = computed(() => {
   let count = 0
-  if (filters.value.tanggalDari) count++
-  if (filters.value.tanggalSampai) count++
+  if (filters.value.dariBulan) count++
+  if (filters.value.sampaiBulan) count++
   if (filters.value.statusVerifikasi) count++
   if (filters.value.komoditas) count++
   if (filters.value.provinsiId) count++
@@ -989,8 +1003,16 @@ const fetchData = async () => {
   loading.value = true
   try {
     const params = {}
-    if (filters.value.tanggalDari) params.tanggal_dari = filters.value.tanggalDari
-    if (filters.value.tanggalSampai) params.tanggal_sampai = filters.value.tanggalSampai
+    if (filters.value.dariBulan) {
+      const parts = filters.value.dariBulan.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_dari = getStartOfMonth(d)
+    }
+    if (filters.value.sampaiBulan) {
+      const parts = filters.value.sampaiBulan.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_sampai = getEndOfMonth(d)
+    }
     if (filters.value.namaPenggilingan) params.nama_penggilingan = filters.value.namaPenggilingan
     if (filters.value.statusVerifikasi) params.status_verifikasi = filters.value.statusVerifikasi
     if (filters.value.komoditas) params.komoditas = filters.value.komoditas
@@ -1017,8 +1039,8 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   filters.value = {
-    tanggalDari: '',
-    tanggalSampai: '',
+    dariBulan: '',
+    sampaiBulan: '',
     namaPenggilingan: '',
     statusVerifikasi: '',
     komoditas: '',

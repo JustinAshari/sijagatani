@@ -138,12 +138,12 @@
             </div>
 
             <div class="fd-field">
-              <label class="fd-label">Tanggal Dari</label>
-              <input v-model="filterTanggalDari" type="date" class="fd-input" />
+              <label class="fd-label">Dari Bulan</label>
+              <input v-model="filterDariBulan" type="month" class="fd-input" />
             </div>
             <div class="fd-field">
-              <label class="fd-label">Tanggal Sampai</label>
-              <input v-model="filterTanggalSampai" type="date" class="fd-input" />
+              <label class="fd-label">Sampai Bulan</label>
+              <input v-model="filterSampaiBulan" type="month" class="fd-input" />
             </div>
           </FilterDropdown>
         </div>
@@ -642,8 +642,22 @@ const filterKabupatenId = ref('')
 const filterKecamatan = ref('')
 const filterKalurahan = ref('')
 const filterKomoditi = ref('')
-const filterTanggalDari = ref('')
-const filterTanggalSampai = ref('')
+const filterDariBulan = ref('')
+const filterSampaiBulan = ref('')
+
+const getStartOfMonth = (date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  return `${y}-${m}-01`
+}
+
+const getEndOfMonth = (date) => {
+  const y = date.getFullYear()
+  const m = date.getMonth() + 1
+  const lastDay = new Date(y, m, 0).getDate()
+  const mStr = String(m).padStart(2, '0')
+  return `${y}-${mStr}-${String(lastDay).padStart(2, '0')}`
+}
 
 const filterKabupatenOptions = ref([])
 const filterKecamatanOptions = ref([])
@@ -689,8 +703,8 @@ const petaniActiveFilterCount = computed(() => {
   if (filterKecamatan.value) count++
   if (filterKalurahan.value) count++
   if (filterKomoditi.value) count++
-  if (filterTanggalDari.value) count++
-  if (filterTanggalSampai.value) count++
+  if (filterDariBulan.value) count++
+  if (filterSampaiBulan.value) count++
   return count
 })
 
@@ -886,8 +900,16 @@ const applyFilter = async () => {
     if (filterKecamatan.value) params.kecamatan_id = filterKecamatan.value
     if (filterKalurahan.value) params.kalurahan_id = filterKalurahan.value
     if (filterKomoditi.value) params.komoditi = filterKomoditi.value
-    if (filterTanggalDari.value) params.tanggal_dari = filterTanggalDari.value
-    if (filterTanggalSampai.value) params.tanggal_sampai = filterTanggalSampai.value
+    if (filterDariBulan.value) {
+      const parts = filterDariBulan.value.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_dari = getStartOfMonth(d)
+    }
+    if (filterSampaiBulan.value) {
+      const parts = filterSampaiBulan.value.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_sampai = getEndOfMonth(d)
+    }
 
     const response = await api.get('/petani', { params })
     petaniList.value = response.data.data
@@ -903,8 +925,8 @@ const resetFilter = () => {
   filterKecamatan.value = ''
   filterKalurahan.value = ''
   filterKomoditi.value = ''
-  filterTanggalDari.value = ''
-  filterTanggalSampai.value = ''
+  filterDariBulan.value = ''
+  filterSampaiBulan.value = ''
   searchQuery.value = ''
   filterKabupatenOptions.value = []
   filterKecamatanOptions.value = []
