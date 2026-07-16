@@ -60,12 +60,6 @@ class Penggilingan extends Model
         return $this->belongsTo(Kalurahan::class, 'kalurahan_id');
     }
 
-    // Removed petani relationship since we now store nama_petani as string
-    // public function petani(): BelongsTo
-    // {
-    //     return $this->belongsTo(Petani::class);
-    // }
-
     public function transports(): HasMany
     {
         return $this->hasMany(PenggilinganTransport::class)->orderBy('urutan');
