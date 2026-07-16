@@ -148,6 +148,15 @@
           </FilterDropdown>
         </div>
         <div class="toolbar-right" style="display: flex; gap: 0.5rem; align-items: center;">
+          <button v-if="authStore.canManagePetani" @click="triggerImportFile" class="btn-primary" :disabled="loading" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none;">
+            <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Import Excel/CSV
+          </button>
+          <input type="file" ref="importFileInput" @change="handleImportFile" accept=".xlsx,.xls,.csv" style="display: none;" />
           <button @click="exportExcel" class="btn-primary" :disabled="loading" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
             <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -742,6 +751,7 @@ const showEditModal = ref(false)
 const showDetailModal = ref(false)
 const selectedPetani = ref(null)
 const loading = ref(false)
+const importFileInput = ref(null)
 
 const showColPicker = ref(false)
 const allColDefs = [
@@ -1123,6 +1133,46 @@ const closeModal = () => {
   kalurahanOptions.value = []
 }
 
+const triggerImportFile = () => {
+  if (importFileInput.value) {
+    importFileInput.value.click()
+  }
+}
+
+const handleImportFile = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // Reset the file input value so same file can be selected again
+  event.target.value = ''
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    loading.value = true
+    const response = await api.post('/petani/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    if (response.data && response.data.success) {
+      const res = response.data.data
+      alert(`Import Selesai!\nSukses: ${res.success_count}\nSkip (Duplikat): ${res.skipped_count}\nGagal (Error): ${res.failed_count}\n\n${res.errors && res.errors.length ? 'Detail:\n' + res.errors.slice(0, 5).join('\n') : ''}`)
+      // Reload the data
+      await fetchPetani()
+    } else {
+      alert(response.data.message || 'Gagal import data')
+    }
+  } catch (error) {
+    const errorMsg = error.response?.data?.message || 'Terjadi kesalahan saat mengunggah file'
+    alert('Gagal import data: ' + errorMsg)
+  } finally {
+    loading.value = false
+  }
+}
+
 const exportExcel = async () => {
   try {
     loading.value = true
@@ -1132,8 +1182,16 @@ const exportExcel = async () => {
     if (filterKecamatan.value) params.kecamatan_id = filterKecamatan.value
     if (filterKalurahan.value) params.kalurahan_id = filterKalurahan.value
     if (filterKomoditi.value) params.komoditi = filterKomoditi.value
-    if (filterTanggalDari.value) params.tanggal_dari = filterTanggalDari.value
-    if (filterTanggalSampai.value) params.tanggal_sampai = filterTanggalSampai.value
+    if (filterDariBulan.value) {
+      const parts = filterDariBulan.value.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_dari = getStartOfMonth(d)
+    }
+    if (filterSampaiBulan.value) {
+      const parts = filterSampaiBulan.value.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_sampai = getEndOfMonth(d)
+    }
     
     const response = await api.get('/petani/export/excel', {
       params,

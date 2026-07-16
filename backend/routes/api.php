@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/petani', [PetaniController::class, 'index']);
         Route::get('/petani/{id}', [PetaniController::class, 'show']);
         Route::get('/petani/export/excel', [PetaniController::class, 'export']);
+        Route::post('/petani/import', [PetaniController::class, 'import']);
         Route::post('/petani', [PetaniController::class, 'store']);
         Route::post('/petani/check-nik', [PetaniController::class, 'checkNik']);
         Route::put('/petani/{id}', [PetaniController::class, 'update']);

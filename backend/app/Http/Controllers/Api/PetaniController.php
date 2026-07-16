@@ -353,6 +353,44 @@ class PetaniController extends Controller
     }
 
     /**
+     * Import data petani from Excel/CSV
+     */
+    public function import(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls,csv|max:5120'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi file gagal',
+                'errors' => $e->errors()
+            ], 422);
+        }
+
+        try {
+            $import = new \App\Imports\PetaniImport();
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+            
+            $results = $import->getImportResults();
+            
+            ActivityLogService::log($request, 'import', 'petani', "Mengimport data petani: {$results['success_count']} sukses, {$results['skipped_count']} skip, {$results['failed_count']} gagal");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Proses import selesai',
+                'data' => $results
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal import data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Export data petani to Excel
      */
     public function export(Request $request)
