@@ -611,7 +611,17 @@ class PenggilinganController extends Controller
      */
     public function export(Request $request)
     {
-        $filters = $request->only(['tanggal_dari', 'tanggal_sampai', 'nama_penggilingan', 'kabupaten']);
+        $filters = $request->only([
+            'tanggal_dari',
+            'tanggal_sampai',
+            'nama_penggilingan',
+            'status_verifikasi',
+            'komoditas',
+            'provinsi_id',
+            'kabupaten_id',
+            'kecamatan_id',
+            'kalurahan_id'
+        ]);
 
         // Paksa filter nama_penggilingan untuk role penggilingan
         if ($request->user()->isAdminPenggilingan()) {

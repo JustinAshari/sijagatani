@@ -21,7 +21,7 @@ class PenggilinganExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function collection()
     {
-        $query = Penggilingan::with(['petani', 'transports']);
+        $query = Penggilingan::with(['provinsi', 'kabupaten', 'kecamatan', 'kalurahan', 'transports']);
 
         // Apply filters
         if (isset($this->filters['tanggal_dari'])) {
@@ -33,10 +33,23 @@ class PenggilinganExport implements FromCollection, WithHeadings, WithMapping, W
         if (isset($this->filters['nama_penggilingan'])) {
             $query->where('nama_penggilingan', 'LIKE', '%' . $this->filters['nama_penggilingan'] . '%');
         }
-        if (isset($this->filters['kabupaten'])) {
-            $query->whereHas('petani', function($q) {
-                $q->where('kabupaten', $this->filters['kabupaten']);
-            });
+        if (isset($this->filters['status_verifikasi'])) {
+            $query->where('status_verifikasi', $this->filters['status_verifikasi']);
+        }
+        if (isset($this->filters['komoditas'])) {
+            $query->where('komoditas', $this->filters['komoditas']);
+        }
+        if (isset($this->filters['provinsi_id'])) {
+            $query->where('provinsi_id', $this->filters['provinsi_id']);
+        }
+        if (isset($this->filters['kabupaten_id'])) {
+            $query->where('kabupaten_id', $this->filters['kabupaten_id']);
+        }
+        if (isset($this->filters['kecamatan_id'])) {
+            $query->where('kecamatan_id', $this->filters['kecamatan_id']);
+        }
+        if (isset($this->filters['kalurahan_id'])) {
+            $query->where('kalurahan_id', $this->filters['kalurahan_id']);
         }
 
         return $query->latest('tanggal_pengajuan')->get();
@@ -48,13 +61,15 @@ class PenggilinganExport implements FromCollection, WithHeadings, WithMapping, W
             'No',
             'Tanggal Pengajuan',
             'Nama Penggilingan',
-            'NIK Petani',
-            'Nama Petani',
+            'Komoditas',
+            'Provinsi',
             'Kabupaten',
             'Kecamatan',
+            'Kalurahan',
             'Lokasi Makloon',
             'Total Tonase (Ton)',
             'Jumlah Angkutan',
+            'Status Verifikasi',
             'Detail Transportasi'
         ];
     }
@@ -68,7 +83,7 @@ class PenggilinganExport implements FromCollection, WithHeadings, WithMapping, W
         $transportDetails = '';
         foreach ($penggilingan->transports as $i => $transport) {
             $transportDetails .= sprintf(
-                "Transport %d: %s (%s) - %.3f ton\n",
+                "Angkutan %d: %s (%s) - %.3f ton\n",
                 $i + 1,
                 $transport->nama_pengemudi,
                 $transport->nopol,
@@ -78,15 +93,17 @@ class PenggilinganExport implements FromCollection, WithHeadings, WithMapping, W
 
         return [
             $index,
-            $penggilingan->tanggal_pengajuan->format('d-m-Y'),
+            $penggilingan->tanggal_pengajuan ? $penggilingan->tanggal_pengajuan->format('d-m-Y') : '-',
             $penggilingan->nama_penggilingan,
-            $penggilingan->petani->nik ?? '-',
-            $penggilingan->petani->nama ?? '-',
-            $penggilingan->petani->kabupaten ?? '-',
-            $penggilingan->petani->kecamatan ?? '-',
+            $penggilingan->komoditas,
+            $penggilingan->provinsi->nama ?? '-',
+            $penggilingan->kabupaten->nama ?? '-',
+            $penggilingan->kecamatan->nama ?? '-',
+            $penggilingan->kalurahan->nama ?? '-',
             $penggilingan->lokasi_makloon,
             number_format($penggilingan->total_tonase, 3, ',', '.'),
             $penggilingan->jumlah_angkutan,
+            ucfirst($penggilingan->status_verifikasi ?? 'pending'),
             trim($transportDetails)
         ];
     }

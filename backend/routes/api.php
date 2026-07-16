@@ -41,9 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Penggilingan Routes - Admin and Penggilingan role can access
     Route::middleware('role:admin,penggilingan,superadmin')->group(function () {
         Route::get('/penggilingan', [PenggilinganController::class, 'index']);
-        Route::get('/penggilingan/{id}', [PenggilinganController::class, 'show']);
         Route::get('/penggilingan/summary', [PenggilinganController::class, 'summary']);
         Route::get('/penggilingan/export/excel', [PenggilinganController::class, 'export']);
+        Route::get('/penggilingan/{id}', [PenggilinganController::class, 'show']);
         Route::get('/penggilingan/{id}/export-makloon-gkp', [PenggilinganController::class, 'exportMakloonGKP']);
         Route::post('/penggilingan', [PenggilinganController::class, 'store']);
         Route::put('/penggilingan/{id}', [PenggilinganController::class, 'update']);

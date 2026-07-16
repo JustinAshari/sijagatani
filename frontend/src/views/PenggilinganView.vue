@@ -147,7 +147,15 @@
             </div>
           </FilterDropdown>
         </div>
-        <div class="toolbar-right">
+        <div class="toolbar-right" style="display: flex; gap: 0.5rem; align-items: center;">
+          <button @click="exportExcel" class="btn-primary" :disabled="loading" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+            <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export Excel
+          </button>
           <button v-if="authStore.canManagePenggilingan" @click="openAddModal" class="btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline" style="width: 14px; height: 14px; margin-right: 4px;">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -1435,6 +1443,48 @@ const formatDate = (dateString) => {
     month: 'long',
     year: 'numeric',
   })
+}
+
+const exportExcel = async () => {
+  loading.value = true
+  try {
+    const params = {}
+    if (filters.value.dariBulan) {
+      const parts = filters.value.dariBulan.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_dari = getStartOfMonth(d)
+    }
+    if (filters.value.sampaiBulan) {
+      const parts = filters.value.sampaiBulan.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_sampai = getEndOfMonth(d)
+    }
+    if (filters.value.namaPenggilingan) params.nama_penggilingan = filters.value.namaPenggilingan
+    if (filters.value.statusVerifikasi) params.status_verifikasi = filters.value.statusVerifikasi
+    if (filters.value.komoditas) params.komoditas = filters.value.komoditas
+    if (filters.value.provinsiId) params.provinsi_id = filters.value.provinsiId
+    if (filters.value.kabupatenId) params.kabupaten_id = filters.value.kabupatenId
+    if (filters.value.kecamatanId) params.kecamatan_id = filters.value.kecamatanId
+    if (filters.value.kalurahanId) params.kalurahan_id = filters.value.kalurahanId
+
+    const response = await api.get('/penggilingan/export/excel', {
+      params,
+      responseType: 'blob'
+    })
+
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `data_penggilingan_${new Date().getTime()}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    console.error('Error exporting:', error)
+    alert('Gagal export data')
+  } finally {
+    loading.value = false
+  }
 }
 
 const downloadMakloonGKP = async (penggilinganId) => {
