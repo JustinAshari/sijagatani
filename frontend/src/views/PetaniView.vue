@@ -148,7 +148,7 @@
           </FilterDropdown>
         </div>
         <div class="toolbar-right" style="display: flex; gap: 0.5rem; align-items: center;">
-          <button v-if="authStore.canManagePetani" @click="triggerImportFile" class="btn-primary" :disabled="loading" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none;">
+          <button v-if="authStore.canManagePetani" @click="openImportModal" class="btn-primary" :disabled="loading" style="background: linear-gradient(135deg, #3b82f6, #2563eb); border: none;">
             <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="17 8 12 3 7 8"/>
@@ -156,7 +156,6 @@
             </svg>
             Import Excel/CSV
           </button>
-          <input type="file" ref="importFileInput" @change="handleImportFile" accept=".xlsx,.xls,.csv" style="display: none;" />
           <button @click="exportExcel" class="btn-primary" :disabled="loading" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
             <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -631,6 +630,54 @@
         </div>
       </div>
     </div>
+    <!-- Import Modal -->
+    <div v-if="showImportModal" class="modal-overlay" @click.self="closeImportModal">
+      <div class="modal" style="max-width: 520px;">
+        <div class="modal-header">
+          <h3>Import Data Petani</h3>
+          <button @click="closeImportModal" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 1.25rem 1.5rem;">
+          <div class="import-section" style="margin-bottom: 1.25rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.5rem; text-transform: uppercase;">1. Download Template</h4>
+            <p style="font-size: 0.85rem; color: #4b5563; margin-bottom: 0.75rem;">Download template Excel dengan format standard untuk import:</p>
+            <button @click="downloadTemplate" class="btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              📄 Download Template Data Petani
+            </button>
+          </div>
+
+          <div class="import-section" style="margin-bottom: 1.25rem; border-top: 1px solid #f0f3f7; padding-top: 1.25rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; margin-bottom: 0.5rem; text-transform: uppercase;">2. Upload File Excel</h4>
+            <p style="font-size: 0.85rem; color: #4b5563; margin-bottom: 0.75rem;">Pilih file Excel (.xlsx, .xls, atau .csv):</p>
+            <input 
+              type="file" 
+              @change="handleFileSelect" 
+              accept=".xlsx,.xls,.csv"
+              ref="fileInput"
+              class="file-input"
+              style="display: block; width: 100%; font-size: 0.875rem;"
+            />
+            <p v-if="selectedFile" class="file-name" style="margin-top: 8px; font-weight: 600; color: #0d9488; font-size: 0.85rem;">📎 {{ selectedFile.name }}</p>
+          </div>
+
+          <div class="import-info" style="background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #9d174d;">
+            <strong style="display: block; margin-bottom: 4px;">⚠️ Catatan Penting:</strong>
+            <ul style="margin: 0; padding-left: 16px;">
+              <li>Format: NO, TANGGAL, NIK, NAMA, NO_TELEPON, BANK, NO_REKENING, PROVINSI, KABUPATEN, KECAMATAN, KELURAHAN_DESA, ALAMAT, LUAS_LAHAN, ALAMAT_LAHAN, KOMODITI</li>
+              <li>NIK wajib berupa 16 digit angka unik</li>
+              <li>Komoditi yang diperbolehkan: Gabah, Beras, Jagung</li>
+              <li>Sistem mencari ID wilayah berdasarkan nama Kelurahan/Desa. Jika Kelurahan/Desa tidak ditemukan, data baris tersebut akan dilewati (skip).</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-actions" style="padding: 0 1.5rem 1.5rem;">
+          <button type="button" @click="closeImportModal" class="btn-cancel">Batal</button>
+          <button @click="importData" class="btn-primary" :disabled="!selectedFile || importing">
+            {{ importing ? 'Mengimport...' : 'Import Sekarang' }}
+          </button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -751,7 +798,10 @@ const showEditModal = ref(false)
 const showDetailModal = ref(false)
 const selectedPetani = ref(null)
 const loading = ref(false)
-const importFileInput = ref(null)
+const showImportModal = ref(false)
+const importing = ref(false)
+const selectedFile = ref(null)
+const fileInput = ref(null)
 
 const showColPicker = ref(false)
 const allColDefs = [
@@ -1133,24 +1183,53 @@ const closeModal = () => {
   kalurahanOptions.value = []
 }
 
-const triggerImportFile = () => {
-  if (importFileInput.value) {
-    importFileInput.value.click()
+const openImportModal = () => {
+  selectedFile.value = null
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
+  showImportModal.value = true
+}
+
+const closeImportModal = () => {
+  showImportModal.value = false
+  selectedFile.value = null
+  importing.value = false
+}
+
+const handleFileSelect = (event) => {
+  selectedFile.value = event.target.files[0]
+}
+
+const downloadTemplate = async () => {
+  try {
+    const response = await api.get('/petani/template', {
+      responseType: 'blob'
+    })
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `template_data_petani.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    console.error('Error downloading template:', error)
+    alert('Gagal download template')
   }
 }
 
-const handleImportFile = async (event) => {
-  const file = event.target.files[0]
-  if (!file) return
+const importData = async () => {
+  if (!selectedFile.value) {
+    alert('Pilih file terlebih dahulu')
+    return
+  }
 
-  // Reset the file input value so same file can be selected again
-  event.target.value = ''
-
-  const formData = new FormData()
-  formData.append('file', file)
-
+  importing.value = true
   try {
-    loading.value = true
+    const formData = new FormData()
+    formData.append('file', selectedFile.value)
+
     const response = await api.post('/petani/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -1160,16 +1239,17 @@ const handleImportFile = async (event) => {
     if (response.data && response.data.success) {
       const res = response.data.data
       alert(`Import Selesai!\nSukses: ${res.success_count}\nSkip (Duplikat): ${res.skipped_count}\nGagal (Error): ${res.failed_count}\n\n${res.errors && res.errors.length ? 'Detail:\n' + res.errors.slice(0, 5).join('\n') : ''}`)
-      // Reload the data
+      closeImportModal()
       await fetchPetani()
     } else {
       alert(response.data.message || 'Gagal import data')
     }
   } catch (error) {
+    console.error('Error importing:', error)
     const errorMsg = error.response?.data?.message || 'Terjadi kesalahan saat mengunggah file'
     alert('Gagal import data: ' + errorMsg)
   } finally {
-    loading.value = false
+    importing.value = false
   }
 }
 

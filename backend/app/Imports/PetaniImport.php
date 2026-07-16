@@ -87,10 +87,27 @@ class PetaniImport implements ToModel, WithHeadingRow
                 return null;
             }
 
+            $tanggalVal = trim($row['tanggal'] ?? '');
+            $tanggal = now();
+            if ($tanggalVal) {
+                try {
+                    // Handle Excel serial date or string date
+                    if (is_numeric($tanggalVal)) {
+                        $tanggal = Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($tanggalVal));
+                    } else {
+                        $tanggal = Carbon::parse($tanggalVal);
+                    }
+                } catch (\Exception $e) {
+                    $tanggal = now();
+                }
+            }
+
+            $alamatLahan = isset($row['alamat_lahan']) ? trim($row['alamat_lahan']) : $alamat;
+
             $potensiPanen = $luasLahan * 5500; // default formula
 
             $petani = Petani::create([
-                'tanggal' => now(),
+                'tanggal' => $tanggal,
                 'nik' => $nik,
                 'nama' => $nama,
                 'alamat' => $alamat,
@@ -102,7 +119,7 @@ class PetaniImport implements ToModel, WithHeadingRow
                 'bank' => $bank ?: null,
                 'no_rekening' => $noRekening ?: null,
                 'luas_lahan' => $luasLahan,
-                'alamat_lahan' => $alamat,
+                'alamat_lahan' => $alamatLahan,
                 'potensi_panen' => $potensiPanen,
                 'komoditi' => $komoditi,
                 'status_verifikasi' => 'pending',

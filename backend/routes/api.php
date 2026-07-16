@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Petani Routes - Admin and Lapangan role can access
     Route::middleware('role:admin,lapangan,superadmin')->group(function () {
         Route::get('/petani', [PetaniController::class, 'index']);
+        Route::get('/petani/template', [PetaniController::class, 'template']);
         Route::get('/petani/{id}', [PetaniController::class, 'show']);
         Route::get('/petani/export/excel', [PetaniController::class, 'export']);
         Route::post('/petani/import', [PetaniController::class, 'import']);

@@ -413,4 +413,80 @@ class PetaniController extends Controller
         );
     }
 
+    /**
+     * Download template Excel for import
+     */
+    public function template()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Template Data Petani');
+        
+        // HEADER (matches PetaniExport headings exactly)
+        $headers = [
+            'No',
+            'Tanggal',
+            'NIK',
+            'Nama',
+            'No. Telepon',
+            'Bank',
+            'No. Rekening',
+            'Provinsi',
+            'Kabupaten',
+            'Kecamatan',
+            'Kalurahan',
+            'Alamat',
+            'Luas Lahan (Ha)',
+            'Alamat Lahan',
+            'Potensi Panen (Kg)',
+            'Komoditi',
+        ];
+        
+        foreach ($headers as $index => $header) {
+            $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+            $sheet->setCellValue($columnLetter . '1', $header);
+        }
+        
+        // Style header
+        $lastColumnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($headers));
+        $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true)->setSize(11);
+        $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FFE0E0E0');
+        
+        // Example Row
+        $sheet->setCellValue('A2', '1');
+        $sheet->setCellValue('B2', '2026-07-16');
+        $sheet->setCellValue('C2', '3301021234567890');
+        $sheet->setCellValue('D2', 'Ahmad Petani');
+        $sheet->setCellValue('E2', '081234567890');
+        $sheet->setCellValue('F2', 'BRI');
+        $sheet->setCellValue('G2', '1234567890');
+        $sheet->setCellValue('H2', 'Jawa Tengah');
+        $sheet->setCellValue('I2', 'Klaten');
+        $sheet->setCellValue('J2', 'Juwiring');
+        $sheet->setCellValue('K2', 'Trasan');
+        $sheet->setCellValue('L2', 'RT 01 / RW 02, Trasan, Juwiring');
+        $sheet->setCellValue('M2', '1.5');
+        $sheet->setCellValue('N2', 'Sawah Blok A, Trasan');
+        $sheet->setCellValue('O2', '8250'); // Potensi Panen: 1.5 * 5500
+        $sheet->setCellValue('P2', 'Gabah');
+
+        // Auto-fit column widths
+        foreach (range(1, count($headers)) as $col) {
+            $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'template_data_petani.xlsx';
+        
+        $temp_file = tempnam(sys_get_temp_dir(), 'template');
+        $writer->save($temp_file);
+        
+        return response()->download($temp_file, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
+    }
+
 }
