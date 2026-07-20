@@ -524,7 +524,7 @@
 
     <!-- Detail Modal -->
     <div v-if="showDetailModal" class="modal-overlay" @click.self="showDetailModal = false">
-      <div class="modal-content modal-detail">
+      <div class="modal detail-modal">
         <div class="modal-header">
           <h2>Detail Makloon</h2>
           <button @click="showDetailModal = false" class="btn-close">×</button>
@@ -657,7 +657,7 @@
 
     <!-- Modal Verifikasi -->
     <div v-if="showVerifikasiModal" class="modal-overlay" @click.self="showVerifikasiModal = false">
-      <div class="modal-content modal-verifikasi">
+      <div class="modal modal-verifikasi">
         <div class="modal-header">
           <h2>Verifikasi Data Makloon</h2>
           <button @click="showVerifikasiModal = false" class="btn-close">×</button>
@@ -2297,7 +2297,7 @@ const downloadMakloonGKP = async (penggilinganId) => {
 }
 
 @media (max-width: 640px) {
-  .modal-content {
+  .modal {
     overflow-y: auto;
     padding: 12px;
   }

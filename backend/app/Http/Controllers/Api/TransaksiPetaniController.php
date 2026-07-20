@@ -337,4 +337,30 @@ class TransaksiPetaniController extends Controller
             'data' => $transaksi
         ]);
     }
+
+    /**
+     * Export data transaksi petani to Excel
+     */
+    public function export(Request $request)
+    {
+        $filters = $request->only([
+            'tanggal_dari',
+            'tanggal_sampai',
+            'status_transaksi',
+            'status_verifikasi',
+            'komoditas',
+            'provinsi_id',
+            'kabupaten_id',
+            'kecamatan_id',
+            'kalurahan_id',
+            'search'
+        ]);
+
+        $filename = 'data_transaksi_petani_' . date('Y-m-d_His') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\TransaksiPetaniExport($filters),
+            $filename
+        );
+    }
 }

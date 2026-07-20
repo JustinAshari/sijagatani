@@ -191,12 +191,22 @@
             </div>
           </FilterDropdown>
         </div>
-        <button v-if="authStore.canManagePetani" @click="openAdd" class="btn-primary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Tambah Transaksi
-        </button>
+        <div class="toolbar-right" style="display: flex; gap: 0.5rem; align-items: center;">
+          <button @click="exportExcel" class="btn-primary" :disabled="loading" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+            <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export Excel
+          </button>
+          <button v-if="authStore.canManagePetani" @click="openAdd" class="btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline" style="width: 14px; height: 14px; margin-right: 4px;">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Tambah Transaksi
+          </button>
+        </div>
       </div>
 
       <!-- Loading State -->
@@ -797,6 +807,50 @@ const fetchTransaksi = async () => {
     transaksiList.value = res.data.data || []
   } catch {
     alert('Gagal memuat data transaksi')
+  } finally {
+    loading.value = false
+  }
+}
+
+const exportExcel = async () => {
+  loading.value = true
+  try {
+    const params = {}
+    if (filterStatus.value) params.status_transaksi = filterStatus.value
+    if (filterStatusVerifikasi.value) params.status_verifikasi = filterStatusVerifikasi.value
+    if (filterKomoditi.value) params.komoditas = filterKomoditi.value
+    if (filterProvinsi.value) params.provinsi_id = filterProvinsi.value
+    if (filterKabupatenId.value) params.kabupaten_id = filterKabupatenId.value
+    if (filterKecamatan.value) params.kecamatan_id = filterKecamatan.value
+    if (filterKalurahan.value) params.kalurahan_id = filterKalurahan.value
+    if (searchQuery.value) params.search = searchQuery.value
+    
+    if (filterDariBulan.value) {
+      const parts = filterDariBulan.value.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_dari = getStartOfMonth(d)
+    }
+    if (filterSampaiBulan.value) {
+      const parts = filterSampaiBulan.value.split('-')
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1)
+      params.tanggal_sampai = getEndOfMonth(d)
+    }
+
+    const response = await api.get('/transaksi-petani/export/excel', {
+      params,
+      responseType: 'blob'
+    })
+
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `data_transaksi_petani_${new Date().getTime()}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+  } catch (error) {
+    console.error('Error exporting:', error)
+    alert('Gagal export data transaksi')
   } finally {
     loading.value = false
   }

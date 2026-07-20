@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::delete('/petani/{id}', [PetaniController::class, 'destroy']);
         
         // Transaksi Petani Routes
+        Route::get('/transaksi-petani/export/excel', [TransaksiPetaniController::class, 'export']);
         Route::apiResource('/transaksi-petani', TransaksiPetaniController::class);
     });
     
