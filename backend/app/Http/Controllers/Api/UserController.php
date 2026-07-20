@@ -65,6 +65,7 @@ class UserController extends Controller
             'password' => 'required|string|min:6',
             'role' => ['required', Rule::in(['admin', 'lapangan', 'penggilingan'])],
             'nama_penggilingan' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
         ];
 
         $request->validate($rules);
@@ -74,6 +75,7 @@ class UserController extends Controller
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'is_active' => $request->input('is_active', true),
         ];
 
         // Wajib isi nama_penggilingan untuk role penggilingan
@@ -125,6 +127,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:6',
             'role' => ['required', Rule::in(['admin', 'lapangan', 'penggilingan'])],
             'nama_penggilingan' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
         ]);
 
         // Wajib isi nama_penggilingan untuk role penggilingan
@@ -141,11 +144,20 @@ class UserController extends Controller
         $user->role = $request->role;
         $user->nama_penggilingan = $request->role === 'penggilingan' ? $request->nama_penggilingan : null;
         
+        if ($request->has('is_active')) {
+            $user->is_active = $request->boolean('is_active');
+        }
+
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
         
         $user->save();
+
+        // Jika dinonaktifkan, hapus semua token aktif agar dipaksa logout
+        if (!$user->is_active) {
+            $user->tokens()->delete();
+        }
 
         ActivityLogService::log($request, 'update', 'user', "Mengupdate akun: {$user->name} ({$user->username}), role: {$user->role}");
 
@@ -178,6 +190,38 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User berhasil dihapus'
+        ]);
+    }
+
+    /**
+     * Toggle active/inactive status of a user.
+     */
+    public function toggleStatus(Request $request, string $id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->role === 'superadmin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak dapat mengubah status akun superadmin'
+            ], 403);
+        }
+
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        // Jika dinonaktifkan, paksa logout
+        if (!$user->is_active) {
+            $user->tokens()->delete();
+        }
+
+        $statusText = $user->is_active ? 'mengaktifkan' : 'menonaktifkan';
+        ActivityLogService::log($request, 'update', 'user', "Mengubah status akun: {$statusText} user {$user->name} ({$user->username})");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status user berhasil diubah',
+            'data' => $user
         ]);
     }
 }

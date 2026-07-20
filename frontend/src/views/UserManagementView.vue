@@ -27,6 +27,7 @@
           <button @click="showModal = true" class="btn-primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-inline" style="width: 14px; height: 14px; margin-right: 4px; display: inline-block; vertical-align: middle;">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+
             </svg>
             Tambah User
           </button>
@@ -43,13 +44,14 @@
               <th>Username</th>
               <th>Role</th>
               <th>Nama Penggilingan</th>
+              <th>Status</th>
               <th>Dibuat</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="7" class="loading-cell">
+              <td colspan="8" class="loading-cell">
                 <div class="loading-wrap">
                   <div class="spinner"></div>
                   <span>Memuat data user...</span>
@@ -57,7 +59,7 @@
               </td>
             </tr>
             <tr v-else-if="users.length === 0">
-              <td colspan="7" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data user</td>
+              <td colspan="8" class="empty-cell" style="text-align: center; padding: 2rem 0; color: #9ea9b8;">Tidak ada data user</td>
             </tr>
             <tr v-else v-for="(user, index) in paginatedUsers" :key="user.id">
               <td class="td-num">{{ rowNumber(index) }}</td>
@@ -73,6 +75,23 @@
                   {{ user.nama_penggilingan || '-' }}
                 </span>
                 <span v-else class="text-muted">-</span>
+              </td>
+              <td>
+                <div v-if="user.role !== 'superadmin'" class="status-toggle-wrapper">
+                  <label class="switch">
+                    <input 
+                      type="checkbox" 
+                      :checked="user.is_active" 
+                      @change="toggleUserStatus(user)"
+                      :disabled="user.loadingToggle"
+                    >
+                    <span class="slider round purple-theme"></span>
+                  </label>
+                  <span class="status-label" :class="user.is_active ? 'text-active' : 'text-inactive'">
+                    {{ user.is_active ? 'Aktif' : 'Nonaktif' }}
+                  </span>
+                </div>
+                <span v-else class="status-label text-active font-semibold">Aktif</span>
               </td>
               <td class="td-date">{{ formatDate(user.created_at) }}</td>
               <td class="td-actions">
@@ -168,6 +187,20 @@
             />
             <small class="form-hint" style="display: block; margin-top: 4px; color: #6b7280; font-size: 0.75rem;">Akun ini hanya dapat mengelola data dengan nama penggilingan tersebut.</small>
           </div>
+          <!-- Status Akun (hanya muncul saat Edit untuk menghindari salah konfigurasi user baru) -->
+          <div v-if="isEdit && form.role !== 'superadmin'" class="form-group">
+            <label>Status Akun</label>
+            <div class="form-toggle-group">
+              <label class="switch">
+                <input type="checkbox" v-model="form.is_active" />
+                <span class="slider round purple-theme"></span>
+              </label>
+              <span class="status-label font-semibold" :class="form.is_active ? 'text-active' : 'text-inactive'">
+                {{ form.is_active ? 'Aktif (Akses diizinkan)' : 'Nonaktif (Akses diblokir)' }}
+              </span>
+            </div>
+          </div>
+
           <div class="modal-actions">
             <button type="button" @click="closeModal" class="btn-cancel">Batal</button>
             <button type="submit" class="btn-primary">{{ isEdit ? 'Update' : 'Simpan' }}</button>
@@ -194,7 +227,8 @@ const form = ref({
   username: '',
   password: '',
   role: '',
-  nama_penggilingan: ''
+  nama_penggilingan: '',
+  is_active: true
 })
 
 const totalPages = computed(() => {
@@ -268,7 +302,8 @@ const editUser = (user) => {
     username: user.username,
     password: '',
     role: user.role,
-    nama_penggilingan: user.nama_penggilingan || ''
+    nama_penggilingan: user.nama_penggilingan || '',
+    is_active: user.is_active !== undefined ? user.is_active : true
   }
   showModal.value = true
 }
@@ -290,6 +325,7 @@ const submitForm = async () => {
     }
 
     if (isEdit.value) {
+      data.is_active = form.value.is_active
       await api.put(`/users/${form.value.id}`, data)
       alert('User berhasil diupdate')
     } else {
@@ -318,6 +354,21 @@ const deleteUser = async (id) => {
   }
 }
 
+const toggleUserStatus = async (user) => {
+  user.loadingToggle = true
+  try {
+    const response = await api.patch(`/users/${user.id}/toggle-status`)
+    if (response.data.success) {
+      user.is_active = response.data.data.is_active
+    }
+  } catch (error) {
+    console.error('Error toggling user status:', error)
+    alert(error.response?.data?.message || 'Gagal mengubah status user')
+  } finally {
+    user.loadingToggle = false
+  }
+}
+
 const closeModal = () => {
   showModal.value = false
   isEdit.value = false
@@ -327,7 +378,8 @@ const closeModal = () => {
     username: '',
     password: '',
     role: '',
-    nama_penggilingan: ''
+    nama_penggilingan: '',
+    is_active: true
   }
 }
 
@@ -687,5 +739,77 @@ onMounted(() => {
 @media (max-width: 640px) {
   .hero-banner.purple { padding: 1.25rem; }
   .toolbar { flex-direction: column; align-items: stretch; }
+}
+
+/* Premium Toggle Switch Styles */
+.status-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px dashed #e2e8f0;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+}
+input:checked + .slider.purple-theme {
+  background-color: #6b21a8; /* Purple theme active */
+}
+input:checked + .slider.blue-theme {
+  background-color: #3b82f6; /* Blue theme active */
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+.status-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.text-active {
+  color: #10b981;
+}
+.text-inactive {
+  color: #ef4444;
 }
 </style>

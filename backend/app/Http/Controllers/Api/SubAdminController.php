@@ -42,7 +42,7 @@ class SubAdminController extends Controller
 
         $subAdmins = $parent->subAdmins()
             ->orderBy('created_at', 'desc')
-            ->get(['id', 'name', 'username', 'role', 'nama_penggilingan', 'parent_id', 'created_at']);
+            ->get(['id', 'name', 'username', 'role', 'nama_penggilingan', 'parent_id', 'is_active', 'created_at']);
 
         return response()->json([
             'success' => true,
@@ -62,6 +62,7 @@ class SubAdminController extends Controller
             'name'     => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:6',
+            'is_active' => 'nullable|boolean',
         ]);
 
         $subAdmin = User::create([
@@ -71,6 +72,7 @@ class SubAdminController extends Controller
             'role'              => 'penggilingan',
             'nama_penggilingan' => $parent->nama_penggilingan,
             'parent_id'         => $parent->id,
+            'is_active'         => $request->input('is_active', true),
         ]);
 
         ActivityLogService::log($request, 'create', 'sub-admin', "Menambahkan sub-admin: {$subAdmin['name']} ({$subAdmin['username']}) untuk {$parent->nama_penggilingan}");
@@ -78,7 +80,7 @@ class SubAdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Sub-admin berhasil ditambahkan',
-            'data' => $subAdmin->only(['id', 'name', 'username', 'role', 'nama_penggilingan', 'parent_id', 'created_at'])
+            'data' => $subAdmin->only(['id', 'name', 'username', 'role', 'nama_penggilingan', 'parent_id', 'is_active', 'created_at'])
         ], 201);
     }
 
@@ -98,10 +100,15 @@ class SubAdminController extends Controller
             'name'     => 'required|string|max:255',
             'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($subAdmin->id)],
             'password' => 'nullable|string|min:6',
+            'is_active' => 'nullable|boolean',
         ]);
 
         $subAdmin->name     = $request->name;
         $subAdmin->username = $request->username;
+
+        if ($request->has('is_active')) {
+            $subAdmin->is_active = $request->boolean('is_active');
+        }
 
         if ($request->filled('password')) {
             $subAdmin->password = Hash::make($request->password);
@@ -109,12 +116,17 @@ class SubAdminController extends Controller
 
         $subAdmin->save();
 
+        // Jika dinonaktifkan, paksa logout sub-admin tersebut
+        if (!$subAdmin->is_active) {
+            $subAdmin->tokens()->delete();
+        }
+
         ActivityLogService::log($request, 'update', 'sub-admin', "Mengupdate sub-admin: {$subAdmin->name} ({$subAdmin->username})");
 
         return response()->json([
             'success' => true,
             'message' => 'Sub-admin berhasil diupdate',
-            'data' => $subAdmin->only(['id', 'name', 'username', 'role', 'nama_penggilingan', 'parent_id', 'created_at'])
+            'data' => $subAdmin->only(['id', 'name', 'username', 'role', 'nama_penggilingan', 'parent_id', 'is_active', 'created_at'])
         ]);
     }
 
@@ -137,6 +149,35 @@ class SubAdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Sub-admin berhasil dihapus'
+        ]);
+    }
+
+    /**
+     * Toggle status aktif/nonaktif sub-admin.
+     */
+    public function toggleStatus(Request $request, string $id)
+    {
+        $parent = $this->authorizeParent($request);
+
+        $subAdmin = User::where('id', $id)
+            ->where('parent_id', $parent->id)
+            ->firstOrFail();
+
+        $subAdmin->is_active = !$subAdmin->is_active;
+        $subAdmin->save();
+
+        // Jika dinonaktifkan, paksa logout
+        if (!$subAdmin->is_active) {
+            $subAdmin->tokens()->delete();
+        }
+
+        $statusText = $subAdmin->is_active ? 'mengaktifkan' : 'menonaktifkan';
+        ActivityLogService::log($request, 'update', 'sub-admin', "Mengubah status sub-admin: {$statusText} sub-admin {$subAdmin->name} ({$subAdmin->username})");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status sub-admin berhasil diubah',
+            'data' => $subAdmin->only(['id', 'name', 'username', 'role', 'nama_penggilingan', 'parent_id', 'is_active', 'created_at'])
         ]);
     }
 }

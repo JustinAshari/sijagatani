@@ -58,6 +58,7 @@
               <th>Nama</th>
               <th>Username</th>
               <th>Perusahaan</th>
+              <th>Status</th>
               <th>Ditambahkan</th>
               <th>Aksi</th>
             </tr>
@@ -73,6 +74,22 @@
               </td>
               <td><code class="username-code">{{ sa.username }}</code></td>
               <td><span class="company-badge">{{ sa.nama_penggilingan }}</span></td>
+              <td>
+                <div class="status-toggle-wrapper">
+                  <label class="switch">
+                    <input 
+                      type="checkbox" 
+                      :checked="sa.is_active" 
+                      @change="toggleSubAdminStatus(sa)"
+                      :disabled="sa.loadingToggle"
+                    >
+                    <span class="slider round blue-theme"></span>
+                  </label>
+                  <span class="status-label" :class="sa.is_active ? 'text-active' : 'text-inactive'">
+                    {{ sa.is_active ? 'Aktif' : 'Nonaktif' }}
+                  </span>
+                </div>
+              </td>
               <td class="td-date">{{ formatDate(sa.created_at) }}</td>
               <td class="td-actions">
                 <button @click="openEdit(sa)" class="btn-icon btn-edit" title="Edit">
@@ -126,6 +143,20 @@
               </button>
             </div>
           </div>
+          <!-- Status Akun (hanya muncul saat Edit) -->
+          <div v-if="isEdit" class="form-group">
+            <label>Status Akun</label>
+            <div class="form-toggle-group">
+              <label class="switch">
+                <input type="checkbox" v-model="form.is_active" />
+                <span class="slider round blue-theme"></span>
+              </label>
+              <span class="status-label font-semibold" :class="form.is_active ? 'text-active' : 'text-inactive'">
+                {{ form.is_active ? 'Aktif (Akses diizinkan)' : 'Nonaktif (Akses diblokir)' }}
+              </span>
+            </div>
+          </div>
+
           <div class="modal-actions">
             <button type="button" @click="closeModal" class="btn-secondary">Batal</button>
             <button type="submit" class="btn-primary" :disabled="saving">
@@ -154,7 +185,7 @@ const showModal = ref(false)
 const isEdit    = ref(false)
 const showPassword = ref(false)
 
-const emptyForm = () => ({ id: null, name: '', username: '', password: '' })
+const emptyForm = () => ({ id: null, name: '', username: '', password: '', is_active: true })
 const form = ref(emptyForm())
 
 const fetchSubAdmins = async () => {
@@ -179,7 +210,13 @@ const openAdd = () => {
 const openEdit = (sa) => {
   isEdit.value = true
   showPassword.value = false
-  form.value = { id: sa.id, name: sa.name, username: sa.username, password: '' }
+  form.value = { 
+    id: sa.id, 
+    name: sa.name, 
+    username: sa.username, 
+    password: '',
+    is_active: sa.is_active !== undefined ? sa.is_active : true
+  }
   showModal.value = true
 }
 
@@ -192,6 +229,7 @@ const submitForm = async () => {
     if (form.value.password) payload.password = form.value.password
 
     if (isEdit.value) {
+      payload.is_active = form.value.is_active
       await api.put(`/my-sub-admins/${form.value.id}`, payload)
       alert('Sub-admin berhasil diupdate')
     } else {
@@ -223,6 +261,21 @@ const confirmDelete = async (sa) => {
     subAdmins.value = subAdmins.value.filter(s => s.id !== sa.id)
   } catch {
     alert('Gagal menghapus sub-admin')
+  }
+}
+
+const toggleSubAdminStatus = async (sa) => {
+  sa.loadingToggle = true
+  try {
+    const response = await api.patch(`/my-sub-admins/${sa.id}/toggle-status`)
+    if (response.data.success) {
+      sa.is_active = response.data.data.is_active
+    }
+  } catch (err) {
+    console.error('Error toggling sub-admin status:', err)
+    alert(err.response?.data?.message || 'Gagal mengubah status sub-admin')
+  } finally {
+    sa.loadingToggle = false
   }
 }
 
@@ -416,5 +469,74 @@ onMounted(fetchSubAdmins)
   .hero-banner { padding: 1.25rem; }
   .data-table th, .data-table td { padding: .6rem .75rem; }
   .td-date { display: none; }
+}
+
+/* Premium Toggle Switch Styles */
+.status-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px dashed #e2e8f0;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+}
+input:checked + .slider.blue-theme {
+  background-color: #3b82f6; /* Blue theme active */
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+.status-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.text-active {
+  color: #10b981;
+}
+.text-inactive {
+  color: #ef4444;
 }
 </style>

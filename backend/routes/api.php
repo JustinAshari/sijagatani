@@ -16,7 +16,7 @@ use App\Http\Controllers\WilayahController as WilayahExportImportController;
 Route::post('/login', [AuthController::class, 'login']);
 
 // Protected Routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -69,6 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/my-sub-admins', [SubAdminController::class, 'store']);
         Route::put('/my-sub-admins/{id}', [SubAdminController::class, 'update']);
         Route::delete('/my-sub-admins/{id}', [SubAdminController::class, 'destroy']);
+        Route::patch('/my-sub-admins/{id}/toggle-status', [SubAdminController::class, 'toggleStatus']);
     });
 
     // User Management Routes - Only SuperAdmin can access
@@ -78,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/{id}', [UserController::class, 'show']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
+        Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
         
         // Wilayah Write Routes
         Route::post('/provinsi', [WilayahController::class, 'storeProvinsi']);

@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role',
         'nama_penggilingan', // Hanya diisi untuk role 'penggilingan'
         'parent_id',         // Diisi untuk sub-admin penggilingan
+        'is_active',         // Status aktif/non-aktif akun
     ];
 
     /**
@@ -46,6 +47,7 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 

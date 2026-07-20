@@ -40,6 +40,13 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if (!$user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda dinonaktifkan. Silakan hubungi administrator.'
+            ], 403);
+        }
+
         // Create token
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -56,6 +63,7 @@ class AuthController extends Controller
                     'role'             => $user->role,
                     'nama_penggilingan' => $user->nama_penggilingan,
                     'parent_id'        => $user->parent_id,
+                    'is_active'        => $user->is_active,
                 ],
                 'token' => $token,
             ]
@@ -92,6 +100,7 @@ class AuthController extends Controller
                 'role'             => $user->role,
                 'nama_penggilingan' => $user->nama_penggilingan,
                 'parent_id'        => $user->parent_id,
+                'is_active'        => $user->is_active,
             ]
         ]);
     }

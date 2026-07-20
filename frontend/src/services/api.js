@@ -29,9 +29,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      const isDeactivated = error.response?.data?.message && error.response.data.message.includes('dinonaktifkan');
+      if (isDeactivated) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        alert(error.response.data.message)
+        window.location.href = '/login'
+      } else if (error.response?.status === 401) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }
