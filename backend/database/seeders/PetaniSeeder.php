@@ -287,5 +287,72 @@ class PetaniSeeder extends Seeder
             $cleanData = collect($data)->except(['status_verifikasi', 'catatan_verifikasi'])->toArray();
             Petani::create($cleanData);
         }
+
+        // ── GENERATE BANYAK DATA PETANI TAMBAHAN SECARA DINAMIS ──
+        $firstNames = ['Ahmad', 'Budi', 'Chandra', 'Dedi', 'Eko', 'Fajar', 'Gunawan', 'Hendra', 'Iwan', 'Joko', 'Kartika', 'Lilis', 'Mulyono', 'Nanang', 'Oki', 'Prabowo', 'Rian', 'Siti', 'Tri', 'Umar', 'Wawan', 'Yanto', 'Zainal', 'Adi', 'Dewi', 'Endah', 'Fitri', 'Gita', 'Heni', 'Indah', 'Rudi', 'Bambang', 'Agus', 'Herman', 'Taufik'];
+        $lastNames = ['Santoso', 'Prasetyo', 'Wibowo', 'Lestari', 'Saputra', 'Hidayat', 'Kurniawan', 'Nugroho', 'Raharjo', 'Susilo', 'Wulandari', 'Setiawan', 'Purwanto', 'Hadi', 'Aminah', 'Fauzi', 'Rahayu', 'Suryanto', 'Susanto', 'Hartono', 'Cahyono', 'Rizki', 'Pranoto', 'Sutrisno', 'Irawan', 'Kusuma', 'Gunadi', 'Subagyo'];
+
+        $banks = ['BRI', 'BNI', 'Mandiri', 'BCA', 'BTN', 'BPD Jateng'];
+        $komoditasList = ['Gabah', 'Jagung', 'Beras'];
+
+        // Ambil semua kalurahan dengan relasi kecamatan dan kabupaten untuk Jateng
+        $allKalurahan = \App\Models\Kalurahan::with('kecamatan.kabupaten')
+            ->whereHas('kecamatan.kabupaten', function($q) {
+                $q->where('provinsi_id', 2);
+            })->get();
+
+        if ($allKalurahan->isNotEmpty()) {
+            $targetTotal = 80;
+            $currentCount = Petani::count();
+
+            while ($currentCount < $targetTotal) {
+                $kal = $allKalurahan->random();
+                $kec = $kal->kecamatan;
+                $kab = $kec->kabupaten;
+
+                $firstName = $firstNames[array_rand($firstNames)];
+                $lastName = $lastNames[array_rand($lastNames)];
+                $nama = $firstName . ' ' . $lastName;
+
+                // Random NIK (16 digit)
+                $nik = '33' . str_pad($kab->id, 2, '0', STR_PAD_LEFT) . rand(10, 99) . rand(10, 99) . rand(10, 99) . rand(1000, 9999);
+
+                if (Petani::where('nik', $nik)->exists()) {
+                    continue;
+                }
+
+                $bank = $banks[array_rand($banks)];
+                $no_rekening = rand(1000, 9999) . '-' . rand(1000, 9999) . '-' . rand(1000, 9999);
+                $no_telepon = '08' . rand(11, 19) . rand(1000, 9999) . rand(1000, 9999);
+
+                $luas_lahan = rand(50, 450) / 100; // 0.50 s/d 4.50 Ha
+                $komoditi = $komoditasList[array_rand($komoditasList)];
+                $potensi_panen = $luas_lahan * rand(2500, 3500); // 2.5 s/d 3.5 ton per Ha
+
+                $tanggal = \Carbon\Carbon::now()->subDays(rand(10, 180))->format('Y-m-d');
+
+                Petani::create([
+                    'tanggal'       => $tanggal,
+                    'nik'           => $nik,
+                    'nama'          => $nama,
+                    'alamat'        => "Desa " . $kal->nama . " RT 0" . rand(1, 9) . "/0" . rand(1, 9) . ", Kec. " . $kec->nama,
+                    'provinsi_id'   => 2,
+                    'kabupaten_id'  => $kab->id,
+                    'kecamatan_id'  => $kec->id,
+                    'kalurahan_id'  => $kal->id,
+                    'no_telepon'    => $no_telepon,
+                    'bank'          => $bank,
+                    'no_rekening'   => $no_rekening,
+                    'luas_lahan'    => $luas_lahan,
+                    'alamat_lahan'  => "Lahan Pertanian Desa " . $kal->nama . ", Kec. " . $kec->nama . ", " . $kab->nama,
+                    'potensi_panen' => $potensi_panen,
+                    'komoditi'      => $komoditi,
+                ]);
+
+                $currentCount++;
+            }
+        }
+
+        $this->command->info("✅ PetaniSeeder: Berhasil menjamin total {$targetTotal} data petani terbuat.");
     }
 }

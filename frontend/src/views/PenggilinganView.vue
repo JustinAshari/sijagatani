@@ -318,7 +318,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Tanggal Pengajuan <span class="required">*</span></label>
-                <input type="date" v-model="form.tanggal_pengajuan" required />
+                <input type="date" v-model="form.tanggal_pengajuan" required disabled style="background-color: #f3f4f6; cursor: not-allowed;" />
               </div>
               <div class="form-group">
                 <label>Nama Makloon/MPP <span class="required">*</span></label>
@@ -384,30 +384,7 @@
             </div>
           </div>
 
-          <!-- GKP Photos -->
-          <div class="form-section">
-            <h3>
-              <svg class="icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
-              Upload Foto & Dokumen
-            </h3>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Foto GKP 1 (Di Sawah)</label>
-                <img v-if="form.foto_gkp_1_preview" :src="form.foto_gkp_1_preview" class="preview-image" alt="Preview Foto GKP 1" />
-                <input type="file" @change="handleFileUpload($event, 'foto_gkp_1')" accept="image/*" />
-              </div>
-              <div class="form-group">
-                <label>Foto GKP 2 (Di Makloon)</label>
-                <img v-if="form.foto_gkp_2_preview" :src="form.foto_gkp_2_preview" class="preview-image" alt="Preview Foto GKP 2" />
-                <input type="file" @change="handleFileUpload($event, 'foto_gkp_2')" accept="image/*" />
-              </div>
-            </div>
-            <small class="help-text">* Format: JPG, PNG, PDF. Max: 5MB (gambar akan dikompres otomatis)</small>
-          </div>
+          
 
           <!-- Transport Entries -->
           <div class="form-section">
@@ -789,7 +766,7 @@ const penggilinganActiveFilterCount = computed(() => {
 
 const form = ref({
   id: null,
-  tanggal_pengajuan: '',
+  tanggal_pengajuan: new Date().toISOString().split('T')[0],
   nama_penggilingan: '',
   lokasi_makloon: '',
   komoditas: '',
@@ -1367,7 +1344,7 @@ const closeModal = () => {
   isEditing.value = false
   form.value = {
     id: null,
-    tanggal_pengajuan: '',
+    tanggal_pengajuan: new Date().toISOString().split('T')[0],
     // Pre-fill untuk role penggilingan
     nama_penggilingan: authStore.isPenggilingan ? (authStore.namaPenggilingan || '') : '',
     lokasi_makloon: '',

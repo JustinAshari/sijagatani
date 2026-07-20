@@ -328,7 +328,7 @@
             <div class="form-row-2">
               <div class="form-group">
                 <label>Tanggal Penambahan Data <span class="req">*</span></label>
-                <input v-model="form.tanggal" type="date" required />
+                <input v-model="form.tanggal" type="date" required disabled style="background-color: #f3f4f6; cursor: not-allowed;" />
               </div>
               <div class="form-group">
                 <label>NIK <span class="req">*</span> <span class="nik-status" :class="nikStatus.class" style="font-size: 0.72rem; margin-left: 4px;">{{ nikStatus.message }}</span></label>

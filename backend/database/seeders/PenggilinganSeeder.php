@@ -205,6 +205,102 @@ class PenggilinganSeeder extends Seeder
             }
         }
 
-        $this->command->info('✅ PenggilinganSeeder: 3 akun & 9 data penggilingan berhasil dibuat.');
+        // ── GENERATE BANYAK DATA MAKLOON TAMBAHAN SECARA DINAMIS ──
+        $makloonNames = [
+            'UD Tani Makmur',
+            'Rice Mill Sukses Bersama',
+            'Koperasi Produsen Pangan',
+            'UD Sari Bumi',
+            'Penggilingan Padi Barokah',
+            'UD Dwi Putra',
+            'Rice Mill Sri Rejeki',
+            'UD Tani Mandiri',
+            'Karya Tani Modern'
+        ];
+
+        // Ambil semua kalurahan dengan relasi kecamatan dan kabupaten untuk Jateng
+        $allKalurahan = \App\Models\Kalurahan::with('kecamatan.kabupaten')
+            ->whereHas('kecamatan.kabupaten', function($q) {
+                $q->where('provinsi_id', 2);
+            })->get();
+
+        $driverNames = ['Supriadi', 'Mulyadi', 'Jatmiko', 'Suryono', 'Hartono', 'Priyanto', 'Riyadi', 'Santoso', 'Hadi', 'Suwito', 'Kusno', 'Dwi', 'Joko', 'Agus', 'Budi', 'Slamet', 'Heru', 'Doni', 'Rudi', 'Wahyu', 'Eko', 'Widodo', 'Purnomo', 'Teguh', 'Bambang', 'Suryo', 'Yusuf', 'Andi', 'Fajar', 'Mulyono', 'Suharto', 'Pranoto', 'Sutrisno', 'Parno', 'Darmo', 'Legiman'];
+        $nopolPrefixes = ['AD', 'AB', 'H', 'K'];
+
+        foreach ($makloonNames as $makloonName) {
+            $username = 'penggilingan_' . strtolower(str_replace(' ', '', $makloonName));
+
+            $user = User::firstOrCreate(
+                ['username' => $username],
+                [
+                    'name'              => 'Admin - ' . $makloonName,
+                    'password'          => Hash::make('makloon123'),
+                    'role'              => 'penggilingan',
+                    'nama_penggilingan' => $makloonName,
+                ]
+            );
+
+            $user->update([
+                'nama_penggilingan' => $makloonName,
+                'role'              => 'penggilingan',
+            ]);
+
+            // Buat 4 s/d 8 pengajuan makloon per user
+            $totalRecords = rand(4, 8);
+            for ($r = 0; $r < $totalRecords; $r++) {
+                $tanggal = \Carbon\Carbon::now()->subDays(rand(5, 120))->format('Y-m-d');
+
+                $exists = Penggilingan::where('nama_penggilingan', $makloonName)
+                    ->whereDate('tanggal_pengajuan', $tanggal)
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
+                $kal = $allKalurahan->isNotEmpty() ? $allKalurahan->random() : null;
+                $kec = $kal ? $kal->kecamatan : null;
+                $kab = $kec ? $kec->kabupaten : null;
+
+                $status = ['disetujui', 'pending', 'ditolak'][rand(0, 2)];
+                $komoditas = ['Gabah', 'Jagung', 'Beras'][rand(0, 2)];
+
+                $penggilingan = Penggilingan::create([
+                    'tanggal_pengajuan'   => $tanggal,
+                    'nama_penggilingan'   => $makloonName,
+                    'komoditas'           => $komoditas,
+                    'lokasi_makloon'      => $kab ? $kab->nama : 'Kab. Sukoharjo',
+                    'provinsi_id'         => 2,
+                    'kabupaten_id'        => $kab ? $kab->id : 8,
+                    'kecamatan_id'        => $kec ? $kec->id : null,
+                    'kalurahan_id'        => $kal ? $kal->id : null,
+                    'status_verifikasi'   => $status,
+                    'catatan_verifikasi'  => $status === 'ditolak' ? 'Foto bukti timbang atau nota tidak jelas, silakan ajukan ulang.' : null,
+                    'verified_at'         => in_array($status, ['disetujui', 'ditolak']) ? \Carbon\Carbon::parse($tanggal)->addDays(rand(1, 5)) : null,
+                    'verified_by'         => in_array($status, ['disetujui', 'ditolak']) ? (User::where('role', 'admin')->first()?->id ?? 1) : null
+                ]);
+
+                // Buat 2 s/d 5 transport logs per makloon record
+                $numTransports = rand(2, 5);
+                for ($t = 0; $t < $numTransports; $t++) {
+                    $driver = $driverNames[array_rand($driverNames)] . ' ' . $driverNames[array_rand($driverNames)];
+                    $nopol = $nopolPrefixes[array_rand($nopolPrefixes)] . ' ' . rand(1000, 9999) . ' ' . chr(rand(65, 90)) . chr(rand(65, 90));
+                    $kuantum = rand(300, 850) / 100; // 3.00 s/d 8.50 ton
+
+                    PenggilinganTransport::create([
+                        'penggilingan_id' => $penggilingan->id,
+                        'urutan'          => $t + 1,
+                        'nama_pengemudi'  => $driver,
+                        'nopol'           => $nopol,
+                        'kuantum'         => $kuantum,
+                    ]);
+                }
+
+                $penggilingan->refresh();
+                $penggilingan->calculateTotals();
+            }
+        }
+
+        $this->command->info('✅ PenggilinganSeeder: Data makloon (penggilingan) tambahan berhasil dibuat.');
     }
 }

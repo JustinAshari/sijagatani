@@ -23,8 +23,13 @@ class TransaksiPetaniSeeder extends Seeder
         $statuses = ['belum', 'sudah'];
 
         foreach ($petani as $p) {
-            // Generate 1-3 transactions per farmer
-            $numTransactions = rand(1, 3);
+            // Skip if transactions already exist for this farmer
+            if (TransaksiPetani::where('petani_id', $p->id)->exists()) {
+                continue;
+            }
+
+            // Generate 2-5 transactions per farmer
+            $numTransactions = rand(2, 5);
 
             for ($i = 0; $i < $numTransactions; $i++) {
                 // Determine price per kg based on komoditi

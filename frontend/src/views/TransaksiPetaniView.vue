@@ -352,7 +352,7 @@
 
           <div class="form-group">
             <label>Tanggal Transaksi <span class="req">*</span></label>
-            <input v-model="form.tanggal_transaksi" type="date" required />
+            <input v-model="form.tanggal_transaksi" type="date" required disabled style="background-color: #f3f4f6; cursor: not-allowed;" />
           </div>
 
           <div class="form-row-2">
